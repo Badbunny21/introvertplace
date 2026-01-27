@@ -300,11 +300,12 @@
     .modal-overlay { position: absolute; inset: 0; background: rgba(10,12,16,0.95); backdrop-filter: blur(20px); }
     .modal-content { position: relative; width: 100%; max-width: 600px; padding: 60px 40px; text-align: center; }
     .close-modal {
-      position: absolute; top: 0; right: 0; width: 48px; height: 48px;
-      background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 50%;
-      color: var(--text-muted); font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+      position: fixed; top: 20px; right: 20px; width: 56px; height: 56px;
+      background: var(--bg-surface); border: 2px solid var(--border-light); border-radius: 50%;
+      color: var(--text-primary); font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease; z-index: 1001; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
-    .close-modal:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .close-modal:hover { background: var(--accent-green); color: var(--bg-deep); border-color: var(--accent-green); transform: scale(1.1); }
     .breath-visualization { position: relative; width: 280px; height: 280px; margin: 0 auto 40px; }
     .breath-circle-outer {
       position: absolute; inset: 0; border-radius: 50%;

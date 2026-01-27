@@ -1373,9 +1373,61 @@
         return;
       }
 
-      btn.classList.add('joined');
-      btn.textContent = '✓ Joined';
-      showToast('🏠 Welcome to the community!');
+      try {
+        // Insert into community_members junction table
+        const { error } = await db
+          .from('community_members')
+          .insert({
+            user_id: currentUser.id,
+            community_id: communityId
+          });
+
+        if (error) {
+          // Check if already joined (unique constraint)
+          if (error.code === '23505') {
+            showToast('👋 You\'re already a member!');
+            btn.classList.add('joined');
+            btn.textContent = '✓ Joined';
+            return;
+          }
+          throw error;
+        }
+
+        // Update member count
+        await db.rpc('increment_member_count', { cid: communityId }).catch(() => {
+          // RPC might not exist, that's ok
+        });
+
+        btn.classList.add('joined');
+        btn.textContent = '✓ Joined';
+        showToast('🏠 Welcome to the community!');
+
+      } catch (err) {
+        console.error('Join community error:', err);
+        showToast('⚠️ Error joining community');
+      }
+    }
+
+    // Leave a community
+    async function leaveCommunity(communityId, btn) {
+      if (!db || !currentUser) return;
+
+      try {
+        const { error } = await db
+          .from('community_members')
+          .delete()
+          .eq('user_id', currentUser.id)
+          .eq('community_id', communityId);
+
+        if (error) throw error;
+
+        btn.classList.remove('joined');
+        btn.textContent = 'Join';
+        showToast('👋 Left community');
+
+      } catch (err) {
+        console.error('Leave community error:', err);
+      }
     }
 
     // Load unread message count
