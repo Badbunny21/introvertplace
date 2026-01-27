@@ -735,6 +735,7 @@
       <div class="reading-actions">
         <button class="reading-action" onclick="toggleSave(this)" title="Save for later">🔖</button>
         <button class="reading-action" title="Share quietly">↗️</button>
+        <button class="reading-action delete-btn" id="deletePostBtn" onclick="deleteCurrentPost()" title="Delete post" style="display: none; background: rgba(232,124,154,0.2); color: #e87c9a;">🗑️</button>
       </div>
     </div>
     <div class="reading-content">
@@ -815,6 +816,65 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <script>
+    // Supabase initialization
+    const SUPABASE_URL = 'https://inpziyxjznikinqqputz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlucHppeXhqem5pa2lucXFwdXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MzQ0MTcsImV4cCI6MjA4NDAxMDQxN30.5QoXaD5vNcuteEmwmo82l_OIklVbGGCRpNtV0PMuSyY';
+
+    let db = null;
+    let currentUser = null;
+
+    try {
+      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch (err) {
+      console.error('Supabase init error:', err);
+    }
+
+    // Auth check
+    async function initAuth() {
+      if (!db) {
+        console.log('No db connection');
+        loadBlogPosts(); // Still load posts without auth
+        return;
+      }
+      try {
+        console.log('Checking auth session...');
+        const { data: { session }, error } = await db.auth.getSession();
+        console.log('Session result:', session, 'Error:', error);
+        if (session) {
+          currentUser = session.user;
+          console.log('User logged in:', currentUser.id);
+        } else {
+          console.log('No session found');
+        }
+        // Always load posts regardless of auth
+        loadBlogPosts();
+      } catch (err) {
+        console.error('Auth error:', err);
+        loadBlogPosts(); // Still load posts on error
+      }
+    }
+
+    // Also listen for auth state changes
+    if (db) {
+      db.auth.onAuthStateChange((event, session) => {
+        console.log('Auth state changed:', event);
+        if (session) {
+          currentUser = session.user;
+          console.log('User now logged in:', currentUser.id);
+        } else {
+          currentUser = null;
+        }
+      });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', initAuth);
+  </script>
 
   <script>
     document.querySelectorAll('.tab').forEach(tab => {
@@ -941,10 +1001,15 @@
       showToast('✨ Draft saved');
     }
 
-    function publishPost() {
+    async function publishPost() {
+      console.log('publishPost called');
       const title = document.getElementById('postTitle').value;
       const content = document.getElementById('postContent').value;
       const category = document.querySelector('.category-option.selected')?.textContent || '';
+
+      console.log('Title:', title);
+      console.log('Content length:', content?.length);
+      console.log('Category:', category);
 
       if (!title.trim()) {
         showToast('Please add a title');
@@ -959,17 +1024,251 @@
         return;
       }
 
-      showToast('🎉 Your story has been published!');
-      localStorage.removeItem('blogDraft');
+      console.log('db:', db);
+      console.log('currentUser:', currentUser);
 
-      document.getElementById('postTitle').value = '';
-      document.getElementById('postContent').value = '';
-      document.querySelectorAll('.category-option').forEach(c => c.classList.remove('selected'));
+      if (!db || !currentUser) {
+        showToast('Please sign in to publish');
+        return;
+      }
 
-      setTimeout(() => {
-        closeEditor();
-        switchTab('discover');
-      }, 1500);
+      try {
+        // Get user profile for author info
+        let authorName = 'Anonymous';
+        const { data: profile } = await db
+          .from('profiles')
+          .select('username, avatar_emoji')
+          .eq('id', currentUser.id)
+          .single();
+
+        if (profile?.username) {
+          authorName = profile.username;
+        }
+
+        // Save to blog_posts table
+        console.log('Attempting to insert blog post...');
+        const postData = {
+          user_id: currentUser.id,
+          title: title.trim(),
+          content: content.trim(),
+          category: category,
+          author_name: authorName,
+          author_avatar: profile?.avatar_emoji || '🌙',
+          read_time: Math.ceil(content.split(/\s+/).length / 200) + ' min read'
+        };
+        console.log('Post data:', postData);
+
+        const { data, error } = await db
+          .from('blog_posts')
+          .insert(postData)
+          .select();
+
+        console.log('Insert result - data:', data, 'error:', error);
+
+        if (error) {
+          console.error('Publish error:', error);
+          if (error.message && error.message.includes('does not exist')) {
+            showToast('⚠️ Blog table needs setup - check console');
+            console.log('Run this SQL in Supabase to create the blog_posts table');
+          } else {
+            showToast('⚠️ Error publishing: ' + error.message);
+          }
+          return;
+        }
+
+        showToast('🎉 Your story has been published!');
+        localStorage.removeItem('blogDraft');
+
+        document.getElementById('postTitle').value = '';
+        document.getElementById('postContent').value = '';
+        document.querySelectorAll('.category-option').forEach(c => c.classList.remove('selected'));
+
+        setTimeout(() => {
+          closeEditor();
+          switchTab('discover');
+          loadBlogPosts(); // Refresh the posts
+        }, 1500);
+
+      } catch (err) {
+        console.error('Publish exception:', err);
+        showToast('⚠️ Error publishing post');
+      }
+    }
+
+    // Load and display blog posts
+    async function loadBlogPosts() {
+      if (!db) return;
+
+      try {
+        const { data: posts, error } = await db
+          .from('blog_posts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (error) {
+          console.log('Could not load posts:', error.message);
+          return;
+        }
+
+        if (!posts || posts.length === 0) return;
+
+        // Find the articles grid and add real posts
+        const articlesGrid = document.querySelector('#tab-discover .articles-grid');
+        if (!articlesGrid) {
+          console.log('Articles grid not found');
+          return;
+        }
+
+        // Hide empty state if we have posts
+        const emptyState = document.querySelector('#tab-discover .empty-featured');
+        if (emptyState) {
+          emptyState.style.display = 'none';
+        }
+
+        // Create HTML for real posts and prepend to grid
+        const postsHtml = posts.map(post => `
+          <article class="article-card" onclick="openArticleById('${post.id}')">
+            <div class="article-image" style="background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-calm) 100%);">
+              ${post.category === '💭 Deep Thoughts' ? '💭' : post.category === '🌱 Growth' ? '🌱' : post.category === '🎨 Creative' ? '🎨' : post.category === '💜 Relationships' ? '💜' : '📝'}
+              <span class="article-type community">Community</span>
+            </div>
+            <div class="article-body">
+              <span class="article-category">${post.category || 'Story'}</span>
+              <h3>${escapeHtml(post.title)}</h3>
+              <p>${escapeHtml(post.content.substring(0, 150))}...</p>
+              <div class="article-footer">
+                <div class="article-author">
+                  <div class="article-author-avatar" style="display: flex; align-items: center; justify-content: center; font-size: 16px;">${post.author_avatar || '🌙'}</div>
+                  <span>${escapeHtml(post.author_name || 'Anonymous')}</span>
+                </div>
+                <span style="font-size: 12px; color: var(--text-muted);">${post.read_time || '3 min read'}</span>
+              </div>
+            </div>
+          </article>
+        `).join('');
+
+        // Insert real posts into the grid (replace any existing)
+        articlesGrid.innerHTML = postsHtml;
+
+        // Show empty state again if no posts
+        if (posts.length === 0 && emptyState) {
+          emptyState.style.display = 'block';
+        }
+
+      } catch (err) {
+        console.error('Load posts error:', err);
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Track current post being viewed
+    let currentPostId = null;
+
+    // Delete current post (from header button)
+    function deleteCurrentPost() {
+      if (currentPostId) {
+        deletePost(currentPostId);
+      }
+    }
+
+    // Delete a blog post
+    async function deletePost(postId) {
+      if (!db || !currentUser) {
+        showToast('Please sign in to delete');
+        return;
+      }
+
+      if (!confirm('Are you sure you want to delete this post?')) {
+        return;
+      }
+
+      try {
+        const { error } = await db
+          .from('blog_posts')
+          .delete()
+          .eq('id', postId)
+          .eq('user_id', currentUser.id);
+
+        if (error) {
+          console.error('Delete error:', error);
+          showToast('Error deleting post');
+          return;
+        }
+
+        showToast('🗑️ Post deleted');
+        closeArticle();
+        loadBlogPosts();
+
+      } catch (err) {
+        console.error('Delete exception:', err);
+        showToast('Error deleting post');
+      }
+    }
+
+    // Open article by ID (for real posts from database)
+    async function openArticleById(postId) {
+      if (!db) return;
+
+      try {
+        const { data: post, error } = await db
+          .from('blog_posts')
+          .select('*')
+          .eq('id', postId)
+          .single();
+
+        if (error || !post) {
+          showToast('Could not load article');
+          return;
+        }
+
+        // Populate the reading modal with post content
+        const modal = document.getElementById('readingModal');
+        const articleContent = modal.querySelector('.article-content');
+
+        // Store current post ID for delete function
+        currentPostId = post.id;
+
+        // Check if this is the user's own post and show/hide delete button
+        const isOwnPost = currentUser && post.user_id === currentUser.id;
+        const deleteBtn = document.getElementById('deletePostBtn');
+        if (deleteBtn) {
+          deleteBtn.style.display = isOwnPost ? 'flex' : 'none';
+        }
+
+        if (articleContent) {
+          articleContent.innerHTML = `
+            <div class="article-meta">
+              <span class="article-category">${post.category || 'Story'}</span>
+              <span class="article-date">${new Date(post.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+              <span class="article-read-time">${post.read_time || '3 min read'}</span>
+            </div>
+            <h1 class="article-title">${escapeHtml(post.title)}</h1>
+            <div class="article-author">
+              <div class="author-avatar-large">${post.author_avatar || '🌙'}</div>
+              <div class="author-info">
+                <span class="author-name">${escapeHtml(post.author_name || 'Anonymous')}</span>
+                <span class="author-tagline">Sharing their story</span>
+              </div>
+            </div>
+            <div class="article-body">
+              ${post.content.split('\n').map(p => p.trim() ? `<p>${escapeHtml(p)}</p>` : '').join('')}
+            </div>
+          `;
+        }
+
+        openArticle();
+
+      } catch (err) {
+        console.error('Open article error:', err);
+        showToast('Error loading article');
+      }
     }
 
     // Load draft on editor open

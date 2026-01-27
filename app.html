@@ -629,7 +629,7 @@
       link.classList.add('active');
     }
 
-    function loadPage(page, evt) {
+    function loadPage(page, evt, params) {
       const frame = document.getElementById('appFrame');
       const appWrapper = document.querySelector('.app-wrapper');
       const map = {
@@ -642,13 +642,22 @@
       };
       const mood = JSON.parse(localStorage.getItem('currentMood') || '{}');
       let url = map[page] || 'sanctuary.html';
-      // Add cache buster
-      const cacheBuster = 'v=' + Date.now();
+      // Build query string
+      const queryParams = new URLSearchParams();
+      queryParams.set('v', Date.now()); // Cache buster
+
       if (page === 'sanctuary' && mood.id) {
-        url += '?mood=' + mood.id + '&' + cacheBuster;
-      } else {
-        url += '?' + cacheBuster;
+        queryParams.set('mood', mood.id);
       }
+
+      // Add any additional params passed in
+      if (params && typeof params === 'object') {
+        Object.entries(params).forEach(([key, value]) => {
+          queryParams.set(key, value);
+        });
+      }
+
+      url += '?' + queryParams.toString();
       frame.src = url;
 
       // Toggle fullscreen mode for profile page
@@ -684,7 +693,7 @@
     // Listen for navigation messages from iframes
     window.addEventListener('message', (event) => {
       if (event.data && event.data.action === 'navigate') {
-        loadPage(event.data.page);
+        loadPage(event.data.page, null, event.data.params);
         // Update active nav link
         document.querySelectorAll('.nav-link').forEach(link => {
           link.classList.remove('active');
