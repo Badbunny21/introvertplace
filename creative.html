@@ -1,0 +1,4261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creative - Introvert Place</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-black: #000000;
+      --bg-gray-900: #111827;
+      --bg-gray-800: #1f2937;
+      --text-white: #ffffff;
+      --text-gray-400: #9ca3af;
+      --text-gray-500: #6b7280;
+      --border-white-10: rgba(255,255,255,0.1);
+      --border-white-20: rgba(255,255,255,0.2);
+      --border-white-40: rgba(255,255,255,0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      background: linear-gradient(135deg, var(--bg-black) 0%, var(--bg-gray-900) 100%);
+      color: var(--text-white);
+      min-height: 100vh;
+      letter-spacing: 0.025em;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+    }
+
+    /* Glass Card */
+    .glass-card {
+      background: rgba(31,41,55,0.4);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-white-10);
+      border-radius: 16px;
+      transition: all 0.5s ease;
+    }
+
+    .glass-card:hover { border-color: var(--border-white-20); }
+
+    /* ==================== */
+    /* PAGES - Only one visible at a time */
+    /* ==================== */
+    .page {
+      display: none !important;
+      min-height: 100vh;
+    }
+    .page.active {
+      display: block !important;
+    }
+    .wizard-page.active {
+      display: flex !important;
+    }
+
+    /* ==================== */
+    /* WIZARD PAGE */
+    /* ==================== */
+    .wizard-page {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .wizard-container {
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    .wizard-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .wizard-header h1 {
+      font-size: 42px;
+      margin-bottom: 16px;
+    }
+
+    .wizard-header p {
+      font-size: 18px;
+      color: var(--text-gray-400);
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Progress Dots */
+    .progress-dots {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transition: all 0.5s ease;
+    }
+
+    .dot.active {
+      background: var(--text-white);
+      box-shadow: 0 0 20px rgba(255,255,255,0.6);
+    }
+
+    .dot.done { background: var(--text-white); }
+
+    /* Steps */
+    .step { display: none; animation: fadeIn 0.5s ease; width: 100%; }
+    .step.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-title {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .step-subtitle {
+      text-align: center;
+      font-size: 16px;
+      color: var(--text-gray-500);
+      margin-bottom: 48px;
+    }
+
+    /* Mode Cards */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      width: 100%;
+    }
+
+    .mode-card {
+      padding: 36px;
+      cursor: pointer;
+      position: relative;
+      text-align: center;
+    }
+
+    .mode-card.selected {
+      border-color: var(--border-white-40);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .mode-card.selected::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: white;
+      box-shadow: 0 0 20px rgba(255,255,255,0.8);
+    }
+
+    .mode-icon {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .mode-card h3 {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .mode-card p {
+      font-size: 14px;
+      color: var(--text-gray-500);
+      line-height: 1.6;
+    }
+
+    /* Options */
+    .options-group {
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .options-label {
+      font-size: 16px;
+      color: var(--text-gray-400);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .options-list {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .option {
+      padding: 14px 24px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-gray-400);
+    }
+
+    .option:hover { color: var(--text-white); }
+
+    .option.selected {
+      border-color: var(--border-white-40);
+      color: var(--text-white);
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* Preview Card */
+    .preview-card {
+      padding: 60px;
+      text-align: center;
+    }
+
+    .preview-icon {
+      font-size: 72px;
+      display: block;
+      margin-bottom: 24px;
+    }
+
+    .preview-card h3 {
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+
+    .preview-card p {
+      font-size: 16px;
+      color: var(--text-gray-500);
+      max-width: 400px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Navigation */
+    .wizard-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border-white-10);
+    }
+
+    .skip-btn {
+      background: none;
+      border: none;
+      color: var(--text-gray-500);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .skip-btn:hover { color: var(--text-gray-400); }
+
+    .nav-btns { display: flex; gap: 16px; }
+
+    .btn {
+      padding: 16px 36px;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border-white-20);
+      color: var(--text-gray-400);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--border-white-40);
+      color: var(--text-white);
+    }
+
+    .btn-primary {
+      background: var(--text-white);
+      border: none;
+      color: var(--bg-black);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 0 30px rgba(255,255,255,0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:disabled {
+      background: rgba(255,255,255,0.2);
+      color: rgba(0,0,0,0.4);
+      cursor: not-allowed;
+    }
+
+    /* ==================== */
+    /* CREATIVE SPACE PAGE */
+    /* ==================== */
+    .creative-page { position: relative; }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .mode-tab {
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-10);
+      border-radius: 8px;
+      color: var(--text-gray-400);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .mode-tab:hover { color: var(--text-white); }
+    .mode-tab.active {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--border-white-40);
+      color: var(--text-white);
+    }
+
+    .create-btn {
+      padding: 12px 24px;
+      background: white;
+      border: none;
+      border-radius: 8px;
+      color: black;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .create-btn:hover {
+      box-shadow: 0 0 30px rgba(255,255,255,0.3);
+    }
+
+    .settings-btn {
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-10);
+      border-radius: 10px;
+      color: var(--text-gray-400);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .settings-btn:hover { color: white; }
+
+    /* Constellation View */
+    .constellation {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, #0a0a15 0%, #000 100%);
+      display: none;
+    }
+
+    .creative-page.active .constellation.active {
+      display: block;
+      position: fixed;
+      z-index: 10;
+    }
+
+    /* Constellation Empty State */
+    .constellation-empty-state {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      padding: 48px;
+      background: rgba(10,10,21,0.8);
+      border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 24px;
+      backdrop-filter: blur(12px);
+      z-index: 20;
+    }
+    .constellation-empty-state .constellation-empty-icon { font-size: 64px; margin-bottom: 20px; }
+    .constellation-empty-state h3 { font-size: 24px; margin-bottom: 12px; color: var(--text-white); }
+    .constellation-empty-state p { font-size: 15px; color: var(--text-gray-400); max-width: 350px; margin: 0 auto 24px; line-height: 1.6; }
+    .constellation-empty-btn {
+      padding: 14px 28px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      color: var(--text-white);
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .constellation-empty-btn:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+    }
+
+    .star.sm { width: 2px; height: 2px; }
+    .star.md { width: 4px; height: 4px; background: rgba(255,255,255,0.8); }
+    .star.lg { width: 8px; height: 8px; background: white; box-shadow: 0 0 10px white; }
+
+    .creation-node {
+      position: absolute;
+      cursor: pointer;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .creation-node:hover { transform: scale(1.15); }
+
+    .node-orb {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(31,41,55,0.7);
+      border: 1px solid var(--border-white-20);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 8px;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
+    }
+
+    .creation-node:hover .node-orb {
+      border-color: white;
+      box-shadow: 0 0 30px rgba(255,255,255,0.4);
+    }
+
+    .node-label {
+      font-size: 11px;
+      color: var(--text-gray-500);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .creation-node:hover .node-label { opacity: 1; }
+
+    .hint {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      background: rgba(31,41,55,0.6);
+      border: 1px solid var(--border-white-10);
+      border-radius: 24px;
+      font-size: 13px;
+      color: var(--text-gray-500);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .mode-grid { grid-template-columns: 1fr; }
+      .wizard-header h1 { font-size: 32px; }
+      .options-list { flex-direction: column; }
+      .mode-tabs { display: none; }
+      .rooms-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ==================== */
+    /* INFINITE CANVAS VIEW */
+    /* ==================== */
+    .canvas-view {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: var(--bg-black);
+    }
+
+    /* Only show canvas view when BOTH creative page AND canvas view are active */
+    .creative-page.active .canvas-view.active {
+      display: block;
+      position: fixed;
+      z-index: 10;
+    }
+
+    body.canvas-dragging {
+      cursor: grabbing !important;
+    }
+
+    body.canvas-placing {
+      cursor: crosshair !important;
+    }
+
+    /* Canvas Container */
+    .canvas-container {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      cursor: grab;
+      background: #030305;
+    }
+
+    .infinite-canvas {
+      position: absolute;
+      width: 8000px;
+      height: 8000px;
+      left: 50%;
+      top: 50%;
+      transform-origin: center center;
+    }
+
+    /* Grid background */
+    .canvas-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 100px 100px, 20px 20px;
+      pointer-events: none;
+    }
+
+    /* Center marker */
+    .center-marker {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .center-marker::before,
+    .center-marker::after {
+      content: '';
+      position: absolute;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .center-marker::before {
+      width: 1px;
+      height: 40px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .center-marker::after {
+      width: 40px;
+      height: 1px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Canvas Empty State */
+    .canvas-empty-state {
+      position: absolute;
+      text-align: center;
+      padding: 48px;
+      background: rgba(26,26,36,0.9);
+      border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 24px;
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+    .canvas-empty-state .canvas-empty-icon { font-size: 56px; margin-bottom: 20px; }
+    .canvas-empty-state h3 { font-size: 22px; margin-bottom: 12px; color: var(--text-white); }
+    .canvas-empty-state p { font-size: 14px; color: var(--text-gray-400); max-width: 300px; margin: 0 auto 20px; line-height: 1.5; }
+    .canvas-empty-btn {
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: var(--text-white);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .canvas-empty-btn:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+
+    /* Creation cards on canvas */
+    .canvas-creation {
+      position: absolute;
+      width: 280px;
+      background: rgba(26,26,36,0.95);
+      border: 1px solid var(--border-white-10);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      transform-origin: center center;
+    }
+
+    .canvas-creation:hover {
+      border-color: var(--border-white-20);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(196,161,255,0.1);
+      transform: scale(1.05);
+      z-index: 50;
+    }
+
+    .canvas-creation.selected {
+      border-color: #c4a1ff;
+      box-shadow: 0 0 0 3px rgba(196,161,255,0.3), 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    .creation-image {
+      height: 160px;
+      background: var(--bg-gray-800);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+      position: relative;
+    }
+
+    .creation-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(26,26,36,0.95) 0%, transparent 40%);
+    }
+
+    .creation-type-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 5px 12px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 100px;
+      font-size: 11px;
+      color: var(--text-gray-400);
+      z-index: 2;
+    }
+
+    .creation-info {
+      padding: 16px;
+    }
+
+    .creation-title {
+      font-size: 16px;
+      font-family: 'Cormorant Garamond', serif;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .creation-author {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-gray-500);
+    }
+
+    .author-avatar {
+      width: 20px;
+      height: 20px;
+      background: var(--bg-gray-800);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+
+    .creation-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-white-10);
+    }
+
+    .mood-tag {
+      padding: 4px 10px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 100px;
+      font-size: 11px;
+      color: var(--text-gray-400);
+    }
+
+    .creation-reactions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--text-gray-500);
+    }
+
+    /* Cluster labels */
+    .cluster-label {
+      position: absolute;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px dashed var(--border-white-10);
+      border-radius: 100px;
+      font-size: 13px;
+      color: var(--text-gray-500);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* Canvas Toolbar */
+    .canvas-toolbar {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px;
+      background: rgba(31,41,55,0.9);
+      border: 1px solid var(--border-white-10);
+      border-radius: 12px;
+      backdrop-filter: blur(12px);
+      z-index: 101;
+    }
+
+    .tool-btn {
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-gray-500);
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tool-btn:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text-white);
+    }
+
+    .tool-btn.active {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-white);
+    }
+
+    .tool-separator {
+      width: 1px;
+      height: 24px;
+      background: var(--border-white-10);
+      margin: 0 4px;
+    }
+
+    /* Minimap */
+    .minimap {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      width: 200px;
+      height: 140px;
+      background: rgba(17,24,39,0.95);
+      border: 1px solid var(--border-white-10);
+      border-radius: 12px;
+      overflow: hidden;
+      z-index: 101;
+    }
+
+    .minimap-header {
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border-white-10);
+      font-size: 11px;
+      color: var(--text-gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .minimap-canvas {
+      position: relative;
+      height: calc(100% - 30px);
+      cursor: pointer;
+    }
+
+    .minimap-dot {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #c4a1ff;
+      border-radius: 50%;
+      opacity: 0.7;
+    }
+
+    .minimap-viewport {
+      position: absolute;
+      border: 2px solid var(--text-white);
+      border-radius: 3px;
+      background: rgba(255,255,255,0.05);
+      transition: all 0.1s ease;
+    }
+
+    /* Zoom controls */
+    .zoom-controls {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 101;
+    }
+
+    .zoom-btn {
+      width: 44px;
+      height: 44px;
+      background: rgba(17,24,39,0.95);
+      border: 1px solid var(--border-white-10);
+      border-radius: 12px;
+      color: var(--text-gray-400);
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zoom-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-white);
+    }
+
+    .zoom-level {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-gray-500);
+      padding: 8px;
+      background: rgba(17,24,39,0.95);
+      border: 1px solid var(--border-white-10);
+      border-radius: 8px;
+    }
+
+    /* Canvas hint */
+    .canvas-hint-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      background: rgba(17,24,39,0.95);
+      border: 1px solid var(--border-white-10);
+      border-radius: 100px;
+      font-size: 13px;
+      color: var(--text-gray-500);
+      z-index: 101;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hint-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hint-key {
+      padding: 3px 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    /* Placement mode */
+    .placement-mode {
+      position: fixed;
+      top: 140px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 28px;
+      background: #c4a1ff;
+      border-radius: 100px;
+      color: var(--bg-black);
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 102;
+      display: none;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .placement-mode.active {
+      display: flex;
+    }
+
+    .cancel-placement {
+      padding: 6px 14px;
+      background: rgba(0,0,0,0.2);
+      border: none;
+      border-radius: 100px;
+      color: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .cancel-placement:hover {
+      background: rgba(0,0,0,0.3);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: 14px 28px;
+      background: rgba(255,255,255,0.95);
+      color: var(--bg-black);
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.4s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ==================== */
+    /* CREATE MODAL */
+    /* ==================== */
+    .create-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .create-modal-overlay.active {
+      display: flex;
+    }
+
+    .create-modal {
+      background: #0c0c14;
+      border: 1px solid var(--border-white-10);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow: hidden;
+      animation: createModalIn 0.3s ease;
+    }
+
+    @keyframes createModalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .create-modal-header {
+      padding: 28px 28px 0;
+      text-align: center;
+    }
+
+    .create-modal-title {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .create-modal-subtitle {
+      font-size: 15px;
+      color: var(--text-gray-500);
+    }
+
+    .create-modal-body {
+      padding: 28px;
+      max-height: calc(90vh - 200px);
+      overflow-y: auto;
+    }
+
+    .create-type-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .create-type-card {
+      padding: 24px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-white-10);
+      border-radius: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .create-type-card:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: var(--border-white-20);
+      transform: translateY(-4px);
+    }
+
+    .create-type-card.selected {
+      border-color: var(--border-white-40);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .create-type-icon {
+      font-size: 40px;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .create-type-name {
+      font-size: 16px;
+      font-family: 'Cormorant Garamond', serif;
+      margin-bottom: 4px;
+    }
+
+    .create-type-desc {
+      font-size: 12px;
+      color: var(--text-gray-500);
+    }
+
+    .create-input-group {
+      margin-bottom: 20px;
+    }
+
+    .create-input-label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-gray-400);
+      margin-bottom: 8px;
+    }
+
+    .create-input {
+      width: 100%;
+      padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-white-10);
+      border-radius: 12px;
+      color: var(--text-white);
+      font-family: inherit;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .create-input:focus {
+      outline: none;
+      border-color: var(--border-white-40);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .create-input::placeholder {
+      color: var(--text-gray-500);
+    }
+
+    .create-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .create-modal-footer {
+      display: flex;
+      gap: 12px;
+      padding: 0 28px 28px;
+    }
+
+    .create-modal-btn {
+      flex: 1;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .create-modal-btn.cancel {
+      background: transparent;
+      border: 1px solid var(--border-white-20);
+      color: var(--text-gray-400);
+    }
+
+    .create-modal-btn.cancel:hover {
+      border-color: var(--border-white-40);
+      color: var(--text-white);
+    }
+
+    .create-modal-btn.submit {
+      background: var(--text-white);
+      border: none;
+      color: var(--bg-black);
+    }
+
+    .create-modal-btn.submit:hover {
+      box-shadow: 0 0 30px rgba(255,255,255,0.4);
+      transform: translateY(-2px);
+    }
+
+    .create-modal-btn.submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .create-modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 50%;
+      color: var(--text-gray-400);
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 10;
+    }
+    .create-modal-close:hover {
+      background: rgba(255,255,255,0.2);
+      color: var(--text-white);
+    }
+
+    /* Create Steps */
+    .create-step {
+      display: none;
+    }
+    .create-step.active {
+      display: block;
+    }
+
+    .create-back-btn {
+      background: none;
+      border: none;
+      color: var(--text-gray-400);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 8px 0;
+      margin-bottom: 16px;
+      transition: color 0.2s;
+    }
+    .create-back-btn:hover {
+      color: var(--text-white);
+    }
+
+    .required {
+      color: #f87171;
+    }
+
+    /* Content Areas */
+    .create-content-area {
+      margin-bottom: 20px;
+    }
+
+    .create-content-editor {
+      min-height: 200px;
+      font-family: 'Georgia', serif;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    /* Writing Toolbar */
+    .writing-toolbar {
+      display: flex;
+      gap: 4px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-10);
+      border-bottom: none;
+      border-radius: 12px 12px 0 0;
+    }
+    .writing-toolbar button {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: var(--text-gray-400);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .writing-toolbar button:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-white);
+    }
+    .toolbar-divider {
+      width: 1px;
+      background: var(--border-white-10);
+      margin: 0 8px;
+    }
+
+    .writing-toolbar + .create-content-editor {
+      border-radius: 0 0 12px 12px;
+    }
+
+    .content-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-gray-500);
+    }
+
+    .upload-alt {
+      cursor: pointer;
+      color: var(--text-gray-400);
+      transition: color 0.2s;
+    }
+    .upload-alt:hover {
+      color: var(--text-white);
+    }
+
+    /* Upload Zone */
+    .upload-zone {
+      border: 2px dashed var(--border-white-20);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .upload-zone:hover {
+      border-color: var(--border-white-40);
+      background: rgba(255,255,255,0.03);
+    }
+    .upload-zone.dragover {
+      border-color: #a78bfa;
+      background: rgba(167, 139, 250, 0.1);
+    }
+
+    .upload-zone-content {
+      pointer-events: none;
+    }
+    .upload-icon {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 16px;
+    }
+    .upload-text {
+      font-size: 16px;
+      color: var(--text-gray-300);
+      margin-bottom: 8px;
+    }
+    .upload-hint {
+      font-size: 13px;
+      color: var(--text-gray-500);
+    }
+
+    .upload-preview {
+      position: relative;
+    }
+    .upload-preview img {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 12px;
+      object-fit: contain;
+    }
+    .remove-upload {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.7);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .remove-upload:hover {
+      background: rgba(239, 68, 68, 0.8);
+    }
+
+    .audio-preview {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+    }
+    .audio-icon {
+      font-size: 32px;
+    }
+    .audio-name {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text-gray-300);
+    }
+    .audio-preview .remove-upload {
+      position: relative;
+      top: auto;
+      right: auto;
+    }
+
+    /* Music Options */
+    .music-options {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .music-option-btn {
+      flex: 1;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-10);
+      border-radius: 10px;
+      color: var(--text-gray-400);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .music-option-btn:hover {
+      border-color: var(--border-white-20);
+    }
+    .music-option-btn.active {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--border-white-40);
+      color: var(--text-white);
+    }
+
+    .input-hint {
+      font-size: 12px;
+      color: var(--text-gray-500);
+      margin-top: 8px;
+    }
+
+    /* Mood Options */
+    .mood-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .mood-option {
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-10);
+      border-radius: 20px;
+      font-size: 13px;
+      color: var(--text-gray-400);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mood-option:hover {
+      border-color: var(--border-white-20);
+      color: var(--text-gray-300);
+    }
+    .mood-option.selected {
+      background: rgba(167, 139, 250, 0.2);
+      border-color: #a78bfa;
+      color: var(--text-white);
+    }
+
+    /* Visibility Options */
+    .visibility-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .visibility-option {
+      cursor: pointer;
+    }
+    .visibility-option input {
+      display: none;
+    }
+    .visibility-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-white-10);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    .visibility-option input:checked + .visibility-card {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--border-white-40);
+    }
+    .visibility-card:hover {
+      border-color: var(--border-white-20);
+    }
+    .visibility-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    .visibility-name {
+      font-size: 14px;
+      color: var(--text-white);
+      margin-bottom: 4px;
+    }
+    .visibility-desc {
+      font-size: 11px;
+      color: var(--text-gray-500);
+    }
+
+    /* Canvas responsive */
+    @media (max-width: 768px) {
+      .canvas-toolbar { display: none; }
+      .minimap { width: 140px; height: 100px; }
+      .canvas-hint-bar { display: none; }
+    }
+
+    /* ==================== */
+    /* GARDEN VIEW - FULL */
+    /* ==================== */
+    .garden-view {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: #060806;
+      overflow-y: auto;
+    }
+
+    .creative-page.active .garden-view.active {
+      display: block;
+      position: fixed;
+      z-index: 10;
+    }
+
+    /* Garden ambient background */
+    .garden-ambient-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .garden-ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.3;
+      animation: garden-float-orb 20s ease-in-out infinite;
+    }
+
+    .garden-ambient-orb:nth-child(1) {
+      width: 400px;
+      height: 400px;
+      background: rgba(124,232,168,0.15);
+      top: -100px;
+      left: -100px;
+      animation-delay: 0s;
+    }
+
+    .garden-ambient-orb:nth-child(2) {
+      width: 300px;
+      height: 300px;
+      background: rgba(196,161,255,0.1);
+      bottom: -50px;
+      right: -50px;
+      animation-delay: -10s;
+    }
+
+    .garden-ambient-orb:nth-child(3) {
+      width: 250px;
+      height: 250px;
+      background: rgba(232,200,124,0.1);
+      top: 50%;
+      left: 50%;
+      animation-delay: -5s;
+    }
+
+    @keyframes garden-float-orb {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(50px, 30px) scale(1.1); }
+    }
+
+    .garden-main {
+      position: relative;
+      z-index: 1;
+      padding: 120px 48px 80px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .garden-page-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .garden-page-header h1 {
+      font-size: 52px;
+      font-weight: 400;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .garden-page-header p {
+      font-size: 18px;
+      color: #9ca89c;
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+
+    /* View toggle */
+    .garden-view-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 48px;
+    }
+
+    .garden-view-btn {
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 100px;
+      color: #6b7a6b;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .garden-view-btn:hover {
+      background: rgba(255,255,255,0.06);
+      color: #f0eeeb;
+    }
+
+    .garden-view-btn.active {
+      background: rgba(124,232,168,0.1);
+      border-color: rgba(124,232,168,0.3);
+      color: #7ce8a8;
+    }
+
+    /* Stats bar */
+    .garden-stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-bottom: 48px;
+      padding: 20px 0;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .garden-stat-item {
+      text-align: center;
+    }
+
+    .garden-stat-value {
+      font-size: 28px;
+      font-family: 'Cormorant Garamond', serif;
+      color: #f0eeeb;
+    }
+
+    .garden-stat-label {
+      font-size: 13px;
+      color: #6b7a6b;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Section dividers */
+    .garden-section-divider {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin: 48px 0 32px;
+    }
+
+    .garden-section-divider::before,
+    .garden-section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .garden-section-title {
+      font-size: 14px;
+      color: #6b7a6b;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+
+    /* Room grid */
+    .garden-rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 28px;
+    }
+
+    /* Room card */
+    .garden-room-card {
+      background: #1a241a;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 24px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .garden-room-card:hover {
+      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-8px);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+    }
+
+    .garden-room-card.your-room {
+      border-style: dashed;
+      border-color: rgba(255,255,255,0.15);
+      background: linear-gradient(135deg, #1a241a 0%, rgba(124,232,168,0.05) 100%);
+    }
+
+    .garden-room-card.your-room:hover {
+      border-color: #7ce8a8;
+      box-shadow: 0 24px 60px rgba(124,232,168,0.15);
+    }
+
+    /* Room preview */
+    .garden-room-preview {
+      height: 200px;
+      background: #141c14;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .garden-room-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 4px;
+      padding: 4px;
+      height: 100%;
+    }
+
+    .garden-preview-item {
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      transition: all 0.3s ease;
+    }
+
+    .garden-room-card:hover .garden-preview-item {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .garden-preview-item.featured {
+      grid-column: span 2;
+      grid-row: span 2;
+      font-size: 56px;
+    }
+
+    .garden-room-preview.empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .garden-empty-icon {
+      width: 80px;
+      height: 80px;
+      background: rgba(124,232,168,0.1);
+      border: 2px dashed rgba(124,232,168,0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      transition: all 0.3s ease;
+    }
+
+    .garden-room-card:hover .garden-empty-icon {
+      background: rgba(124,232,168,0.15);
+      border-color: rgba(124,232,168,0.5);
+      transform: scale(1.05);
+    }
+
+    .garden-empty-text {
+      font-size: 16px;
+      color: #6b7a6b;
+    }
+
+    /* Garden Empty State */
+    .garden-empty-state {
+      text-align: center;
+      padding: 60px 40px;
+      background: rgba(124,232,168,0.03);
+      border: 2px dashed rgba(124,232,168,0.2);
+      border-radius: 24px;
+      margin-bottom: 24px;
+    }
+    .garden-empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    .garden-empty-state h3 {
+      font-size: 22px;
+      color: var(--text-white);
+      margin-bottom: 12px;
+    }
+    .garden-empty-state p {
+      font-size: 15px;
+      color: var(--text-gray-400);
+      max-width: 400px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+    .garden-empty-state-btn {
+      padding: 14px 28px;
+      background: rgba(124,232,168,0.15);
+      border: 1px solid rgba(124,232,168,0.3);
+      border-radius: 12px;
+      color: #7ce8a8;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .garden-empty-state-btn:hover {
+      background: rgba(124,232,168,0.25);
+      transform: translateY(-2px);
+    }
+
+    /* Room status badge */
+    .garden-room-status {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(8px);
+    }
+
+    .garden-room-status.open {
+      background: rgba(124,232,168,0.2);
+      color: #7ce8a8;
+    }
+
+    .garden-room-status.quiet {
+      background: rgba(196,161,255,0.2);
+      color: #c4a1ff;
+    }
+
+    .garden-room-status.closed {
+      background: rgba(255,255,255,0.1);
+      color: #6b7a6b;
+    }
+
+    .garden-status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Owner badge */
+    .garden-owner-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      padding: 6px 14px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 100px;
+      font-size: 12px;
+      color: #9ca89c;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .garden-owner-avatar {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: #141c14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+
+    /* Room info */
+    .garden-room-info {
+      padding: 24px;
+    }
+
+    .garden-room-title {
+      font-size: 22px;
+      font-family: 'Cormorant Garamond', serif;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .garden-room-description {
+      font-size: 14px;
+      color: #6b7a6b;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .garden-room-meta {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 13px;
+      color: #6b7a6b;
+      margin-bottom: 20px;
+    }
+
+    .garden-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Room tags */
+    .garden-room-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .garden-room-tag {
+      padding: 5px 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 100px;
+      font-size: 12px;
+      color: #9ca89c;
+    }
+
+    /* Room actions */
+    .garden-room-actions {
+      display: flex;
+      gap: 12px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .garden-knock-btn {
+      flex: 1;
+      padding: 14px 24px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      color: #f0eeeb;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .garden-knock-btn:hover {
+      background: #f0eeeb;
+      color: #060806;
+    }
+
+    .garden-peek-btn {
+      width: 48px;
+      height: 48px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      color: #6b7a6b;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .garden-peek-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: #f0eeeb;
+    }
+
+    .garden-enter-btn {
+      flex: 1;
+      padding: 14px 24px;
+      background: #7ce8a8;
+      border: none;
+      border-radius: 14px;
+      color: #060806;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .garden-enter-btn:hover {
+      box-shadow: 0 0 30px rgba(124,232,168,0.4);
+    }
+
+    /* Visitor activity */
+    .garden-visitor-activity {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+
+    .garden-visitor-avatars {
+      display: flex;
+    }
+
+    .garden-visitor-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: #141c14;
+      border: 2px solid #1a241a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      margin-left: -8px;
+    }
+
+    .garden-visitor-avatar:first-child {
+      margin-left: 0;
+    }
+
+    .garden-visitor-text {
+      font-size: 12px;
+      color: #6b7a6b;
+      margin-left: 4px;
+    }
+
+    /* Knock modal */
+    .garden-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .garden-modal-overlay.active {
+      display: flex;
+    }
+
+    .garden-modal {
+      background: #0c120c;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+      animation: gardenModalIn 0.3s ease;
+    }
+
+    @keyframes gardenModalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .garden-modal-header {
+      padding: 28px 28px 0;
+      text-align: center;
+    }
+
+    .garden-modal-icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+    }
+
+    .garden-modal-title {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .garden-modal-subtitle {
+      font-size: 15px;
+      color: #6b7a6b;
+    }
+
+    .garden-modal-body {
+      padding: 28px;
+    }
+
+    .garden-knock-message-label {
+      font-size: 13px;
+      color: #9ca89c;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .garden-knock-message {
+      width: 100%;
+      padding: 16px;
+      background: #141c14;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 14px;
+      color: #f0eeeb;
+      font-size: 15px;
+      font-family: inherit;
+      resize: none;
+      height: 100px;
+    }
+
+    .garden-knock-message:focus {
+      outline: none;
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .garden-knock-message::placeholder {
+      color: #6b7a6b;
+    }
+
+    .garden-knock-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .garden-knock-suggestion {
+      padding: 8px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 100px;
+      color: #9ca89c;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .garden-knock-suggestion:hover {
+      background: rgba(255,255,255,0.1);
+      color: #f0eeeb;
+    }
+
+    .garden-modal-actions {
+      display: flex;
+      gap: 12px;
+      padding: 0 28px 28px;
+    }
+
+    .garden-modal-cancel {
+      flex: 1;
+      padding: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      color: #9ca89c;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .garden-modal-cancel:hover {
+      background: rgba(255,255,255,0.1);
+      color: #f0eeeb;
+    }
+
+    .garden-modal-submit {
+      flex: 1;
+      padding: 16px;
+      background: #7ce8a8;
+      border: none;
+      border-radius: 14px;
+      color: #060806;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .garden-modal-submit:hover {
+      box-shadow: 0 0 30px rgba(124,232,168,0.4);
+    }
+
+    /* Garden responsive */
+    @media (max-width: 900px) {
+      .garden-main { padding: 100px 24px 60px; }
+      .garden-page-header h1 { font-size: 36px; }
+      .garden-rooms-grid { grid-template-columns: 1fr; }
+      .garden-stats-bar { gap: 24px; flex-wrap: wrap; }
+    }
+
+    @media (max-width: 600px) {
+      .garden-view-toggle { flex-wrap: wrap; }
+      .garden-room-actions { flex-direction: column; }
+      .garden-peek-btn { width: 100%; }
+    }
+
+    /* ==================== */
+    /* SEASONAL FLOW VIEW */
+    /* ==================== */
+    .seasonal-view {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: #0a0c10;
+      overflow-y: auto;
+    }
+
+    .creative-page.active .seasonal-view.active {
+      display: block;
+      position: fixed;
+      z-index: 10;
+    }
+
+    /* Season background variations */
+    .seasonal-view.winter { background: linear-gradient(180deg, #0a0c14 0%, #0f1420 100%); }
+    .seasonal-view.spring { background: linear-gradient(180deg, #0a100a 0%, #0f1a0f 100%); }
+    .seasonal-view.summer { background: linear-gradient(180deg, #14120a 0%, #1a180f 100%); }
+    .seasonal-view.autumn { background: linear-gradient(180deg, #140c0a 0%, #1a100f 100%); }
+
+    /* Season colors */
+    .seasonal-view {
+      --winter-primary: #a1c4e8;
+      --winter-glow: rgba(161,196,232,0.3);
+      --spring-primary: #c4e8c4;
+      --spring-glow: rgba(196,232,196,0.3);
+      --summer-primary: #f0e87c;
+      --summer-glow: rgba(240,232,124,0.3);
+      --autumn-primary: #e8a87c;
+      --autumn-glow: rgba(232,168,124,0.3);
+    }
+
+    /* Seasonal particles */
+    .seasonal-particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .seasonal-particle {
+      position: absolute;
+      border-radius: 50%;
+      animation: seasonal-float-particle 20s ease-in-out infinite;
+    }
+
+    .seasonal-view.winter .seasonal-particle { background: rgba(161,196,232,0.3); }
+    .seasonal-view.spring .seasonal-particle { background: rgba(196,232,196,0.3); }
+    .seasonal-view.summer .seasonal-particle { background: rgba(240,232,124,0.3); }
+    .seasonal-view.autumn .seasonal-particle { background: rgba(232,168,124,0.3); }
+
+    @keyframes seasonal-float-particle {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.2; }
+      50% { transform: translateY(-100px) translateX(50px); opacity: 0.5; }
+    }
+
+    .seasonal-main {
+      position: relative;
+      z-index: 1;
+      padding: 120px 48px 80px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .seasonal-page-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .seasonal-page-header h1 {
+      font-size: 48px;
+      font-weight: 300;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .seasonal-page-header p {
+      font-size: 18px;
+      color: #9ca3af;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Season selector */
+    .season-selector {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .season-btn {
+      padding: 16px 32px;
+      background: rgba(255,255,255,0.03);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      color: #9ca3af;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .season-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--season-color);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .season-btn:hover {
+      background: rgba(255,255,255,0.06);
+      color: #f0eeeb;
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .season-btn.active {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--season-color);
+      color: #f0eeeb;
+      box-shadow: 0 0 30px var(--season-glow);
+    }
+
+    .season-btn.active::before {
+      opacity: 1;
+    }
+
+    .season-btn[data-season="winter"] { --season-color: var(--winter-primary); --season-glow: var(--winter-glow); }
+    .season-btn[data-season="spring"] { --season-color: var(--spring-primary); --season-glow: var(--spring-glow); }
+    .season-btn[data-season="summer"] { --season-color: var(--summer-primary); --season-glow: var(--summer-glow); }
+    .season-btn[data-season="autumn"] { --season-color: var(--autumn-primary); --season-glow: var(--autumn-glow); }
+
+    .season-emoji { font-size: 24px; }
+    .season-name { font-weight: 400; }
+
+    /* Mood filters */
+    .seasonal-mood-section {
+      margin-bottom: 48px;
+    }
+
+    .seasonal-mood-label {
+      text-align: center;
+      font-size: 13px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+    }
+
+    .seasonal-mood-filters {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .seasonal-mood-filter {
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 100px;
+      color: #6b7280;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .seasonal-mood-filter:hover {
+      background: rgba(255,255,255,0.06);
+      color: #f0eeeb;
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .seasonal-mood-filter.active {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.4);
+      color: #f0eeeb;
+    }
+
+    /* Exhibition sections */
+    .seasonal-exhibition {
+      margin-bottom: 64px;
+    }
+
+    .seasonal-exhibition-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .seasonal-exhibition-info {
+      flex: 1;
+    }
+
+    .seasonal-exhibition-title {
+      font-size: 28px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .seasonal-exhibition-meta {
+      font-size: 14px;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .seasonal-exhibition-meta .separator {
+      width: 4px;
+      height: 4px;
+      background: #6b7280;
+      border-radius: 50%;
+    }
+
+    .seasonal-exhibition-timer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(232,168,124,0.1);
+      border-radius: 100px;
+      font-size: 13px;
+      color: #e8a87c;
+    }
+
+    .seasonal-view-all-btn {
+      padding: 10px 24px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      color: #9ca3af;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .seasonal-view-all-btn:hover {
+      background: rgba(255,255,255,0.05);
+      color: #f0eeeb;
+    }
+
+    /* Seasonal creation grid */
+    .seasonal-creation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .seasonal-creation-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .seasonal-creation-card:hover {
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .seasonal-creation-image {
+      height: 200px;
+      background: #1a1e28;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .seasonal-creation-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
+    }
+
+    /* Season-tinted images */
+    .seasonal-view.winter .seasonal-creation-image { background: linear-gradient(135deg, #1a2030 0%, #0f1520 100%); }
+    .seasonal-view.spring .seasonal-creation-image { background: linear-gradient(135deg, #1a2a1a 0%, #0f1a0f 100%); }
+    .seasonal-view.summer .seasonal-creation-image { background: linear-gradient(135deg, #2a281a 0%, #1a180f 100%); }
+    .seasonal-view.autumn .seasonal-creation-image { background: linear-gradient(135deg, #2a1a1a 0%, #1a0f0f 100%); }
+
+    .seasonal-creation-type {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      padding: 6px 14px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 100px;
+      font-size: 12px;
+      color: #9ca3af;
+      z-index: 2;
+    }
+
+    .seasonal-creation-info {
+      padding: 20px;
+    }
+
+    .seasonal-creation-title {
+      font-size: 18px;
+      margin-bottom: 8px;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .seasonal-creation-author {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .seasonal-creation-author-avatar {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: #1a1e28;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+
+    .seasonal-creation-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .seasonal-mood-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 100px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .seasonal-appreciation-btn {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 50%;
+      color: #6b7280;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .seasonal-appreciation-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: #f0eeeb;
+      transform: scale(1.1);
+    }
+
+    .seasonal-appreciation-btn.appreciated {
+      background: rgba(196,161,255,0.2);
+      border-color: rgba(196,161,255,0.4);
+      color: #c4a1ff;
+    }
+
+    /* Featured/Large card */
+    .seasonal-creation-card.featured {
+      grid-column: span 2;
+    }
+
+    .seasonal-creation-card.featured .seasonal-creation-image {
+      height: 280px;
+    }
+
+    .seasonal-creation-card.featured .seasonal-creation-title {
+      font-size: 24px;
+    }
+
+    /* Ephemeral badge */
+    .seasonal-ephemeral-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 6px 14px;
+      background: rgba(232,168,124,0.2);
+      border: 1px solid rgba(232,168,124,0.3);
+      border-radius: 100px;
+      font-size: 11px;
+      color: #e8a87c;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Empty state */
+    .seasonal-empty-state {
+      text-align: center;
+      padding: 80px 40px;
+      background: rgba(255,255,255,0.02);
+      border: 1px dashed rgba(255,255,255,0.1);
+      border-radius: 24px;
+    }
+
+    .seasonal-empty-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
+    .seasonal-empty-state h3 { font-size: 24px; margin-bottom: 12px; }
+    .seasonal-empty-state p { font-size: 15px; color: #6b7280; max-width: 400px; margin: 0 auto; }
+
+    .seasonal-empty-state-main {
+      text-align: center;
+      padding: 80px 40px;
+      background: rgba(255,255,255,0.02);
+      border: 2px dashed rgba(255,255,255,0.1);
+      border-radius: 24px;
+      margin-top: 32px;
+    }
+    .seasonal-empty-state-main .seasonal-empty-state-icon { font-size: 72px; margin-bottom: 24px; }
+    .seasonal-empty-state-main h3 { font-size: 24px; margin-bottom: 12px; color: var(--text-white); }
+    .seasonal-empty-state-main p { font-size: 15px; color: var(--text-gray-400); max-width: 450px; margin: 0 auto 24px; line-height: 1.6; }
+    .seasonal-empty-state-btn {
+      padding: 14px 28px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      color: var(--text-white);
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .seasonal-empty-state-btn:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+
+    /* Seasonal responsive */
+    @media (max-width: 900px) {
+      .seasonal-main { padding: 100px 24px 60px; }
+      .seasonal-page-header h1 { font-size: 36px; }
+      .season-selector { flex-wrap: wrap; }
+      .season-btn { padding: 12px 20px; }
+      .seasonal-creation-card.featured { grid-column: span 1; }
+      .seasonal-creation-card.featured .seasonal-creation-image { height: 200px; }
+      .seasonal-exhibition-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    }
+
+    @media (max-width: 600px) {
+      .seasonal-creation-grid { grid-template-columns: 1fr; }
+      .seasonal-mood-filters { gap: 8px; }
+      .seasonal-mood-filter { padding: 8px 14px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1: WIZARD -->
+  <div class="page wizard-page active" id="wizardPage">
+    <div class="wizard-container">
+
+      <div class="wizard-header">
+        <h1>Creative Space</h1>
+        <p>Choose how you want to explore and share</p>
+      </div>
+
+      <!-- Progress Dots -->
+      <div class="progress-dots">
+        <div class="dot active" data-step="1"></div>
+        <div class="dot" data-step="2"></div>
+        <div class="dot" data-step="3"></div>
+        <div class="dot" data-step="4"></div>
+        <div class="dot" data-step="5"></div>
+      </div>
+
+      <!-- Step 1: Mode Selection -->
+      <div class="step active" data-step="1">
+        <h2 class="step-title">Choose Your Space</h2>
+        <p class="step-subtitle">How do you want your creations to live?</p>
+        <div class="mode-grid">
+          <div class="glass-card mode-card" data-mode="constellation">
+            <span class="mode-icon">✨</span>
+            <h3>Constellation</h3>
+            <p>Creations float like stars in space. Drift and explore.</p>
+          </div>
+          <div class="glass-card mode-card" data-mode="garden">
+            <span class="mode-icon">🌿</span>
+            <h3>Garden</h3>
+            <p>Design your own room. Visitors knock before entering.</p>
+          </div>
+          <div class="glass-card mode-card" data-mode="canvas">
+            <span class="mode-icon">🎨</span>
+            <h3>Infinite Canvas</h3>
+            <p>One shared space. Place your work anywhere.</p>
+          </div>
+          <div class="glass-card mode-card" data-mode="seasonal">
+            <span class="mode-icon">🌙</span>
+            <h3>Seasonal Flow</h3>
+            <p>Content by moods and themes. Curated exhibitions.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Set Boundaries -->
+      <div class="step" data-step="2">
+        <h2 class="step-title">Set Your Boundaries</h2>
+        <p class="step-subtitle">Control how others interact with your space</p>
+
+        <div class="options-group">
+          <p class="options-label">Who can see your creations?</p>
+          <div class="options-list">
+            <div class="glass-card option selected" data-value="everyone">🌍 Everyone</div>
+            <div class="glass-card option" data-value="connections">🤝 Connections only</div>
+            <div class="glass-card option" data-value="private">🔒 Just me</div>
+          </div>
+        </div>
+
+        <div class="options-group">
+          <p class="options-label">Allow comments?</p>
+          <div class="options-list">
+            <div class="glass-card option selected" data-value="yes">💬 Yes, I'd love feedback</div>
+            <div class="glass-card option" data-value="connections">🤝 From connections only</div>
+            <div class="glass-card option" data-value="no">🤫 No, just reactions</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Creative Preferences -->
+      <div class="step" data-step="3">
+        <h2 class="step-title">Creative Preferences</h2>
+        <p class="step-subtitle">Customize your creative experience</p>
+
+        <div class="options-group">
+          <p class="options-label">What do you like to create?</p>
+          <div class="options-list">
+            <div class="glass-card option" data-value="writing">✍️ Writing</div>
+            <div class="glass-card option" data-value="art">🎨 Visual Art</div>
+            <div class="glass-card option" data-value="music">🎵 Music</div>
+            <div class="glass-card option" data-value="photos">📷 Photography</div>
+            <div class="glass-card option" data-value="ideas">💡 Ideas & Thoughts</div>
+          </div>
+        </div>
+
+        <div class="options-group">
+          <p class="options-label">When are you most creative?</p>
+          <div class="options-list">
+            <div class="glass-card option" data-value="morning">🌅 Morning</div>
+            <div class="glass-card option selected" data-value="night">🌙 Late night</div>
+            <div class="glass-card option" data-value="anytime">✨ Whenever inspiration strikes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Discovery Settings -->
+      <div class="step" data-step="4">
+        <h2 class="step-title">Discovery Settings</h2>
+        <p class="step-subtitle">How do you want to find inspiration?</p>
+
+        <div class="options-group">
+          <p class="options-label">Show me creations that are...</p>
+          <div class="options-list">
+            <div class="glass-card option selected" data-value="similar">🎯 Similar to mine</div>
+            <div class="glass-card option" data-value="different">🌈 Different & surprising</div>
+            <div class="glass-card option" data-value="popular">⭐ Popular in community</div>
+          </div>
+        </div>
+
+        <div class="options-group">
+          <p class="options-label">Notification preference</p>
+          <div class="options-list">
+            <div class="glass-card option" data-value="all">🔔 All activity</div>
+            <div class="glass-card option selected" data-value="minimal">🔕 Minimal & gentle</div>
+            <div class="glass-card option" data-value="none">😌 None, I'll check in</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Preview -->
+      <div class="step" data-step="5">
+        <h2 class="step-title">Your Creative Space Awaits</h2>
+        <p class="step-subtitle">Here's what you've chosen</p>
+
+        <div class="glass-card preview-card">
+          <span class="preview-icon" id="previewIcon">✨</span>
+          <h3 id="previewTitle">Constellation Mode</h3>
+          <p id="previewDescription">Creations float like stars in space. Drift and explore. Similar ideas cluster together like galaxies.</p>
+        </div>
+      </div>
+
+      <!-- Wizard Navigation -->
+      <div class="wizard-nav">
+        <button class="skip-btn" onclick="skipWizard()">Skip setup</button>
+        <div class="nav-btns">
+          <button class="btn btn-secondary" id="backBtn" onclick="prevStep()" style="display: none;">Back</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Continue</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PAGE 2: CREATIVE SPACE (Hidden until wizard done) -->
+  <div class="page creative-page" id="creativePage">
+    
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span>🌙</span>
+        <span>Creative</span>
+      </div>
+      <div class="header-right">
+        <div class="mode-tabs">
+          <button class="mode-tab active" onclick="showView('constellation')">✨ Constellation</button>
+          <button class="mode-tab" onclick="showView('garden')">🌿 Garden</button>
+          <button class="mode-tab" onclick="showView('canvas')">🎨 Canvas</button>
+          <button class="mode-tab" onclick="showView('seasonal')">🌙 Seasonal</button>
+        </div>
+        <button class="create-btn" onclick="openCreateModal()">+ Create</button>
+        <button class="settings-btn" onclick="openSettings()">⚙️</button>
+      </div>
+    </header>
+
+    <!-- Constellation View -->
+    <div class="constellation active" id="constellationView">
+      <!-- Empty State -->
+      <div class="constellation-empty-state">
+        <div class="constellation-empty-icon">✨</div>
+        <h3>Your Creative Constellation</h3>
+        <p>Your creations will appear as stars in your personal constellation. Each piece you create adds a new point of light.</p>
+        <button class="constellation-empty-btn" onclick="openCreateModal()">
+          <span>🌟</span> Create Your First Star
+        </button>
+      </div>
+      <!-- User creations will be dynamically added here as creation-node elements -->
+    </div>
+
+    <!-- Garden View -->
+    <div class="garden-view" id="gardenView">
+      <!-- Ambient Background -->
+      <div class="garden-ambient-bg">
+        <div class="garden-ambient-orb"></div>
+        <div class="garden-ambient-orb"></div>
+        <div class="garden-ambient-orb"></div>
+      </div>
+
+      <main class="garden-main">
+        <!-- Page Header -->
+        <div class="garden-page-header">
+          <h1><span>🌿</span> Garden Rooms</h1>
+          <p>Personal gallery spaces where visitors knock before entering. Each room is a curated sanctuary.</p>
+        </div>
+
+        <!-- Your Room Section -->
+        <div class="garden-section-divider">
+          <span class="garden-section-title">Your Room</span>
+        </div>
+
+        <div class="garden-rooms-grid" style="margin-bottom: 32px;">
+          <!-- Your Room Card -->
+          <div class="garden-room-card your-room" onclick="showToast('🏠 Opening your room editor...')">
+            <div class="garden-room-preview empty">
+              <div class="garden-empty-icon">🌱</div>
+              <div class="garden-empty-text">Design Your Garden Room</div>
+            </div>
+            <div class="garden-room-info">
+              <div class="garden-room-title">🏠 Your Garden Room</div>
+              <div class="garden-room-description">Create a personal space to curate and share your creations. Visitors will knock before entering.</div>
+              <div class="garden-room-actions">
+                <button class="garden-enter-btn" onclick="event.stopPropagation(); showToast('✨ Opening room editor...')">
+                  <span>✨</span>
+                  Start Designing
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Explore Rooms Section -->
+        <div class="garden-section-divider">
+          <span class="garden-section-title">Explore Rooms</span>
+        </div>
+
+        <!-- Empty State for Explore -->
+        <div class="garden-empty-state">
+          <div class="garden-empty-state-icon">🌿</div>
+          <h3>No Garden Rooms Yet</h3>
+          <p>Be the first to create a garden room! Design your personal creative sanctuary where others can visit and appreciate your work.</p>
+          <button class="garden-empty-state-btn" onclick="showToast('✨ Opening room editor...')">
+            <span>✨</span> Create Your Room
+          </button>
+        </div>
+
+        <div class="garden-rooms-grid" id="gardenRoomsGrid">
+          <!-- Rooms will be dynamically loaded here -->
+        </div>
+      </main>
+
+      <!-- Knock Modal -->
+      <div class="garden-modal-overlay" id="gardenKnockModal" onclick="closeGardenKnockModal(event)">
+        <div class="garden-modal" onclick="event.stopPropagation()">
+          <div class="garden-modal-header">
+            <div class="garden-modal-icon">🚪</div>
+            <h2 class="garden-modal-title">Knock to Enter</h2>
+            <p class="garden-modal-subtitle" id="gardenKnockModalSubtitle">Request access to Poetry Corner</p>
+          </div>
+          <div class="garden-modal-body">
+            <label class="garden-knock-message-label">Leave a note (optional)</label>
+            <textarea class="garden-knock-message" id="gardenKnockMessage" placeholder="Hi! I loved your work and would love to see more..."></textarea>
+            <div class="garden-knock-suggestions">
+              <button class="garden-knock-suggestion" onclick="setGardenKnockMessage('Just browsing, thank you!')">Just browsing 👋</button>
+              <button class="garden-knock-suggestion" onclick="setGardenKnockMessage('I love your work!')">Love your work 💜</button>
+              <button class="garden-knock-suggestion" onclick="setGardenKnockMessage('Found you through a friend.')">Via friend 🔗</button>
+            </div>
+          </div>
+          <div class="garden-modal-actions">
+            <button class="garden-modal-cancel" onclick="closeGardenKnockModal()">Cancel</button>
+            <button class="garden-modal-submit" onclick="sendGardenKnock()">
+              <span>🚪</span>
+              Send Knock
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seasonal Flow View -->
+    <div class="seasonal-view winter" id="seasonalView">
+      <!-- Particles -->
+      <div class="seasonal-particles" id="seasonalParticles"></div>
+
+      <main class="seasonal-main">
+        <!-- Page Header -->
+        <div class="seasonal-page-header">
+          <h1><span id="seasonIcon">❄️</span> Seasonal Flow</h1>
+          <p>Content curated by mood and season. Discover what resonates with how you feel right now.</p>
+        </div>
+
+        <!-- Season Selector -->
+        <div class="season-selector">
+          <button class="season-btn active" data-season="winter" onclick="selectSeason('winter')">
+            <span class="season-emoji">❄️</span>
+            <span class="season-name">Winter</span>
+          </button>
+          <button class="season-btn" data-season="spring" onclick="selectSeason('spring')">
+            <span class="season-emoji">🌸</span>
+            <span class="season-name">Spring</span>
+          </button>
+          <button class="season-btn" data-season="summer" onclick="selectSeason('summer')">
+            <span class="season-emoji">☀️</span>
+            <span class="season-name">Summer</span>
+          </button>
+          <button class="season-btn" data-season="autumn" onclick="selectSeason('autumn')">
+            <span class="season-emoji">🍂</span>
+            <span class="season-name">Autumn</span>
+          </button>
+        </div>
+
+        <!-- Mood Filters -->
+        <div class="seasonal-mood-section">
+          <div class="seasonal-mood-label">Filter by Mood</div>
+          <div class="seasonal-mood-filters">
+            <button class="seasonal-mood-filter active" data-mood="all" onclick="selectSeasonalMood(this)">All Moods</button>
+            <button class="seasonal-mood-filter" data-mood="calm" onclick="selectSeasonalMood(this)">😌 Calm</button>
+            <button class="seasonal-mood-filter" data-mood="reflective" onclick="selectSeasonalMood(this)">🌙 Reflective</button>
+            <button class="seasonal-mood-filter" data-mood="creative" onclick="selectSeasonalMood(this)">✨ Creative</button>
+            <button class="seasonal-mood-filter" data-mood="cozy" onclick="selectSeasonalMood(this)">☕ Cozy</button>
+            <button class="seasonal-mood-filter" data-mood="melancholy" onclick="selectSeasonalMood(this)">🌧️ Melancholy</button>
+            <button class="seasonal-mood-filter" data-mood="hopeful" onclick="selectSeasonalMood(this)">🌱 Hopeful</button>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="seasonal-empty-state-main">
+          <div class="seasonal-empty-state-icon">❄️</div>
+          <h3>No Seasonal Creations Yet</h3>
+          <p>Be the first to share something for this season. Your creations will be curated and displayed based on mood and season.</p>
+          <button class="seasonal-empty-state-btn" onclick="openCreateModal()">
+            <span>✨</span> Create Something
+          </button>
+        </div>
+
+        <!-- Creations Container (for future content) -->
+        <div class="seasonal-creations-container" id="seasonalCreationsGrid">
+          <!-- Creations will be dynamically loaded here -->
+        </div>
+      </main>
+    </div>
+
+          <!-- Infinite Canvas View -->
+    <div class="canvas-view" id="canvasView">
+      <div class="canvas-container">
+        <div class="infinite-canvas" id="infiniteCanvas">
+          <div class="canvas-grid"></div>
+          <div class="center-marker"></div>
+
+          <!-- Canvas Empty State (centered) -->
+          <div class="canvas-empty-state" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">
+            <div class="canvas-empty-icon">🎨</div>
+            <h3>Your Infinite Canvas</h3>
+            <p>Create something and watch it appear here. Drag to explore, click to interact.</p>
+            <button class="canvas-empty-btn" onclick="openCreateModal()">
+              <span>✨</span> Add Your First Creation
+            </button>
+          </div>
+
+          <!-- User Creations Container -->
+          <div id="canvasCreationsContainer">
+            <!-- User creations will be dynamically added here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Toolbar -->
+      <div class="canvas-toolbar">
+        <button class="tool-btn active" data-tool="pan" onclick="setCanvasTool('pan')" title="Pan (Drag)">✋</button>
+        <button class="tool-btn" data-tool="select" onclick="setCanvasTool('select')" title="Select">👆</button>
+        <span class="tool-separator"></span>
+        <button class="tool-btn" onclick="goToCanvasCenter()" title="Go to Center">🏠</button>
+        <button class="tool-btn" onclick="goToRandomCreation()" title="Random Creation">🎲</button>
+      </div>
+
+      <!-- Minimap -->
+      <div class="minimap">
+        <div class="minimap-header">Navigator</div>
+        <div class="minimap-canvas" id="minimapCanvas" onclick="minimapClick(event)">
+          <div class="minimap-dot" style="left: 47%; top: 46%;"></div>
+          <div class="minimap-dot" style="left: 52%; top: 43%;"></div>
+          <div class="minimap-dot" style="left: 43%; top: 51%;"></div>
+          <div class="minimap-dot" style="left: 56%; top: 48%;"></div>
+          <div class="minimap-dot" style="left: 41%; top: 42%;"></div>
+          <div class="minimap-dot" style="left: 51%; top: 53%;"></div>
+          <div class="minimap-dot" style="left: 58%; top: 45%;"></div>
+          <div class="minimap-dot" style="left: 46%; top: 56%;"></div>
+          <div class="minimap-dot" style="left: 55%; top: 57%;"></div>
+          <div class="minimap-dot" style="left: 40%; top: 50%;"></div>
+          <div class="minimap-dot" style="left: 61%; top: 51%;"></div>
+          <div class="minimap-dot" style="left: 48%; top: 41%;"></div>
+          <div class="minimap-viewport" id="minimapViewport"></div>
+        </div>
+      </div>
+
+      <!-- Zoom Controls -->
+      <div class="zoom-controls">
+        <button class="zoom-btn" onclick="canvasZoomIn()">+</button>
+        <div class="zoom-level" id="zoomLevel">100%</div>
+        <button class="zoom-btn" onclick="canvasZoomOut()">−</button>
+        <button class="zoom-btn" onclick="resetCanvasZoom()" title="Reset">↺</button>
+      </div>
+
+      <!-- Canvas Hints -->
+      <div class="canvas-hint-bar">
+        <div class="hint-item">
+          <span class="hint-key">Drag</span>
+          <span>Pan</span>
+        </div>
+        <div class="hint-item">
+          <span class="hint-key">Scroll</span>
+          <span>Zoom</span>
+        </div>
+        <div class="hint-item">
+          <span class="hint-key">Home</span>
+          <span>Center</span>
+        </div>
+      </div>
+
+      <!-- Placement Mode Indicator -->
+      <div class="placement-mode" id="placementMode">
+        <span>📍 Click anywhere to place your creation</span>
+        <button class="cancel-placement" onclick="cancelPlacement()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="hint" id="mainHint">Drag to explore • Click creations to view • Scroll to zoom</div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <!-- Create Modal -->
+  <div class="create-modal-overlay" id="createModal">
+    <div class="create-modal">
+      <button class="create-modal-close" onclick="closeCreateModal()">✕</button>
+      <div class="create-modal-header">
+        <h2 class="create-modal-title">Create Something New</h2>
+        <p class="create-modal-subtitle">What would you like to share with the world?</p>
+      </div>
+      <div class="create-modal-body">
+        <!-- Step 1: Choose Type -->
+        <div class="create-step active" id="createStep1">
+          <div class="create-type-grid">
+            <div class="create-type-card" onclick="selectCreateType(this, 'writing')">
+              <span class="create-type-icon">✍️</span>
+              <div class="create-type-name">Writing</div>
+              <div class="create-type-desc">Poetry, prose, thoughts</div>
+            </div>
+            <div class="create-type-card" onclick="selectCreateType(this, 'visual')">
+              <span class="create-type-icon">🎨</span>
+              <div class="create-type-name">Visual Art</div>
+              <div class="create-type-desc">Drawings, paintings, photos</div>
+            </div>
+            <div class="create-type-card" onclick="selectCreateType(this, 'music')">
+              <span class="create-type-icon">🎵</span>
+              <div class="create-type-name">Music</div>
+              <div class="create-type-desc">Songs, compositions, sounds</div>
+            </div>
+            <div class="create-type-card" onclick="selectCreateType(this, 'idea')">
+              <span class="create-type-icon">💡</span>
+              <div class="create-type-name">Idea</div>
+              <div class="create-type-desc">Concepts, musings, sparks</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Create Content -->
+        <div class="create-step" id="createStep2">
+          <button class="create-back-btn" onclick="goToCreateStep(1)">← Back to types</button>
+
+          <div class="create-input-group">
+            <label class="create-input-label">Title <span class="required">*</span></label>
+            <input type="text" class="create-input" id="createTitle" placeholder="Give your creation a name...">
+          </div>
+
+          <!-- Writing Content Area -->
+          <div class="create-content-area" id="contentWriting">
+            <label class="create-input-label">Your Writing <span class="required">*</span></label>
+            <div class="writing-toolbar">
+              <button type="button" onclick="formatText('bold')" title="Bold"><b>B</b></button>
+              <button type="button" onclick="formatText('italic')" title="Italic"><i>I</i></button>
+              <button type="button" onclick="formatText('heading')" title="Heading">H</button>
+              <span class="toolbar-divider"></span>
+              <button type="button" onclick="formatText('quote')" title="Quote">"</button>
+              <button type="button" onclick="formatText('list')" title="List">☰</button>
+            </div>
+            <textarea class="create-input create-content-editor" id="writingContent" placeholder="Start writing your piece...
+
+Tips:
+• Use line breaks to separate stanzas or paragraphs
+• Express yourself freely - there's no wrong way to create
+• Your work can be as short or long as you'd like"></textarea>
+            <div class="content-footer">
+              <span class="word-count" id="wordCount">0 words</span>
+              <label class="upload-alt">
+                <input type="file" accept=".txt,.md,.doc,.docx" onchange="importWritingFile(event)" hidden>
+                <span>📄 Import from file</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Visual Art Content Area -->
+          <div class="create-content-area" id="contentVisual" style="display: none;">
+            <label class="create-input-label">Your Artwork <span class="required">*</span></label>
+            <div class="upload-zone" id="visualUploadZone" onclick="document.getElementById('visualFileInput').click()">
+              <input type="file" id="visualFileInput" accept="image/*" onchange="handleVisualUpload(event)" hidden>
+              <div class="upload-zone-content" id="visualUploadContent">
+                <span class="upload-icon">🖼️</span>
+                <p class="upload-text">Click to upload or drag & drop</p>
+                <p class="upload-hint">PNG, JPG, GIF, WebP (max 10MB)</p>
+              </div>
+              <div class="upload-preview" id="visualPreview" style="display: none;">
+                <img id="visualPreviewImg" src="" alt="Preview">
+                <button class="remove-upload" onclick="removeVisualUpload(event)">✕ Remove</button>
+              </div>
+            </div>
+            <div class="create-input-group" style="margin-top: 16px;">
+              <label class="create-input-label">Art Description (optional)</label>
+              <textarea class="create-input create-textarea" id="visualDescription" placeholder="What inspired this piece? What techniques did you use?"></textarea>
+            </div>
+          </div>
+
+          <!-- Music Content Area -->
+          <div class="create-content-area" id="contentMusic" style="display: none;">
+            <label class="create-input-label">Your Music <span class="required">*</span></label>
+            <div class="music-options">
+              <button class="music-option-btn active" onclick="switchMusicOption('upload')">📁 Upload File</button>
+              <button class="music-option-btn" onclick="switchMusicOption('link')">🔗 Add Link</button>
+            </div>
+            <div class="music-upload-area" id="musicUploadArea">
+              <div class="upload-zone" id="musicUploadZone" onclick="document.getElementById('musicFileInput').click()">
+                <input type="file" id="musicFileInput" accept="audio/*" onchange="handleMusicUpload(event)" hidden>
+                <div class="upload-zone-content" id="musicUploadContent">
+                  <span class="upload-icon">🎵</span>
+                  <p class="upload-text">Click to upload audio file</p>
+                  <p class="upload-hint">MP3, WAV, OGG, M4A (max 20MB)</p>
+                </div>
+                <div class="upload-preview audio-preview" id="musicPreview" style="display: none;">
+                  <span class="audio-icon">🎵</span>
+                  <span class="audio-name" id="musicFileName"></span>
+                  <button class="remove-upload" onclick="removeMusicUpload(event)">✕</button>
+                </div>
+              </div>
+            </div>
+            <div class="music-link-area" id="musicLinkArea" style="display: none;">
+              <input type="text" class="create-input" id="musicLink" placeholder="Paste a SoundCloud, Spotify, or YouTube link...">
+              <p class="input-hint">Share music from your favorite platforms</p>
+            </div>
+            <div class="create-input-group" style="margin-top: 16px;">
+              <label class="create-input-label">About this piece (optional)</label>
+              <textarea class="create-input create-textarea" id="musicDescription" placeholder="What's the story behind this music? What mood were you in?"></textarea>
+            </div>
+          </div>
+
+          <!-- Idea Content Area -->
+          <div class="create-content-area" id="contentIdea" style="display: none;">
+            <label class="create-input-label">Your Idea <span class="required">*</span></label>
+            <textarea class="create-input create-content-editor" id="ideaContent" placeholder="Share your idea, concept, or spark of inspiration...
+
+This could be:
+• A concept you've been thinking about
+• A shower thought worth sharing
+• An idea for a project or collaboration
+• A philosophical musing
+• Anything that sparked your curiosity"></textarea>
+            <div class="create-input-group" style="margin-top: 16px;">
+              <label class="create-input-label">Tags (optional)</label>
+              <input type="text" class="create-input" id="ideaTags" placeholder="Add tags separated by commas (e.g., philosophy, creativity, nature)">
+            </div>
+          </div>
+
+          <!-- Common Fields -->
+          <div class="create-input-group">
+            <label class="create-input-label">Mood</label>
+            <div class="mood-options">
+              <div class="mood-option" onclick="selectCreateMood(this, 'reflective')">🌙 Reflective</div>
+              <div class="mood-option" onclick="selectCreateMood(this, 'hopeful')">🌅 Hopeful</div>
+              <div class="mood-option" onclick="selectCreateMood(this, 'melancholic')">🌧️ Melancholic</div>
+              <div class="mood-option" onclick="selectCreateMood(this, 'peaceful')">🌿 Peaceful</div>
+              <div class="mood-option" onclick="selectCreateMood(this, 'energetic')">⚡ Energetic</div>
+              <div class="mood-option" onclick="selectCreateMood(this, 'nostalgic')">📷 Nostalgic</div>
+            </div>
+          </div>
+
+          <div class="create-input-group">
+            <label class="create-input-label">Visibility</label>
+            <div class="visibility-options">
+              <label class="visibility-option">
+                <input type="radio" name="visibility" value="public" checked>
+                <span class="visibility-card">
+                  <span class="visibility-icon">🌍</span>
+                  <span class="visibility-name">Public</span>
+                  <span class="visibility-desc">Anyone can see</span>
+                </span>
+              </label>
+              <label class="visibility-option">
+                <input type="radio" name="visibility" value="community">
+                <span class="visibility-card">
+                  <span class="visibility-icon">👥</span>
+                  <span class="visibility-name">Community</span>
+                  <span class="visibility-desc">Only community members</span>
+                </span>
+              </label>
+              <label class="visibility-option">
+                <input type="radio" name="visibility" value="private">
+                <span class="visibility-card">
+                  <span class="visibility-icon">🔒</span>
+                  <span class="visibility-name">Private</span>
+                  <span class="visibility-desc">Only you can see</span>
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="create-modal-footer">
+        <button class="create-modal-btn cancel" onclick="closeCreateModal()">Cancel</button>
+        <button class="create-modal-btn submit" id="createSubmitBtn" onclick="submitCreation()" disabled>Create & Share ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== WIZARD ====================
+    let step = 1;
+    const totalSteps = 5;
+    let selectedMode = 'constellation'; // Track selected mode
+
+    // Mode data for preview
+    const modeData = {
+      constellation: {
+        icon: '✨',
+        title: 'Constellation Mode',
+        description: 'Creations float like stars in space. Drift and explore. Similar ideas cluster together like galaxies.'
+      },
+      garden: {
+        icon: '🌿',
+        title: 'Garden Mode',
+        description: 'Design your own room. Visitors knock before entering. Arrange your work however you want.'
+      },
+      canvas: {
+        icon: '🎨',
+        title: 'Infinite Canvas Mode',
+        description: 'One shared space. Place your work anywhere. Zoom to discover. A living tapestry that grows.'
+      },
+      seasonal: {
+        icon: '🌙',
+        title: 'Seasonal Flow Mode',
+        description: 'Content by moods and themes. Curated exhibitions. Slower, intentional discovery.'
+      }
+    };
+
+    function updateWizard() {
+      // Steps
+      document.querySelectorAll('.step').forEach(s => {
+        s.classList.toggle('active', parseInt(s.dataset.step) === step);
+      });
+
+      // Dots
+      document.querySelectorAll('.dot').forEach(d => {
+        const dStep = parseInt(d.dataset.step);
+        d.classList.remove('active', 'done');
+        if (dStep === step) d.classList.add('active');
+        else if (dStep < step) d.classList.add('done');
+      });
+
+      // Buttons
+      document.getElementById('backBtn').style.display = step > 1 ? 'inline-block' : 'none';
+      document.getElementById('nextBtn').textContent = step === totalSteps ? 'Enter Your Space' : 'Continue';
+
+      // Update preview card when on step 5
+      if (step === 5) {
+        updatePreviewCard();
+      }
+    }
+
+    function updatePreviewCard() {
+      const mode = modeData[selectedMode];
+      document.getElementById('previewIcon').textContent = mode.icon;
+      document.getElementById('previewTitle').textContent = mode.title;
+      document.getElementById('previewDescription').textContent = mode.description;
+    }
+
+    function nextStep() {
+      if (step < totalSteps) {
+        step++;
+        updateWizard();
+      } else {
+        enterSpace();
+      }
+    }
+
+    function prevStep() {
+      if (step > 1) {
+        step--;
+        updateWizard();
+      }
+    }
+
+    function enterSpace() {
+      document.getElementById('wizardPage').classList.remove('active');
+      document.getElementById('creativePage').classList.add('active');
+
+      // Show the correct view based on selected mode
+      if (selectedMode === 'canvas') {
+        showViewByName('canvas');
+        initInfiniteCanvas();
+      } else if (selectedMode === 'garden') {
+        showViewByName('garden');
+      } else if (selectedMode === 'seasonal') {
+        showViewByName('seasonal');
+        initSeasonalParticles();
+      } else {
+        showViewByName('constellation');
+        initConstellation();
+      }
+    }
+
+    // Select a mode and enter the creative space directly
+    function selectModeAndEnter(mode) {
+      selectedMode = mode;
+      enterSpace();
+    }
+
+    // Helper to show view without event
+    function showViewByName(view) {
+      document.querySelectorAll('.mode-tab').forEach(t => {
+        t.classList.toggle('active', t.textContent.toLowerCase().includes(view));
+      });
+      document.getElementById('constellationView').classList.toggle('active', view === 'constellation');
+      document.getElementById('gardenView').classList.toggle('active', view === 'garden');
+      document.getElementById('canvasView').classList.toggle('active', view === 'canvas');
+      document.getElementById('seasonalView').classList.toggle('active', view === 'seasonal');
+
+      const mainHint = document.getElementById('mainHint');
+      if (mainHint) {
+        mainHint.style.display = (view === 'canvas' || view === 'garden' || view === 'seasonal') ? 'none' : 'block';
+      }
+
+      // Initialize seasonal particles when showing seasonal view
+      if (view === 'seasonal') {
+        initSeasonalParticles();
+      }
+    }
+
+    function openSettings() {
+      document.getElementById('creativePage').classList.remove('active');
+      document.getElementById('wizardPage').classList.add('active');
+    }
+
+    // Mode cards selection
+    document.querySelectorAll('.mode-card').forEach(card => {
+      card.onclick = function() {
+        document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        // Track the selected mode
+        selectedMode = this.dataset.mode;
+      };
+    });
+
+    // Skip wizard and enter with defaults
+    function skipWizard() {
+      enterSpace();
+    }
+
+    // Option selection
+    document.querySelectorAll('.options-list').forEach(list => {
+      list.querySelectorAll('.option').forEach(opt => {
+        opt.onclick = function() {
+          list.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+          this.classList.add('selected');
+        };
+      });
+    });
+
+    // ==================== VIEWS ====================
+    function showView(view) {
+      document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('constellationView').classList.toggle('active', view === 'constellation');
+      document.getElementById('gardenView').classList.toggle('active', view === 'garden');
+      document.getElementById('canvasView').classList.toggle('active', view === 'canvas');
+      document.getElementById('seasonalView').classList.toggle('active', view === 'seasonal');
+
+      // Show/hide appropriate hints
+      const mainHint = document.getElementById('mainHint');
+      if (mainHint) {
+        mainHint.style.display = (view === 'canvas' || view === 'garden' || view === 'seasonal') ? 'none' : 'block';
+      }
+
+      // Initialize canvas when switching to canvas view
+      if (view === 'canvas') {
+        initInfiniteCanvas();
+      }
+
+      // Initialize seasonal when switching to seasonal view
+      if (view === 'seasonal') {
+        initSeasonalParticles();
+      }
+    }
+
+    // ==================== CONSTELLATION ====================
+    function initConstellation() {
+      const el = document.getElementById('constellationView');
+      if (el.children.length > 0) return; // Already initialized
+
+      // Stars
+      for (let i = 0; i < 80; i++) {
+        const star = document.createElement('div');
+        const sizes = ['sm', 'sm', 'sm', 'md', 'md', 'lg'];
+        star.className = 'star ' + sizes[Math.floor(Math.random() * sizes.length)];
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        el.appendChild(star);
+      }
+
+      // Creation nodes
+      // Creations will be loaded from user data
+      const creations = [];
+
+      creations.forEach(c => {
+        const node = document.createElement('div');
+        node.className = 'creation-node';
+        node.style.left = c.x + '%';
+        node.style.top = c.y + '%';
+        node.innerHTML = `
+          <div class="node-orb">${c.emoji}</div>
+          <div class="node-label">${c.label}</div>
+        `;
+        el.appendChild(node);
+      });
+    }
+
+    // ==================== INFINITE CANVAS ====================
+    let canvasPanX = 0;
+    let canvasPanY = 0;
+    let canvasZoom = 1;
+    let isCanvasDragging = false;
+    let canvasStartX, canvasStartY;
+    let currentCanvasTool = 'pan';
+    let isPlacing = false;
+    let canvasInitialized = false;
+
+    function initInfiniteCanvas() {
+      if (canvasInitialized) return;
+      canvasInitialized = true;
+
+      const canvasContainer = document.querySelector('.canvas-view .canvas-container');
+      const canvas = document.getElementById('infiniteCanvas');
+
+      // Mouse events for panning
+      canvasContainer.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.canvas-toolbar') || e.target.closest('.minimap') ||
+            e.target.closest('.zoom-controls') || e.target.closest('.canvas-hint-bar') ||
+            e.target.closest('.placement-mode')) return;
+
+        if (isPlacing) {
+          placeCreation(e);
+          return;
+        }
+
+        if (e.target.closest('.canvas-creation')) return;
+
+        isCanvasDragging = true;
+        canvasStartX = e.clientX - canvasPanX;
+        canvasStartY = e.clientY - canvasPanY;
+        document.body.classList.add('canvas-dragging');
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isCanvasDragging) return;
+        canvasPanX = e.clientX - canvasStartX;
+        canvasPanY = e.clientY - canvasStartY;
+        updateInfiniteCanvas();
+      });
+
+      document.addEventListener('mouseup', () => {
+        isCanvasDragging = false;
+        document.body.classList.remove('canvas-dragging');
+      });
+
+      // Scroll to zoom (only when canvas is active)
+      canvasContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        canvasZoom = Math.max(0.25, Math.min(2, canvasZoom + delta));
+        updateInfiniteCanvas();
+      }, { passive: false });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (!document.getElementById('canvasView').classList.contains('active')) return;
+
+        if (e.key === 'Escape') {
+          cancelPlacement();
+        } else if (e.key === 'Home') {
+          goToCanvasCenter();
+        } else if (e.key === '+' || e.key === '=') {
+          canvasZoomIn();
+        } else if (e.key === '-') {
+          canvasZoomOut();
+        }
+      });
+
+      // Initial canvas position
+      updateInfiniteCanvas();
+    }
+
+    function updateInfiniteCanvas() {
+      const canvas = document.getElementById('infiniteCanvas');
+      canvas.style.transform = `translate(calc(-50% + ${canvasPanX}px), calc(-50% + ${canvasPanY}px)) scale(${canvasZoom})`;
+      updateMinimap();
+      updateZoomLevel();
+    }
+
+    function canvasZoomIn() {
+      canvasZoom = Math.min(2, canvasZoom + 0.2);
+      updateInfiniteCanvas();
+    }
+
+    function canvasZoomOut() {
+      canvasZoom = Math.max(0.25, canvasZoom - 0.2);
+      updateInfiniteCanvas();
+    }
+
+    function resetCanvasZoom() {
+      canvasZoom = 1;
+      canvasPanX = 0;
+      canvasPanY = 0;
+      updateInfiniteCanvas();
+      showToast('🏠 Reset to center');
+    }
+
+    function updateZoomLevel() {
+      const zoomEl = document.getElementById('zoomLevel');
+      if (zoomEl) {
+        zoomEl.textContent = Math.round(canvasZoom * 100) + '%';
+      }
+    }
+
+    function updateMinimap() {
+      const viewport = document.getElementById('minimapViewport');
+      if (!viewport) return;
+
+      const mapWidth = 200;
+      const mapHeight = 110;
+      const canvasSize = 8000;
+
+      const viewportW = (window.innerWidth / canvasZoom / canvasSize) * mapWidth;
+      const viewportH = (window.innerHeight / canvasZoom / canvasSize) * mapHeight;
+
+      const viewportX = ((canvasSize / 2 - canvasPanX / canvasZoom) / canvasSize) * mapWidth - viewportW / 2;
+      const viewportY = ((canvasSize / 2 - canvasPanY / canvasZoom) / canvasSize) * mapHeight - viewportH / 2;
+
+      viewport.style.width = Math.max(20, viewportW) + 'px';
+      viewport.style.height = Math.max(14, viewportH) + 'px';
+      viewport.style.left = Math.max(0, Math.min(mapWidth - viewportW, viewportX)) + 'px';
+      viewport.style.top = Math.max(0, Math.min(mapHeight - viewportH, viewportY)) + 'px';
+    }
+
+    function minimapClick(e) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+
+      canvasPanX = (0.5 - x) * 8000 * canvasZoom;
+      canvasPanY = (0.5 - y) * 8000 * canvasZoom;
+      updateInfiniteCanvas();
+    }
+
+    function goToCanvasCenter() {
+      canvasPanX = 0;
+      canvasPanY = 0;
+      canvasZoom = 1;
+      updateInfiniteCanvas();
+      showToast('🏠 Returned to center');
+    }
+
+    function goToRandomCreation() {
+      const creations = document.querySelectorAll('.canvas-creation');
+      if (creations.length === 0) return;
+
+      const random = creations[Math.floor(Math.random() * creations.length)];
+      const left = parseInt(random.style.left);
+      const top = parseInt(random.style.top);
+
+      canvasPanX = (4000 - left) * canvasZoom;
+      canvasPanY = (4000 - top) * canvasZoom;
+      updateInfiniteCanvas();
+
+      const title = random.querySelector('.creation-title').textContent;
+      showToast(`🎲 Found: ${title}`);
+    }
+
+    function setCanvasTool(tool) {
+      currentCanvasTool = tool;
+      document.querySelectorAll('.canvas-toolbar .tool-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.canvas-toolbar [data-tool="${tool}"]`).classList.add('active');
+
+      const container = document.querySelector('.canvas-view .canvas-container');
+      if (tool === 'pan') {
+        container.style.cursor = 'grab';
+      } else if (tool === 'select') {
+        container.style.cursor = 'default';
+      }
+    }
+
+    function startPlacement() {
+      isPlacing = true;
+      document.body.classList.add('canvas-placing');
+      document.getElementById('placementMode').classList.add('active');
+      showToast('📍 Click anywhere on the canvas to place');
+    }
+
+    function cancelPlacement() {
+      isPlacing = false;
+      document.body.classList.remove('canvas-placing');
+      document.getElementById('placementMode').classList.remove('active');
+    }
+
+    function placeCreation(e) {
+      cancelPlacement();
+      showToast('✨ Creation placed! Opening editor...');
+      // In real app, open creation modal
+    }
+
+    function openCanvasCreation(title) {
+      showToast(`📖 Opening: ${title}...`);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // ==================== GARDEN ====================
+    let currentKnockRoom = '';
+    let currentKnockOwner = '';
+
+    // Garden view toggle
+    function setGardenView(btn, view) {
+      document.querySelectorAll('.garden-view-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      showToast(`Viewing: ${btn.textContent.trim()}`);
+    }
+
+    // Enter room (for open rooms)
+    function enterGardenRoom(roomName) {
+      showToast(`🚪 Entering ${roomName}...`);
+    }
+
+    // Knock modal
+    function openGardenKnockModal(roomName, ownerName) {
+      currentKnockRoom = roomName;
+      currentKnockOwner = ownerName;
+      document.getElementById('gardenKnockModalSubtitle').textContent = `Request access to ${roomName} by @${ownerName}`;
+      document.getElementById('gardenKnockMessage').value = '';
+      document.getElementById('gardenKnockModal').classList.add('active');
+    }
+
+    function closeGardenKnockModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('gardenKnockModal').classList.remove('active');
+    }
+
+    function setGardenKnockMessage(msg) {
+      document.getElementById('gardenKnockMessage').value = msg;
+    }
+
+    function sendGardenKnock() {
+      const message = document.getElementById('gardenKnockMessage').value;
+      closeGardenKnockModal();
+      showToast(`🚪 Knock sent to ${currentKnockRoom}! You'll be notified when they respond.`);
+    }
+
+    // Close modal with Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeGardenKnockModal();
+      }
+    });
+
+    // ==================== SEASONAL FLOW ====================
+    let seasonalParticlesInitialized = false;
+
+    // Season data
+    const seasonData = {
+      winter: { icon: '❄️', name: 'Winter Stillness' },
+      spring: { icon: '🌸', name: 'Spring Awakening' },
+      summer: { icon: '☀️', name: 'Summer Radiance' },
+      autumn: { icon: '🍂', name: 'Autumn Reflection' }
+    };
+
+    // Initialize seasonal particles
+    function initSeasonalParticles() {
+      if (seasonalParticlesInitialized) return;
+      seasonalParticlesInitialized = true;
+      createSeasonalParticles();
+    }
+
+    // Create particles
+    function createSeasonalParticles() {
+      const container = document.getElementById('seasonalParticles');
+      if (!container) return;
+      container.innerHTML = '';
+      for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'seasonal-particle';
+        particle.style.width = (2 + Math.random() * 4) + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+        container.appendChild(particle);
+      }
+    }
+
+    // Select season
+    function selectSeason(season) {
+      const seasonalView = document.getElementById('seasonalView');
+      const wasActive = seasonalView.classList.contains('active');
+
+      // Update seasonal view class for background color
+      seasonalView.className = 'seasonal-view ' + season;
+      if (wasActive) {
+        seasonalView.classList.add('active');
+      }
+
+      // Update buttons
+      document.querySelectorAll('.season-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`[data-season="${season}"]`).classList.add('active');
+
+      // Update icon
+      const seasonIcon = document.getElementById('seasonIcon');
+      if (seasonIcon) {
+        seasonIcon.textContent = seasonData[season].icon;
+      }
+
+      // Update first exhibition title
+      const mainTitle = document.getElementById('mainExhibitionTitle');
+      if (mainTitle) {
+        mainTitle.innerHTML = `<span>${seasonData[season].icon}</span> ${seasonData[season].name}`;
+      }
+
+      // Recreate particles for new season color
+      createSeasonalParticles();
+
+      showToast(`${seasonData[season].icon} Viewing ${season} content`);
+    }
+
+    // Select mood filter
+    function selectSeasonalMood(btn) {
+      const mood = btn.dataset.mood;
+
+      if (mood === 'all') {
+        document.querySelectorAll('.seasonal-mood-filter').forEach(f => f.classList.remove('active'));
+        btn.classList.add('active');
+      } else {
+        document.querySelector('.seasonal-mood-filter[data-mood="all"]').classList.remove('active');
+        btn.classList.toggle('active');
+
+        // If nothing selected, reactivate "All"
+        const anyActive = document.querySelectorAll('.seasonal-mood-filter.active:not([data-mood="all"])').length > 0;
+        if (!anyActive) {
+          document.querySelector('.seasonal-mood-filter[data-mood="all"]').classList.add('active');
+        }
+      }
+
+      showToast('🎭 Filter updated');
+    }
+
+    // Open seasonal creation
+    function openSeasonalCreation(title) {
+      showToast(`📖 Opening: ${title}...`);
+    }
+
+    // Toggle appreciation
+    function toggleSeasonalAppreciation(btn) {
+      btn.classList.toggle('appreciated');
+      if (btn.classList.contains('appreciated')) {
+        showToast('✨ Appreciation sent');
+      } else {
+        showToast('Appreciation removed');
+      }
+    }
+
+    // ==================== CREATE MODAL ====================
+    let selectedCreateType = null;
+    let selectedCreateMood = null;
+
+    function openCreateModal() {
+      document.getElementById('createModal').classList.add('active');
+      // Start at step 1 (type selection)
+      goToCreateStep(1);
+      resetCreateModal();
+    }
+
+    function closeCreateModal() {
+      document.getElementById('createModal').classList.remove('active');
+      // Reset modal state
+      setTimeout(() => {
+        goToCreateStep(1);
+        resetCreateModal();
+      }, 300);
+    }
+
+    function resetCreateModal() {
+      document.getElementById('createTitle').value = '';
+      document.getElementById('writingContent').value = '';
+      document.getElementById('ideaContent').value = '';
+      document.getElementById('ideaTags').value = '';
+      document.getElementById('visualDescription').value = '';
+      document.getElementById('musicDescription').value = '';
+      document.getElementById('musicLink').value = '';
+
+      // Reset previews
+      document.getElementById('visualPreview').style.display = 'none';
+      document.getElementById('visualUploadContent').style.display = 'block';
+      document.getElementById('musicPreview').style.display = 'none';
+      document.getElementById('musicUploadContent').style.display = 'block';
+
+      // Reset selections
+      document.querySelectorAll('.create-type-card').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.mood-option').forEach(m => m.classList.remove('selected'));
+      document.querySelector('input[name="visibility"][value="public"]').checked = true;
+
+      selectedCreateType = null;
+      selectedCreateMood = null;
+      uploadedVisualFile = null;
+      uploadedMusicFile = null;
+
+      updateSubmitButton();
+    }
+
+    function goToCreateStep(stepNum) {
+      document.querySelectorAll('.create-step').forEach(s => s.classList.remove('active'));
+      document.getElementById('createStep' + stepNum).classList.add('active');
+
+      if (stepNum === 1) {
+        document.querySelector('.create-modal-title').textContent = 'Create Something New';
+        document.querySelector('.create-modal-subtitle').textContent = 'What would you like to share with the world?';
+      }
+    }
+
+    function selectCreateType(card, type) {
+      document.querySelectorAll('.create-type-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedCreateType = type;
+
+      // Update header
+      const typeNames = {
+        writing: '✍️ Writing',
+        visual: '🎨 Visual Art',
+        music: '🎵 Music',
+        idea: '💡 Idea'
+      };
+      document.querySelector('.create-modal-title').textContent = 'Create ' + typeNames[type];
+      document.querySelector('.create-modal-subtitle').textContent = 'Express yourself freely';
+
+      // Show appropriate content area
+      document.querySelectorAll('.create-content-area').forEach(area => area.style.display = 'none');
+      const contentMap = {
+        writing: 'contentWriting',
+        visual: 'contentVisual',
+        music: 'contentMusic',
+        idea: 'contentIdea'
+      };
+      document.getElementById(contentMap[type]).style.display = 'block';
+
+      // Go to step 2
+      goToCreateStep(2);
+      updateSubmitButton();
+    }
+
+    function selectCreateMood(option, mood) {
+      document.querySelectorAll('.mood-option').forEach(o => o.classList.remove('selected'));
+      option.classList.add('selected');
+      selectedCreateMood = mood;
+    }
+
+    // File upload variables
+    let uploadedVisualFile = null;
+    let uploadedMusicFile = null;
+
+    function handleVisualUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('File too large. Max 10MB allowed.');
+        return;
+      }
+
+      uploadedVisualFile = file;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('visualPreviewImg').src = e.target.result;
+        document.getElementById('visualUploadContent').style.display = 'none';
+        document.getElementById('visualPreview').style.display = 'block';
+        updateSubmitButton();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeVisualUpload(event) {
+      event.stopPropagation();
+      uploadedVisualFile = null;
+      document.getElementById('visualPreview').style.display = 'none';
+      document.getElementById('visualUploadContent').style.display = 'block';
+      document.getElementById('visualFileInput').value = '';
+      updateSubmitButton();
+    }
+
+    function handleMusicUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 20 * 1024 * 1024) {
+        showToast('File too large. Max 20MB allowed.');
+        return;
+      }
+
+      uploadedMusicFile = file;
+      document.getElementById('musicFileName').textContent = file.name;
+      document.getElementById('musicUploadContent').style.display = 'none';
+      document.getElementById('musicPreview').style.display = 'flex';
+      updateSubmitButton();
+    }
+
+    function removeMusicUpload(event) {
+      event.stopPropagation();
+      uploadedMusicFile = null;
+      document.getElementById('musicPreview').style.display = 'none';
+      document.getElementById('musicUploadContent').style.display = 'block';
+      document.getElementById('musicFileInput').value = '';
+      updateSubmitButton();
+    }
+
+    function switchMusicOption(option) {
+      document.querySelectorAll('.music-option-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (option === 'upload') {
+        document.getElementById('musicUploadArea').style.display = 'block';
+        document.getElementById('musicLinkArea').style.display = 'none';
+      } else {
+        document.getElementById('musicUploadArea').style.display = 'none';
+        document.getElementById('musicLinkArea').style.display = 'block';
+      }
+      updateSubmitButton();
+    }
+
+    function importWritingFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        let content = e.target.result;
+        const lines = content.split('\n');
+        const firstLine = lines[0].trim();
+
+        // If first line looks like a title, use it
+        if (firstLine.startsWith('# ')) {
+          document.getElementById('createTitle').value = firstLine.substring(2);
+          content = lines.slice(1).join('\n').trim();
+        }
+
+        document.getElementById('writingContent').value = content;
+        updateWordCount();
+        updateSubmitButton();
+        showToast('📄 File imported!');
+      };
+      reader.readAsText(file);
+    }
+
+    function formatText(format) {
+      const textarea = document.getElementById('writingContent');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const text = textarea.value;
+      const selectedText = text.substring(start, end);
+
+      let newText = '';
+      switch(format) {
+        case 'bold':
+          newText = `**${selectedText}**`;
+          break;
+        case 'italic':
+          newText = `*${selectedText}*`;
+          break;
+        case 'heading':
+          newText = `\n## ${selectedText}`;
+          break;
+        case 'quote':
+          newText = `\n> ${selectedText}`;
+          break;
+        case 'list':
+          newText = selectedText.split('\n').map(line => `• ${line}`).join('\n');
+          break;
+      }
+
+      textarea.value = text.substring(0, start) + newText + text.substring(end);
+      textarea.focus();
+      updateWordCount();
+    }
+
+    function updateWordCount() {
+      const text = document.getElementById('writingContent').value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      document.getElementById('wordCount').textContent = words + ' word' + (words !== 1 ? 's' : '');
+    }
+
+    // Add event listeners for word count
+    document.getElementById('writingContent')?.addEventListener('input', updateWordCount);
+
+    function updateSubmitButton() {
+      const title = document.getElementById('createTitle').value.trim();
+      const btn = document.getElementById('createSubmitBtn');
+      let hasContent = false;
+
+      switch(selectedCreateType) {
+        case 'writing':
+          hasContent = document.getElementById('writingContent').value.trim().length > 0;
+          break;
+        case 'visual':
+          hasContent = uploadedVisualFile !== null;
+          break;
+        case 'music':
+          const linkArea = document.getElementById('musicLinkArea');
+          if (linkArea.style.display === 'none') {
+            hasContent = uploadedMusicFile !== null;
+          } else {
+            hasContent = document.getElementById('musicLink').value.trim().length > 0;
+          }
+          break;
+        case 'idea':
+          hasContent = document.getElementById('ideaContent').value.trim().length > 0;
+          break;
+      }
+
+      btn.disabled = !(title && hasContent);
+    }
+
+    // Add input listeners for submit button
+    document.getElementById('createTitle')?.addEventListener('input', updateSubmitButton);
+    document.getElementById('writingContent')?.addEventListener('input', updateSubmitButton);
+    document.getElementById('ideaContent')?.addEventListener('input', updateSubmitButton);
+    document.getElementById('musicLink')?.addEventListener('input', updateSubmitButton);
+
+    // Drag and drop for upload zones
+    ['visualUploadZone', 'musicUploadZone'].forEach(zoneId => {
+      const zone = document.getElementById(zoneId);
+      if (!zone) return;
+
+      zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('dragover');
+      });
+
+      zone.addEventListener('dragleave', () => {
+        zone.classList.remove('dragover');
+      });
+
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) {
+          if (zoneId === 'visualUploadZone') {
+            document.getElementById('visualFileInput').files = e.dataTransfer.files;
+            handleVisualUpload({ target: { files: [file] } });
+          } else {
+            document.getElementById('musicFileInput').files = e.dataTransfer.files;
+            handleMusicUpload({ target: { files: [file] } });
+          }
+        }
+      });
+    });
+
+    function submitCreation() {
+      const title = document.getElementById('createTitle').value.trim();
+      const visibility = document.querySelector('input[name="visibility"]:checked').value;
+
+      let content = '';
+      let description = '';
+
+      switch(selectedCreateType) {
+        case 'writing':
+          content = document.getElementById('writingContent').value.trim();
+          break;
+        case 'visual':
+          content = uploadedVisualFile ? uploadedVisualFile.name : '';
+          description = document.getElementById('visualDescription').value.trim();
+          break;
+        case 'music':
+          const linkArea = document.getElementById('musicLinkArea');
+          if (linkArea.style.display === 'none') {
+            content = uploadedMusicFile ? uploadedMusicFile.name : '';
+          } else {
+            content = document.getElementById('musicLink').value.trim();
+          }
+          description = document.getElementById('musicDescription').value.trim();
+          break;
+        case 'idea':
+          content = document.getElementById('ideaContent').value.trim();
+          description = document.getElementById('ideaTags').value.trim();
+          break;
+      }
+
+      if (!title || !content) {
+        showToast('Please fill in the required fields');
+        return;
+      }
+
+      // Save creation to localStorage
+      const creations = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+      const newCreation = {
+        id: Date.now(),
+        type: selectedCreateType,
+        title: title,
+        content: content,
+        description: description,
+        mood: selectedCreateMood,
+        visibility: visibility,
+        createdAt: new Date().toISOString()
+      };
+      creations.push(newCreation);
+      localStorage.setItem('introvert_creations', JSON.stringify(creations));
+
+      closeCreateModal();
+      showToast('✨ Creation added to your space!');
+
+      // Add to current view if applicable
+      addCreationToView(newCreation);
+    }
+
+    function addCreationToView(creation) {
+      const typeEmojis = {
+        writing: '✍️',
+        visual: '🎨',
+        music: '🎵',
+        idea: '💡'
+      };
+
+      // If in constellation view, add a new node
+      const constellationView = document.getElementById('constellationView');
+      if (constellationView && constellationView.classList.contains('active')) {
+        const node = document.createElement('div');
+        node.className = 'creation-node';
+        node.style.left = (30 + Math.random() * 40) + '%';
+        node.style.top = (30 + Math.random() * 40) + '%';
+        node.innerHTML = `
+          <div class="node-orb">${typeEmojis[creation.type]}</div>
+          <span class="node-label">${creation.title}</span>
+        `;
+        node.onclick = () => showToast(`Opening: ${creation.title}`);
+        constellationView.appendChild(node);
+      }
+
+      // If in canvas view, add a new card
+      const canvasView = document.getElementById('canvasView');
+      if (canvasView && canvasView.classList.contains('active')) {
+        const canvas = document.querySelector('.infinite-canvas');
+        if (canvas) {
+          const card = document.createElement('div');
+          card.className = 'canvas-creation';
+          card.style.left = (3500 + Math.random() * 1000) + 'px';
+          card.style.top = (3500 + Math.random() * 1000) + 'px';
+          card.innerHTML = `
+            <div class="creation-image">${typeEmojis[creation.type]}</div>
+            <div class="creation-info">
+              <div class="creation-title">${creation.title}</div>
+              <div class="creation-author">
+                <div class="author-avatar">🌙</div>
+                <span>You • just now</span>
+              </div>
+              ${creation.mood ? `<div class="creation-meta"><span class="mood-tag">${creation.mood}</span></div>` : ''}
+            </div>
+          `;
+          canvas.appendChild(card);
+        }
+      }
+    }
+
+    // Close modal on overlay click
+    document.getElementById('createModal').addEventListener('click', function(e) {
+      if (e.target.id === 'createModal') {
+        closeCreateModal();
+      }
+    });
+  </script>
+
+</body>
+</html>
+

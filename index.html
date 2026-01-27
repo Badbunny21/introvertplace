@@ -1,0 +1,3918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Introvert Place — Your Quiet Corner of the Internet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0c10;
+      --bg-surface: #12151c;
+      --bg-elevated: #1a1e28;
+      --bg-hover: #242a36;
+      --accent-warm: #e8a87c;
+      --accent-soft: #c4a1ff;
+      --accent-calm: #7cb8e8;
+      --accent-green: #7ce8a8;
+      --accent-gold: #f0e87c;
+      --text-primary: #f0eeeb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --border-subtle: rgba(255,255,255,0.06);
+      --border-light: rgba(255,255,255,0.1);
+      --border-white-20: rgba(255,255,255,0.2);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+    }
+
+    /* Ambient Background */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      animation: drift 25s ease-in-out infinite;
+    }
+
+    .orb-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(232,168,124,0.12) 0%, transparent 70%);
+      top: -200px;
+      right: -100px;
+    }
+
+    .orb-2 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(196,161,255,0.1) 0%, transparent 70%);
+      bottom: 20%;
+      left: -150px;
+      animation-direction: reverse;
+    }
+
+    .orb-3 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(124,184,232,0.08) 0%, transparent 70%);
+      top: 50%;
+      right: 10%;
+      animation-delay: -10s;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(40px, -40px); }
+    }
+
+    /* Stars */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: twinkle 4s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, var(--bg-deep) 0%, transparent 100%);
+      transition: all 0.3s ease;
+    }
+
+    header.scrolled {
+      background: rgba(10,12,16,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .logo-icon { font-size: 28px; }
+    .logo-text { font-family: 'Cormorant Garamond', serif; font-size: 22px; }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s ease;
+    }
+
+    .nav-link:hover { color: var(--text-primary); }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: transparent;
+      border: 1px solid var(--border-light);
+      border-radius: 100px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lang-btn:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .sign-in-btn {
+      padding: 10px 24px;
+      background: transparent;
+      border: 1px solid var(--border-light);
+      border-radius: 100px;
+      color: var(--text-primary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .sign-in-btn:hover {
+      background: var(--bg-elevated);
+    }
+
+    .get-started-btn {
+      padding: 10px 24px;
+      background: var(--text-primary);
+      border: none;
+      border-radius: 100px;
+      color: var(--bg-deep);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .get-started-btn:hover {
+      box-shadow: 0 0 30px rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      background: rgba(196,161,255,0.1);
+      border: 1px solid rgba(196,161,255,0.2);
+      border-radius: 100px;
+      font-size: 13px;
+      color: var(--accent-soft);
+      margin-bottom: 32px;
+    }
+
+    .hero h1 {
+      font-size: 72px;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      max-width: 800px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-soft) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 20px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin-bottom: 48px;
+      line-height: 1.7;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 64px;
+    }
+
+    .cta-primary {
+      padding: 18px 40px;
+      background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-soft) 100%);
+      border: none;
+      border-radius: 14px;
+      color: var(--bg-deep);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .cta-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px rgba(232,168,124,0.3);
+    }
+
+    .cta-secondary {
+      padding: 18px 40px;
+      background: transparent;
+      border: 1px solid var(--border-white-20);
+      border-radius: 14px;
+      color: var(--text-primary);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cta-secondary:hover {
+      background: var(--bg-elevated);
+      border-color: var(--accent-soft);
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 48px;
+      padding: 32px 48px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 36px;
+      color: var(--accent-warm);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 12px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    /* Sections */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 120px 24px;
+    }
+
+    .section-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .section-label {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(124,232,168,0.1);
+      border-radius: 100px;
+      font-size: 12px;
+      color: var(--accent-green);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .section-header p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Features */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 36px;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      border-color: var(--accent-soft);
+      transform: translateY(-8px);
+    }
+
+    .feature-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, rgba(196,161,255,0.15) 0%, rgba(232,168,124,0.1) 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: 24px;
+    }
+
+    .feature-card h3 {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* Why Different */
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+      align-items: center;
+    }
+
+    .why-content h2 {
+      font-size: 42px;
+      margin-bottom: 24px;
+      line-height: 1.2;
+    }
+
+    .why-content p {
+      font-size: 17px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 32px;
+    }
+
+    .why-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .why-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .why-check {
+      width: 28px;
+      height: 28px;
+      background: rgba(124,232,168,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-green);
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .why-item-text h4 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .why-item-text p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+
+    .why-visual {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .comparison-card {
+      background: var(--bg-elevated);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .comparison-card:last-child { margin-bottom: 0; }
+
+    .comparison-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .comparison-icon { font-size: 24px; }
+    .comparison-title { font-size: 16px; font-weight: 500; }
+
+    .comparison-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .comparison-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .comparison-item.bad { color: var(--accent-rose); }
+    .comparison-item.good { color: var(--accent-green); }
+
+    /* Demo Section */
+    .demo-section {
+      background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-surface) 50%, var(--bg-deep) 100%);
+    }
+
+    .demo-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      overflow: hidden;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .demo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .demo-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .demo-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--bg-hover);
+    }
+
+    .demo-dot.red { background: #ff5f57; }
+    .demo-dot.yellow { background: #febc2e; }
+    .demo-dot.green { background: #28c840; }
+
+    .demo-title {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .demo-tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    .demo-tab {
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .demo-tab:hover { color: var(--text-primary); }
+    .demo-tab.active { background: var(--bg-hover); color: var(--text-primary); }
+
+    .demo-content {
+      display: flex;
+      min-height: 500px;
+    }
+
+    .demo-sidebar {
+      width: 220px;
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border-subtle);
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .demo-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 4px;
+    }
+
+    .demo-nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .demo-nav-item.active {
+      background: linear-gradient(135deg, rgba(196,161,255,0.12) 0%, rgba(232,168,124,0.08) 100%);
+      color: var(--text-primary);
+    }
+
+    .demo-main {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+    }
+
+    .demo-main {
+      position: relative;
+    }
+
+    .demo-page {
+      display: none;
+      animation: demoFadeIn 0.3s ease;
+    }
+    .demo-page.active { display: block; }
+    @keyframes demoFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Sanctuary Demo */
+    .demo-sanctuary-header {
+      margin-bottom: 16px;
+    }
+    .demo-sanctuary-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .demo-sanctuary-welcome h3 {
+      font-size: 24px;
+      font-weight: 300;
+      margin-bottom: 6px;
+    }
+    .demo-sanctuary-welcome h3 span {
+      color: var(--accent-warm);
+      font-style: italic;
+    }
+    .demo-mood-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .demo-mood-badge .change {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+    .demo-header-stats {
+      display: flex;
+      gap: 10px;
+    }
+    .demo-stat-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 70px;
+    }
+    .demo-stat-card .value { font-size: 18px; font-weight: 500; }
+    .demo-stat-card .label { font-size: 9px; color: var(--text-muted); }
+    .demo-stat-card.battery .mini-bar {
+      height: 4px;
+      background: var(--bg-hover);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .demo-stat-card.battery .mini-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-green), var(--accent-calm));
+      border-radius: 2px;
+    }
+    .demo-mood-message {
+      padding: 14px 18px;
+      background: var(--bg-elevated);
+      border-radius: 12px;
+      border-left: 3px solid var(--accent-green);
+      margin-bottom: 16px;
+      font-style: italic;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .demo-sanctuary-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .demo-sanctuary-tab {
+      padding: 8px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .demo-sanctuary-tab:hover { color: var(--text-primary); }
+    .demo-sanctuary-tab.active {
+      background: var(--accent-soft);
+      color: var(--bg-deep);
+      border-color: var(--accent-soft);
+    }
+    .demo-sanctuary-content {
+      display: none;
+    }
+    .demo-sanctuary-content.active {
+      display: block;
+    }
+    /* Journal Tab Styles */
+    .demo-journal-header {
+      margin-bottom: 16px;
+    }
+    .demo-journal-header h4 { font-size: 16px; margin-bottom: 4px; }
+    .demo-journal-header p { font-size: 12px; color: var(--text-muted); }
+    .demo-journal-prompt {
+      background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-calm) 100%);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      color: var(--bg-deep);
+    }
+    .demo-journal-prompt .prompt-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      margin-bottom: 6px;
+    }
+    .demo-journal-prompt p { font-size: 14px; font-style: italic; margin-bottom: 12px; }
+    .demo-journal-entries { margin-bottom: 16px; }
+    .demo-journal-entries h5 { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+    .demo-journal-entry {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    .demo-journal-entry .entry-date { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+    .demo-journal-entry .entry-preview { font-size: 12px; line-height: 1.5; margin-bottom: 6px; }
+    .demo-journal-entry .entry-mood { font-size: 11px; color: var(--text-secondary); }
+    /* Mood Tab Styles */
+    .demo-mood-header {
+      margin-bottom: 16px;
+    }
+    .demo-mood-header h4 { font-size: 16px; margin-bottom: 4px; }
+    .demo-mood-header p { font-size: 12px; color: var(--text-muted); }
+    .demo-current-mood {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .demo-current-mood .mood-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .demo-current-mood .mood-emoji { font-size: 36px; }
+    .demo-current-mood .mood-name { font-size: 16px; font-weight: 500; }
+    .demo-current-mood .mood-time { font-size: 11px; color: var(--text-muted); }
+    .demo-mood-history { margin-bottom: 16px; }
+    .demo-mood-history h5 { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+    .demo-mood-timeline {
+      display: flex;
+      justify-content: space-between;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .demo-mood-timeline .mood-day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .demo-mood-timeline .mood-day .day { font-size: 10px; color: var(--text-muted); }
+    .demo-mood-timeline .mood-day .emoji { font-size: 20px; }
+    .demo-mood-timeline .mood-day.today {
+      background: var(--accent-soft);
+      padding: 6px 10px;
+      border-radius: 8px;
+      margin: -6px;
+    }
+    .demo-mood-timeline .mood-day.today .day { color: var(--bg-deep); font-weight: 500; }
+    .demo-mood-insights h5 { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+    .demo-mood-insights .insight-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .demo-mood-insights .insight-icon { font-size: 20px; }
+    .demo-mood-insights p { font-size: 12px; line-height: 1.5; color: var(--text-secondary); }
+    /* Reflections Tab Styles */
+    .demo-reflections-header {
+      margin-bottom: 16px;
+    }
+    .demo-reflections-header h4 { font-size: 16px; margin-bottom: 4px; }
+    .demo-reflections-header p { font-size: 12px; color: var(--text-muted); }
+    .demo-reflection-today {
+      background: linear-gradient(135deg, var(--accent-calm) 0%, var(--accent-soft) 100%);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      color: var(--bg-deep);
+    }
+    .demo-reflection-today .reflection-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+    .demo-reflection-today .reflection-prompt {
+      font-size: 15px;
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .demo-reflection-today .reflection-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      margin-bottom: 14px;
+      opacity: 0.9;
+    }
+    .demo-past-reflections h5 { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+    .demo-reflection-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    .demo-reflection-card .reflection-date { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+    .demo-reflection-card .reflection-q { font-size: 11px; color: var(--text-secondary); font-style: italic; margin-bottom: 6px; }
+    .demo-reflection-card .reflection-preview { font-size: 12px; line-height: 1.5; }
+    /* Demo Buttons */
+    .demo-btn-primary {
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .demo-btn-primary:hover { opacity: 0.9; }
+    .demo-btn-secondary {
+      background: transparent;
+      color: inherit;
+      border: 1px solid currentColor;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .demo-btn-secondary:hover { opacity: 0.8; }
+    .demo-section-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .demo-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .demo-action-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .demo-action-card:hover {
+      border-color: var(--accent-soft);
+      transform: translateY(-2px);
+    }
+    .demo-action-card .icon { font-size: 24px; margin-bottom: 10px; }
+    .demo-action-card h4 { font-size: 13px; margin-bottom: 4px; }
+    .demo-action-card p { font-size: 10px; color: var(--text-muted); line-height: 1.4; }
+    .demo-action-card .time { font-size: 10px; color: var(--text-muted); margin-top: 8px; }
+    .demo-energy-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .demo-energy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .demo-energy-header h4 { font-size: 13px; }
+    .demo-energy-header .trend { font-size: 11px; color: var(--text-muted); }
+    .demo-energy-bars {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      height: 60px;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .demo-energy-bar {
+      flex: 1;
+      background: var(--bg-hover);
+      border-radius: 4px;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+    }
+    .demo-energy-bar-fill {
+      width: 100%;
+      background: linear-gradient(180deg, var(--accent-soft), var(--accent-calm));
+      border-radius: 4px;
+    }
+    .demo-energy-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    /* Blog Demo */
+    .demo-blog-header { text-align: center; margin-bottom: 20px; }
+    .demo-blog-header h3 { font-size: 24px; margin-bottom: 6px; }
+    .demo-blog-header p { font-size: 14px; color: var(--text-secondary); }
+    .demo-blog-header .subtitle { font-size: 12px; color: var(--text-muted); font-style: italic; }
+    .demo-blog-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .demo-blog-tab {
+      padding: 10px 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .demo-blog-tab:hover { color: var(--text-primary); }
+    .demo-blog-tab.active {
+      background: var(--text-primary);
+      color: var(--bg-deep);
+      border-color: var(--text-primary);
+    }
+    .demo-blog-content { display: none; }
+    .demo-blog-content.active { display: block; }
+    .demo-categories {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .demo-category {
+      padding: 6px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .demo-category.active {
+      background: var(--accent-warm);
+      color: var(--bg-deep);
+      border-color: var(--accent-warm);
+    }
+    .demo-article-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .demo-article-card:hover { border-color: var(--accent-soft); }
+    .demo-article-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .demo-article-tag {
+      padding: 3px 10px;
+      background: rgba(196,161,255,0.15);
+      color: var(--accent-soft);
+      border-radius: 12px;
+    }
+    .demo-article-card h4 { font-size: 14px; margin-bottom: 6px; }
+    .demo-article-card p { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+    /* Write tab */
+    .demo-write-section {
+      text-align: center;
+      padding: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+    }
+    .demo-write-section .icon { font-size: 40px; margin-bottom: 12px; }
+    .demo-write-section h4 { font-size: 18px; margin-bottom: 8px; }
+    .demo-write-section p { font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; }
+    .demo-write-btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--accent-warm), var(--accent-soft));
+      border: none;
+      border-radius: 10px;
+      color: var(--bg-deep);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    .demo-upload-btn {
+      padding: 12px 24px;
+      background: var(--bg-hover);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Profile Demo */
+    .demo-profile-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .demo-profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(196,161,255,0.3), rgba(124,184,232,0.3));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 12px;
+      position: relative;
+    }
+    .demo-profile-avatar .edit-badge {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 24px;
+      height: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+    .demo-profile-name {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+    .demo-profile-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .demo-profile-tagline {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .demo-profile-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .demo-profile-tab {
+      padding: 8px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .demo-profile-tab:hover { color: var(--text-primary); }
+    .demo-profile-tab.active {
+      background: var(--text-primary);
+      color: var(--bg-deep);
+      border-color: var(--text-primary);
+    }
+    .demo-profile-content { display: none; }
+    .demo-profile-content.active { display: block; }
+    .demo-profile-card {
+      background: rgba(31,41,55,0.4);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .demo-profile-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    .demo-profile-card-header .emoji { font-size: 16px; }
+    .demo-profile-bio {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      padding: 10px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+    }
+    .demo-profile-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .demo-profile-tag {
+      padding: 4px 10px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .demo-profile-tag.selected {
+      background: rgba(196,161,255,0.15);
+      color: var(--accent-soft);
+    }
+
+    /* Connect Demo */
+    .demo-connect-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .demo-connect-header h3 { font-size: 24px; margin-bottom: 6px; }
+    .demo-connect-header p { font-size: 14px; color: var(--text-secondary); }
+    .demo-connect-header .subtitle { font-size: 12px; color: var(--text-muted); font-style: italic; }
+    .demo-search-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      margin-bottom: 16px;
+    }
+    .demo-search-box span { color: var(--text-muted); }
+    .demo-search-box input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+    }
+    .demo-connect-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .demo-connect-tab {
+      padding: 8px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .demo-connect-tab:hover { color: var(--text-primary); }
+    .demo-connect-tab.active {
+      background: var(--accent-soft);
+      color: var(--bg-deep);
+      border-color: var(--accent-soft);
+    }
+    .demo-connect-tab .badge {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+    }
+    .demo-tab-content { display: none; }
+    .demo-tab-content.active { display: block; }
+    .demo-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .demo-section-header h4 { font-size: 14px; }
+    .demo-create-btn {
+      padding: 8px 14px;
+      background: linear-gradient(135deg, var(--accent-soft), var(--accent-calm));
+      border: none;
+      border-radius: 8px;
+      color: var(--bg-deep);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .demo-community-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .demo-community-card:hover { border-color: var(--accent-soft); }
+    .demo-community-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .demo-community-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--bg-hover);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .demo-community-info h4 { font-size: 14px; margin-bottom: 2px; }
+    .demo-community-info p { font-size: 11px; color: var(--text-muted); }
+    .demo-community-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+    .demo-community-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .demo-activity {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .demo-activity-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-green);
+      border-radius: 50%;
+    }
+    .demo-join-btn {
+      padding: 6px 14px;
+      background: var(--bg-hover);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 11px;
+      cursor: pointer;
+    }
+    /* Messages Demo */
+    .demo-async-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: linear-gradient(135deg, rgba(124,232,168,0.1), rgba(124,184,232,0.1));
+      border: 1px solid rgba(124,232,168,0.2);
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+    .demo-async-banner .icon { font-size: 24px; }
+    .demo-async-banner h4 { font-size: 13px; margin-bottom: 2px; }
+    .demo-async-banner p { font-size: 11px; color: var(--text-secondary); }
+    .demo-message-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .demo-message-item:hover { background: var(--bg-hover); }
+    .demo-message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .demo-message-content { flex: 1; }
+    .demo-message-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+    .demo-message-preview { font-size: 12px; color: var(--text-muted); }
+    .demo-unread-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-soft);
+      border-radius: 50%;
+    }
+
+    /* Wellness Demo */
+    .demo-wellness-header { text-align: center; margin-bottom: 20px; }
+    .demo-wellness-header h3 { font-size: 24px; margin-bottom: 6px; }
+    .demo-wellness-header p { font-size: 14px; color: var(--text-secondary); }
+    .demo-wellness-header .subtitle { font-size: 12px; color: var(--text-muted); font-style: italic; }
+    .demo-wellness-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .demo-wellness-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 80px;
+    }
+    .demo-wellness-tab:hover { background: var(--bg-hover); }
+    .demo-wellness-tab.active {
+      border-color: var(--accent-green);
+      background: rgba(124,232,168,0.08);
+    }
+    .demo-wellness-tab .icon { font-size: 22px; }
+    .demo-wellness-tab .label { font-size: 10px; color: var(--text-muted); }
+    .demo-wellness-tab.active .label { color: var(--text-primary); }
+    .demo-wellness-content { display: none; }
+    .demo-wellness-content.active { display: block; }
+    .demo-status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .demo-status-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .demo-status-card .icon { font-size: 20px; margin-bottom: 6px; }
+    .demo-status-card .label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+    .demo-status-card .value { font-size: 20px; font-weight: 500; margin-bottom: 6px; }
+    .demo-status-bar {
+      height: 4px;
+      background: var(--bg-hover);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .demo-status-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+    }
+    .demo-wellness-message {
+      text-align: center;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(124,232,168,0.1), rgba(124,184,232,0.1));
+      border: 1px solid rgba(124,232,168,0.2);
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    .demo-wellness-message .icon { font-size: 28px; margin-bottom: 8px; }
+    .demo-wellness-message h4 { font-size: 14px; color: var(--accent-green); margin-bottom: 4px; }
+    .demo-wellness-message p { font-size: 11px; color: var(--text-secondary); }
+    .demo-quick-tools h4 { font-size: 13px; margin-bottom: 12px; }
+    .demo-quick-tools-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .demo-quick-tool {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .demo-quick-tool:hover { border-color: var(--accent-green); transform: translateY(-2px); }
+    .demo-quick-tool .icon { font-size: 24px; }
+    .demo-quick-tool .label { font-size: 10px; color: var(--text-muted); }
+    /* Breathing content */
+    .demo-breathing-intro { text-align: center; margin-bottom: 16px; }
+    .demo-breathing-intro h4 { font-size: 16px; margin-bottom: 6px; }
+    .demo-breathing-intro p { font-size: 12px; color: var(--text-secondary); }
+    .demo-breathing-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .demo-breathing-card:hover { border-color: var(--accent-green); }
+    .demo-breathing-card h5 { font-size: 13px; margin-bottom: 2px; }
+    .demo-breathing-card p { font-size: 11px; color: var(--text-muted); }
+    .demo-breathing-card .duration {
+      padding: 6px 12px;
+      background: var(--bg-hover);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* Creative Demo */
+    .demo-creative-header { text-align: center; margin-bottom: 24px; }
+    .demo-creative-header h3 { font-size: 24px; margin-bottom: 8px; }
+    .demo-creative-header p { font-size: 14px; color: var(--text-secondary); }
+    .demo-creative-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .demo-mode-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .demo-mode-card:hover {
+      border-color: var(--accent-soft);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    }
+    .demo-mode-card.selected {
+      border-color: var(--accent-soft);
+      background: linear-gradient(135deg, rgba(196,161,255,0.1) 0%, rgba(232,168,124,0.05) 100%);
+    }
+    .demo-mode-card .icon { font-size: 36px; margin-bottom: 12px; }
+    .demo-mode-card h4 { font-size: 16px; margin-bottom: 8px; }
+    .demo-mode-card p { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+    /* Testimonials */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .testimonial-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 32px;
+    }
+
+    .testimonial-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-style: italic;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      color: var(--text-secondary);
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .testimonial-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(196,161,255,0.3) 0%, rgba(124,184,232,0.3) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .testimonial-info h4 { font-size: 15px; margin-bottom: 2px; }
+    .testimonial-info p { font-size: 13px; color: var(--text-muted); }
+
+    /* CTA Section */
+    .cta-section {
+      text-align: center;
+      padding: 100px 24px;
+    }
+
+    .cta-card {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 64px;
+      background: linear-gradient(135deg, rgba(196,161,255,0.1) 0%, rgba(232,168,124,0.08) 100%);
+      border: 1px solid rgba(196,161,255,0.2);
+      border-radius: 32px;
+    }
+
+    .cta-card h2 {
+      font-size: 42px;
+      margin-bottom: 16px;
+    }
+
+    .cta-card p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 36px;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 1;
+      padding: 64px 24px 32px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+
+    .footer-brand p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 16px;
+      max-width: 300px;
+      line-height: 1.7;
+    }
+
+    .footer-column h4 {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .footer-column a {
+      display: block;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 8px 0;
+      transition: color 0.2s ease;
+    }
+
+    .footer-column a:hover { color: var(--text-primary); }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 32px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .footer-bottom p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer-social a {
+      width: 40px;
+      height: 40px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .footer-social a:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 440px;
+      padding: 40px;
+      position: relative;
+      animation: modalIn 0.3s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-elevated);
+      border: none;
+      border-radius: 50%;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    /* Info Modal Styles */
+    .info-modal {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 40px;
+      position: relative;
+      animation: modalIn 0.3s ease;
+    }
+    .info-modal-header {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .info-modal-header h2 { font-size: 24px; margin-bottom: 4px; }
+    .info-modal-header .subtitle { font-size: 14px; color: var(--text-muted); }
+    .info-modal-header .last-updated { font-size: 12px; color: var(--text-muted); }
+    .info-modal-body { font-size: 14px; line-height: 1.7; color: var(--text-secondary); }
+    .info-modal-body .intro { font-size: 15px; color: var(--text-primary); margin-bottom: 20px; }
+    .info-modal-body h3 { font-size: 16px; color: var(--text-primary); margin: 24px 0 12px; }
+    .info-modal-body h4 { font-size: 14px; color: var(--text-primary); margin-bottom: 6px; }
+    .info-modal-body p { margin-bottom: 12px; }
+    .info-modal-body ul { margin: 12px 0; padding-left: 20px; }
+    .info-modal-body ul li { margin-bottom: 8px; }
+    .info-modal-body .note { font-size: 13px; color: var(--text-muted); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-subtle); }
+    .info-modal-body .note a { color: var(--accent-soft); }
+    /* Contact options */
+    .contact-options { display: flex; flex-direction: column; gap: 16px; margin: 20px 0; }
+    .contact-option { display: flex; gap: 16px; padding: 16px; background: var(--bg-elevated); border-radius: 12px; }
+    .contact-option .contact-icon { font-size: 24px; }
+    .contact-option h4 { margin-bottom: 2px; }
+    .contact-option p { margin-bottom: 4px; color: var(--text-primary); }
+    .contact-option .response-time { font-size: 12px; color: var(--text-muted); }
+    /* FAQ items */
+    .faq-section { margin: 16px 0; }
+    .faq-item { padding: 16px; background: var(--bg-elevated); border-radius: 12px; margin-bottom: 12px; }
+    .faq-item h4 { color: var(--text-primary); margin-bottom: 8px; }
+    .faq-item p { margin: 0; }
+    /* Community previews */
+    .community-previews { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+    .community-preview { display: flex; gap: 14px; padding: 14px; background: var(--bg-elevated); border-radius: 12px; align-items: center; }
+    .community-preview .community-icon { font-size: 28px; }
+    .community-preview h4 { margin-bottom: 2px; }
+    .community-preview p { margin: 0; font-size: 13px; }
+    /* Preview articles */
+    .preview-articles { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+    .preview-article { padding: 16px; background: var(--bg-elevated); border-radius: 12px; }
+    .preview-article .article-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-soft); margin-bottom: 8px; display: inline-block; }
+    .preview-article h4 { margin-bottom: 6px; }
+    .preview-article p { margin: 0; font-size: 13px; }
+    /* Pricing */
+    .pricing-cards { margin: 20px 0; }
+    .pricing-card { padding: 28px; background: var(--bg-elevated); border: 2px solid var(--accent-soft); border-radius: 16px; text-align: center; position: relative; }
+    .pricing-card .pricing-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent-soft); color: var(--bg-deep); padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .pricing-card h3 { font-size: 32px; margin: 12px 0 4px; }
+    .pricing-card .pricing-desc { color: var(--text-muted); margin-bottom: 20px; }
+    .pricing-features { list-style: none; padding: 0; margin: 20px 0; text-align: left; }
+    .pricing-features li { padding: 8px 0; border-bottom: 1px solid var(--border-subtle); }
+    .pricing-features li:last-child { border-bottom: none; }
+    .pricing-note { font-size: 13px; color: var(--text-muted); text-align: center; }
+    /* Roadmap */
+    .roadmap-section { margin-bottom: 20px; }
+    .roadmap-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+    .roadmap-status.now { background: var(--accent-green); color: var(--bg-deep); }
+    .roadmap-status.next { background: var(--accent-soft); color: var(--bg-deep); }
+    .roadmap-status.later { background: var(--bg-elevated); color: var(--text-secondary); }
+    .roadmap-items { padding-left: 8px; }
+    .roadmap-item { padding: 8px 0; font-size: 14px; }
+    /* CTA button for modals */
+    .cta-btn { width: 100%; padding: 14px; background: var(--accent-soft); color: var(--bg-deep); border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 16px; }
+    .cta-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .modal-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .modal-icon { font-size: 48px; margin-bottom: 16px; }
+    .modal-header h2 { font-size: 28px; margin-bottom: 8px; }
+    .modal-header p { font-size: 15px; color: var(--text-secondary); }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 15px;
+      transition: all 0.2s ease;
+    }
+
+    .password-field {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-field .form-input {
+      padding-right: 44px;
+    }
+
+    .eye-btn {
+      position: absolute;
+      right: 12px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 6px;
+    }
+
+    .eye-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+    }
+
+    .form-input::placeholder { color: var(--text-muted); }
+
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .form-checkbox input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-soft);
+    }
+
+    .form-checkbox label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .form-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--text-primary);
+      border: none;
+      border-radius: 12px;
+      color: var(--bg-deep);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 20px;
+    }
+
+    .form-submit:hover {
+      box-shadow: 0 0 30px rgba(255,255,255,0.2);
+    }
+
+    .form-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .form-divider span {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .form-divider::before,
+    .form-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    .social-login {
+      display: flex;
+      gap: 12px;
+    }
+
+    .social-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .social-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    .modal-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .modal-footer a {
+      color: var(--accent-soft);
+      text-decoration: none;
+    }
+
+    .modal-footer a:hover { text-decoration: underline; }
+
+    /* Language Dropdown */
+    .lang-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 8px;
+      min-width: 160px;
+      display: none;
+      z-index: 200;
+    }
+
+    .lang-dropdown.active { display: block; }
+
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lang-option:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .lang-option.active { background: var(--bg-elevated); color: var(--accent-soft); }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .features-grid, .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+      .why-grid { grid-template-columns: 1fr; }
+      .footer-content { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      header { padding: 16px 20px; }
+      .header-nav { display: none; }
+      .hero h1 { font-size: 42px; }
+      .hero-subtitle { font-size: 17px; }
+      .hero-cta { flex-direction: column; }
+      .hero-stats { flex-direction: column; gap: 24px; }
+      .features-grid, .testimonials-grid { grid-template-columns: 1fr; }
+      .section-header h2 { font-size: 36px; }
+      .demo-content { flex-direction: column; }
+      .demo-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-subtle); }
+      .demo-cards { grid-template-columns: 1fr; }
+      .cta-card { padding: 40px 24px; }
+      .cta-buttons { flex-direction: column; }
+      .footer-content { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Background -->
+  <div class="ambient-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Stars -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Header -->
+  <header id="header">
+    <a href="#" class="logo">
+      <span class="logo-text">Introvert Place</span>
+    </a>
+
+    <nav class="header-nav">
+      <a href="#features" class="nav-link" data-i18n="nav.features">Features</a>
+      <a href="#why" class="nav-link" data-i18n="nav.why">Why Us</a>
+      <a href="#demo" class="nav-link" data-i18n="nav.demo">Demo</a>
+      <a href="#testimonials" class="nav-link" data-i18n="nav.testimonials">Stories</a>
+    </nav>
+
+    <div class="header-actions">
+      <div style="position: relative;">
+        <button class="lang-btn" onclick="toggleLangDropdown()">
+          <span>🌐</span>
+          <span id="currentLang">EN</span>
+          <span>▼</span>
+        </button>
+        <div class="lang-dropdown" id="langDropdown">
+          <div class="lang-option active" onclick="setLanguage('en', event)">🇺🇸 English</div>
+          <div class="lang-option" onclick="setLanguage('es', event)">🇪🇸 Español</div>
+          <div class="lang-option" onclick="setLanguage('fr', event)">🇫🇷 Français</div>
+          <div class="lang-option" onclick="setLanguage('de', event)">🇩🇪 Deutsch</div>
+          <div class="lang-option" onclick="setLanguage('ja', event)">🇯🇵 日本語</div>
+          <div class="lang-option" onclick="setLanguage('ko', event)">🇰🇷 한국어</div>
+          <div class="lang-option" onclick="setLanguage('zh', event)">🇨🇳 中文</div>
+          <div class="lang-option" onclick="setLanguage('pt', event)">🇧🇷 Português</div>
+        </div>
+      </div>
+      <button class="sign-in-btn" onclick="openModal('signin')" data-i18n="nav.signin">Sign In</button>
+      <button class="get-started-btn" onclick="openModal('signup')" data-i18n="nav.getstarted">Get Started</button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span>✨</span>
+      <span data-i18n="hero.badge">A sanctuary for quiet souls</span>
+    </div>
+
+    <h1 data-i18n="hero.title">Your Quiet Corner of the <span>Internet</span></h1>
+
+    <p class="hero-subtitle" data-i18n="hero.subtitle">
+      A social space designed for introverts. No algorithms, no likes, no pressure. 
+      Just authentic connection at your own pace.
+    </p>
+
+    <div class="hero-cta">
+      <button class="cta-primary" onclick="openModal('signup')" data-i18n="hero.cta.primary">Create Your Sanctuary</button>
+      <button class="cta-secondary" onclick="scrollToDemo()">
+        <span>▶</span>
+        <span data-i18n="hero.cta.secondary">See How It Works</span>
+      </button>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-value">1K+</div>
+        <div class="stat-label" data-i18n="hero.stats.souls">Quiet Souls</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">Free</div>
+        <div class="stat-label" data-i18n="hero.stats.free">One Month Free</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">0</div>
+        <div class="stat-label" data-i18n="hero.stats.ads">Ads & Trackers</div>
+      </div>
+    </div>
+
+    <div class="scroll-indicator">
+      <span data-i18n="hero.scroll">Scroll to explore</span>
+      <span>↓</span>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-label" data-i18n="features.label">Features</span>
+        <h2 data-i18n="features.title">Built for How You Actually Feel</h2>
+        <p data-i18n="features.subtitle">Every feature designed with introverts in mind. No overwhelming feeds, just peaceful tools.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔋</div>
+          <h3 data-i18n="features.battery.title">Social Battery Tracker</h3>
+          <p data-i18n="features.battery.desc">Track your energy levels and get gentle suggestions for when to recharge. Your boundaries, respected.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✨</div>
+          <h3 data-i18n="features.creative.title">Private Creative Space</h3>
+          <p data-i18n="features.creative.desc">Share art, writing, and thoughts without metrics or algorithms. Create for you, share when you're ready.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🤝</div>
+          <h3 data-i18n="features.connect.title">Meaningful Connections</h3>
+          <p data-i18n="features.connect.desc">Find similar souls based on interests, not popularity. Deep conversations, not small talk.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌿</div>
+          <h3 data-i18n="features.wellness.title">Wellness Tools</h3>
+          <p data-i18n="features.wellness.desc">Breathing exercises, grounding techniques, and recovery timers for when you need to decompress.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3 data-i18n="features.preferences.title">Boundary Preferences</h3>
+          <p data-i18n="features.preferences.desc">Control exactly how others can interact with you. Set response times, welcome specific interaction types.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📖</div>
+          <h3 data-i18n="features.blog.title">Thoughtful Blog</h3>
+          <p data-i18n="features.blog.desc">Read and write articles for quiet minds. No viral pressure, just authentic stories and insights.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Different -->
+  <section id="why">
+    <div class="section-container">
+      <div class="why-grid">
+        <div class="why-content">
+          <span class="section-label" data-i18n="why.label">Why Different</span>
+          <h2 data-i18n="why.title">Social Media That Actually Gets You</h2>
+          <p data-i18n="why.subtitle">We built this because we needed it. Traditional social media is exhausting for introverts. Here's how we're different:</p>
+
+          <div class="why-list">
+            <div class="why-item">
+              <div class="why-check">✓</div>
+              <div class="why-item-text">
+                <h4 data-i18n="why.item1.title">No Follower Counts</h4>
+                <p data-i18n="why.item1.desc">Your worth isn't measured in numbers</p>
+              </div>
+            </div>
+            <div class="why-item">
+              <div class="why-check">✓</div>
+              <div class="why-item-text">
+                <h4 data-i18n="why.item2.title">No Infinite Scroll</h4>
+                <p data-i18n="why.item2.desc">Intentional browsing, not addictive feeds</p>
+              </div>
+            </div>
+            <div class="why-item">
+              <div class="why-check">✓</div>
+              <div class="why-item-text">
+                <h4 data-i18n="why.item3.title">Async-First Communication</h4>
+                <p data-i18n="why.item3.desc">Respond in your own time, no pressure</p>
+              </div>
+            </div>
+            <div class="why-item">
+              <div class="why-check">✓</div>
+              <div class="why-item-text">
+                <h4 data-i18n="why.item4.title">Private by Default</h4>
+                <p data-i18n="why.item4.desc">Share only what you want, with who you want</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="why-visual">
+          <div class="comparison-card">
+            <div class="comparison-header">
+              <span class="comparison-icon">😰</span>
+              <span class="comparison-title" data-i18n="why.other.title">Other Platforms</span>
+            </div>
+            <div class="comparison-items">
+              <div class="comparison-item bad">✗ Constant notifications</div>
+              <div class="comparison-item bad">✗ Pressure to perform</div>
+              <div class="comparison-item bad">✗ Algorithm-driven anxiety</div>
+              <div class="comparison-item bad">✗ Public by default</div>
+            </div>
+          </div>
+          <div class="comparison-card">
+            <div class="comparison-header">
+              <span class="comparison-icon">🌙</span>
+              <span class="comparison-title" data-i18n="why.us.title">Introvert Place</span>
+            </div>
+            <div class="comparison-items">
+              <div class="comparison-item good">✓ Peaceful, quiet space</div>
+              <div class="comparison-item good">✓ No metrics or pressure</div>
+              <div class="comparison-item good">✓ You control the pace</div>
+              <div class="comparison-item good">✓ Private by default</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo -->
+  <section id="demo" class="demo-section">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-label" data-i18n="demo.label">Interactive Demo</span>
+        <h2 data-i18n="demo.title">Take a Peek Inside</h2>
+        <p data-i18n="demo.subtitle">Explore the app before signing up. Click around — it's safe here.</p>
+      </div>
+
+      <div class="demo-container">
+        <div class="demo-content">
+          <div class="demo-sidebar">
+            <div class="demo-nav-item active" data-page="sanctuary" onclick="setDemoNav(this, 'sanctuary')">
+              <span>🧘</span> Sanctuary
+            </div>
+            <div class="demo-nav-item" data-page="wellness" onclick="setDemoNav(this, 'wellness')">
+              <span>🌿</span> Wellness
+            </div>
+            <div class="demo-nav-item" data-page="creative" onclick="setDemoNav(this, 'creative')">
+              <span>✨</span> Creative
+            </div>
+            <div class="demo-nav-item" data-page="blog" onclick="setDemoNav(this, 'blog')">
+              <span>📖</span> Blog
+            </div>
+            <div class="demo-nav-item" data-page="connect" onclick="setDemoNav(this, 'connect')">
+              <span>🤝</span> Connect
+            </div>
+            <div style="flex: 1;"></div>
+            <div class="demo-nav-item" data-page="profile" onclick="setDemoNav(this, 'profile')" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-subtle);">
+              <span>🌸</span> quiet_soul
+            </div>
+          </div>
+
+          <div class="demo-main">
+            <!-- Sanctuary Page -->
+            <div class="demo-page active" id="demo-sanctuary">
+              <div class="demo-sanctuary-header">
+                <div class="demo-sanctuary-top">
+                  <div class="demo-sanctuary-welcome">
+                    <h3>Good evening, <span>quiet_soul</span></h3>
+                    <div class="demo-mood-badge">
+                      😌 Feeling peaceful this evening
+                      <span class="change">change</span>
+                    </div>
+                  </div>
+                  <div class="demo-header-stats">
+                    <div class="demo-stat-card">
+                      <div class="value">7</div>
+                      <div class="label">Day streak</div>
+                    </div>
+                    <div class="demo-stat-card">
+                      <div class="value">12</div>
+                      <div class="label">Reflections</div>
+                    </div>
+                    <div class="demo-stat-card battery">
+                      <div class="value">72%</div>
+                      <div class="label">Social Battery</div>
+                      <div class="mini-bar"><div class="mini-bar-fill" style="width: 72%;"></div></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="demo-mood-message">
+                  "Your peaceful energy is a gift tonight. This might be a good time for gentle creativity or quiet reflection."
+                </div>
+              </div>
+
+              <div class="demo-sanctuary-tabs">
+                <button class="demo-sanctuary-tab active" onclick="switchSanctuaryTab(this, 'foryou')">✨ For You</button>
+                <button class="demo-sanctuary-tab" onclick="switchSanctuaryTab(this, 'journal')">📓 Journal</button>
+                <button class="demo-sanctuary-tab" onclick="switchSanctuaryTab(this, 'mood')">💭 Mood</button>
+                <button class="demo-sanctuary-tab" onclick="switchSanctuaryTab(this, 'reflections')">🪞 Reflections</button>
+              </div>
+
+              <!-- For You Tab -->
+              <div class="demo-sanctuary-content active" id="demo-sanc-foryou">
+              <p class="demo-section-subtitle">Suggested for your mood</p>
+              <div class="demo-actions-grid">
+                <div class="demo-action-card" onclick="showToast('🌬️ Starting breathing exercise...')">
+                  <div class="icon">🌬️</div>
+                  <h4>Gentle Breathing</h4>
+                  <p>A calming 4-7-8 breathing exercise</p>
+                  <div class="time">⏱️ 3 min</div>
+                </div>
+                <div class="demo-action-card" onclick="showToast('✍️ Opening journal...')">
+                  <div class="icon">✍️</div>
+                  <h4>Evening Journal</h4>
+                  <p>Capture a thought before it slips away</p>
+                  <div class="time">⏱️ 5 min</div>
+                </div>
+                <div class="demo-action-card" onclick="showToast('💭 Opening reflection...')">
+                  <div class="icon">💭</div>
+                  <h4>Quick Reflection</h4>
+                  <p>Answer today's prompt</p>
+                  <div class="time">⏱️ 2 min</div>
+                </div>
+              </div>
+
+              <div class="demo-energy-card">
+                <div class="demo-energy-header">
+                  <h4>📊 Your Energy This Week</h4>
+                  <span class="trend">📈 +15% from last week</span>
+                </div>
+                <div class="demo-energy-bars">
+                  <div class="demo-energy-bar"><div class="demo-energy-bar-fill" style="height: 60%;"></div></div>
+                  <div class="demo-energy-bar"><div class="demo-energy-bar-fill" style="height: 45%;"></div></div>
+                  <div class="demo-energy-bar"><div class="demo-energy-bar-fill" style="height: 70%;"></div></div>
+                  <div class="demo-energy-bar"><div class="demo-energy-bar-fill" style="height: 55%;"></div></div>
+                  <div class="demo-energy-bar"><div class="demo-energy-bar-fill" style="height: 80%;"></div></div>
+                  <div class="demo-energy-bar"><div class="demo-energy-bar-fill" style="height: 65%;"></div></div>
+                  <div class="demo-energy-bar"><div class="demo-energy-bar-fill" style="height: 75%;"></div></div>
+                </div>
+                <div class="demo-energy-labels">
+                  <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                </div>
+              </div>
+              </div>
+
+              <!-- Journal Tab -->
+              <div class="demo-sanctuary-content" id="demo-sanc-journal">
+                <div class="demo-journal-header">
+                  <h4>📓 Your Journal</h4>
+                  <p>A private space for your thoughts</p>
+                </div>
+                <div class="demo-journal-prompt">
+                  <div class="prompt-label">Today's Prompt</div>
+                  <p>"What small moment brought you peace today?"</p>
+                  <button class="demo-btn-secondary" onclick="showToast('✍️ Opening prompt...')">Write about this</button>
+                </div>
+                <div class="demo-journal-entries">
+                  <h5>Recent Entries</h5>
+                  <div class="demo-journal-entry">
+                    <div class="entry-date">Today, 8:42 PM</div>
+                    <div class="entry-preview">Had a quiet evening reading by the window. The rain outside felt calming...</div>
+                    <div class="entry-mood">😌 Peaceful</div>
+                  </div>
+                  <div class="demo-journal-entry">
+                    <div class="entry-date">Yesterday, 10:15 PM</div>
+                    <div class="entry-preview">Finished that book I've been putting off. Feeling accomplished but tired...</div>
+                    <div class="entry-mood">😊 Content</div>
+                  </div>
+                  <div class="demo-journal-entry">
+                    <div class="entry-date">Jan 19, 6:30 PM</div>
+                    <div class="entry-preview">Needed some alone time after the family gathering. Recharged with music...</div>
+                    <div class="entry-mood">😮‍💨 Drained</div>
+                  </div>
+                </div>
+                <button class="demo-btn-primary" onclick="showToast('📝 Creating new entry...')">+ New Entry</button>
+              </div>
+
+              <!-- Mood Tab -->
+              <div class="demo-sanctuary-content" id="demo-sanc-mood">
+                <div class="demo-mood-header">
+                  <h4>💭 Mood Tracking</h4>
+                  <p>Understand your emotional patterns</p>
+                </div>
+                <div class="demo-current-mood">
+                  <div class="mood-display">
+                    <span class="mood-emoji">😌</span>
+                    <div class="mood-info">
+                      <div class="mood-name">Peaceful</div>
+                      <div class="mood-time">Set 2 hours ago</div>
+                    </div>
+                  </div>
+                  <button class="demo-btn-secondary" onclick="showToast('🔄 Updating mood...')">Update</button>
+                </div>
+                <div class="demo-mood-history">
+                  <h5>This Week's Moods</h5>
+                  <div class="demo-mood-timeline">
+                    <div class="mood-day">
+                      <span class="day">Mon</span>
+                      <span class="emoji">😊</span>
+                    </div>
+                    <div class="mood-day">
+                      <span class="day">Tue</span>
+                      <span class="emoji">😮‍💨</span>
+                    </div>
+                    <div class="mood-day">
+                      <span class="day">Wed</span>
+                      <span class="emoji">😴</span>
+                    </div>
+                    <div class="mood-day">
+                      <span class="day">Thu</span>
+                      <span class="emoji">😊</span>
+                    </div>
+                    <div class="mood-day">
+                      <span class="day">Fri</span>
+                      <span class="emoji">🥰</span>
+                    </div>
+                    <div class="mood-day">
+                      <span class="day">Sat</span>
+                      <span class="emoji">😊</span>
+                    </div>
+                    <div class="mood-day today">
+                      <span class="day">Sun</span>
+                      <span class="emoji">😌</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="demo-mood-insights">
+                  <h5>Insights</h5>
+                  <div class="insight-card">
+                    <span class="insight-icon">📊</span>
+                    <p>You tend to feel most peaceful on weekends. Consider scheduling recharge time during busy weekdays.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reflections Tab -->
+              <div class="demo-sanctuary-content" id="demo-sanc-reflections">
+                <div class="demo-reflections-header">
+                  <h4>🪞 Reflections</h4>
+                  <p>Daily prompts for self-discovery</p>
+                </div>
+                <div class="demo-reflection-today">
+                  <div class="reflection-label">Today's Reflection</div>
+                  <p class="reflection-prompt">"What boundary did you honor today, and how did it feel?"</p>
+                  <div class="reflection-stats">
+                    <span>🔥 7 day streak</span>
+                    <span>📝 12 total reflections</span>
+                  </div>
+                  <button class="demo-btn-primary" onclick="showToast('✨ Opening reflection...')">Start Reflecting</button>
+                </div>
+                <div class="demo-past-reflections">
+                  <h5>Past Reflections</h5>
+                  <div class="demo-reflection-card">
+                    <div class="reflection-date">Yesterday</div>
+                    <div class="reflection-q">"When did you feel most like yourself this week?"</div>
+                    <div class="reflection-preview">During my morning coffee ritual, before anyone else woke up...</div>
+                  </div>
+                  <div class="demo-reflection-card">
+                    <div class="reflection-date">Jan 20</div>
+                    <div class="reflection-q">"What helps you recharge after social interactions?"</div>
+                    <div class="reflection-preview">Reading fiction and listening to lo-fi music in my room...</div>
+                  </div>
+                  <div class="demo-reflection-card">
+                    <div class="reflection-date">Jan 19</div>
+                    <div class="reflection-q">"Describe your ideal quiet moment."</div>
+                    <div class="reflection-preview">Sitting by the window with tea, watching the rain...</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Wellness Page -->
+            <div class="demo-page" id="demo-wellness">
+              <div class="demo-wellness-header">
+                <h3>🌿 Wellness</h3>
+                <p>Your introvert self-care toolkit</p>
+                <p class="subtitle">Nurture your energy, one breath at a time</p>
+              </div>
+
+              <div class="demo-wellness-tabs">
+                <button class="demo-wellness-tab active" onclick="switchWellnessTab(this, 'overview')"><span class="icon">🌿</span><span class="label">Overview</span></button>
+                <button class="demo-wellness-tab" onclick="switchWellnessTab(this, 'breathing')"><span class="icon">🫁</span><span class="label">Breathing</span></button>
+                <button class="demo-wellness-tab" onclick="switchWellnessTab(this, 'battery')"><span class="icon">🔋</span><span class="label">Battery</span></button>
+                <button class="demo-wellness-tab" onclick="switchWellnessTab(this, 'grounding')"><span class="icon">🌱</span><span class="label">Grounding</span></button>
+              </div>
+
+              <!-- Overview Tab -->
+              <div class="demo-wellness-content active" id="demo-well-overview">
+                <div class="demo-status-grid">
+                  <div class="demo-status-card">
+                    <div class="icon">⚡</div>
+                    <div class="label">Energy</div>
+                    <div class="value">72%</div>
+                    <div class="demo-status-bar"><div class="demo-status-bar-fill" style="width: 72%; background: linear-gradient(90deg, var(--accent-calm), var(--accent-green));"></div></div>
+                  </div>
+                  <div class="demo-status-card">
+                    <div class="icon">💬</div>
+                    <div class="label">Social Battery</div>
+                    <div class="value">45%</div>
+                    <div class="demo-status-bar"><div class="demo-status-bar-fill" style="width: 45%; background: linear-gradient(90deg, var(--accent-warm), var(--accent-gold));"></div></div>
+                  </div>
+                  <div class="demo-status-card">
+                    <div class="icon">😌</div>
+                    <div class="label">Stress</div>
+                    <div class="value">Low</div>
+                    <div class="demo-status-bar"><div class="demo-status-bar-fill" style="width: 25%; background: linear-gradient(90deg, var(--accent-soft), var(--accent-green));"></div></div>
+                  </div>
+                </div>
+
+                <div class="demo-wellness-message">
+                  <div class="icon">🌟</div>
+                  <h4>You're doing great today</h4>
+                  <p>Your energy is balanced. Perfect time for creative work or quiet reflection.</p>
+                </div>
+
+                <div class="demo-quick-tools">
+                  <h4>Quick Tools</h4>
+                  <div class="demo-quick-tools-grid">
+                    <div class="demo-quick-tool" onclick="showToast('🌬️ Starting breathing...')"><span class="icon">🌬️</span><span class="label">Breathe</span></div>
+                    <div class="demo-quick-tool" onclick="showToast('🧘 Opening meditation...')"><span class="icon">🧘</span><span class="label">Meditate</span></div>
+                    <div class="demo-quick-tool" onclick="showToast('📝 Opening journal...')"><span class="icon">📝</span><span class="label">Journal</span></div>
+                    <div class="demo-quick-tool" onclick="showToast('🎵 Playing sounds...')"><span class="icon">🎵</span><span class="label">Sounds</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Breathing Tab -->
+              <div class="demo-wellness-content" id="demo-well-breathing">
+                <div class="demo-breathing-intro">
+                  <h4>Breathing Exercises</h4>
+                  <p>Calm your mind with guided breathing techniques</p>
+                </div>
+                <div class="demo-breathing-card" onclick="showToast('🌬️ Starting 4-7-8 breathing...')">
+                  <div><h5>4-7-8 Relaxation</h5><p>Calm anxiety, promote sleep</p></div>
+                  <span class="duration">4 min</span>
+                </div>
+                <div class="demo-breathing-card" onclick="showToast('🌬️ Starting box breathing...')">
+                  <div><h5>Box Breathing</h5><p>Focus and stress relief</p></div>
+                  <span class="duration">5 min</span>
+                </div>
+                <div class="demo-breathing-card" onclick="showToast('🌬️ Starting deep calm...')">
+                  <div><h5>Deep Calm</h5><p>Full body relaxation</p></div>
+                  <span class="duration">10 min</span>
+                </div>
+              </div>
+
+              <!-- Battery Tab -->
+              <div class="demo-wellness-content" id="demo-well-battery">
+                <div style="text-align: center; padding: 20px;">
+                  <div style="font-size: 48px; margin-bottom: 12px;">🔋</div>
+                  <h4 style="font-size: 16px; margin-bottom: 8px;">Social Battery: 45%</h4>
+                  <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">You have moderate energy for social interactions</p>
+                  <div style="display: flex; gap: 8px; justify-content: center;">
+                    <button style="padding: 8px 16px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-secondary); font-size: 11px; cursor: pointer;" onclick="showToast('⚡ Battery charged!')">+ Recharge</button>
+                    <button style="padding: 8px 16px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-secondary); font-size: 11px; cursor: pointer;" onclick="showToast('📊 Viewing history...')">View History</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Grounding Tab -->
+              <div class="demo-wellness-content" id="demo-well-grounding">
+                <div style="text-align: center; padding: 20px;">
+                  <div style="font-size: 48px; margin-bottom: 12px;">🌱</div>
+                  <h4 style="font-size: 16px; margin-bottom: 8px;">5-4-3-2-1 Grounding</h4>
+                  <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Connect with your senses to feel present</p>
+                  <button style="padding: 10px 24px; background: linear-gradient(135deg, var(--accent-green), var(--accent-calm)); border: none; border-radius: 10px; color: var(--bg-deep); font-size: 12px; font-weight: 500; cursor: pointer;" onclick="showToast('🌱 Starting grounding exercise...')">Begin Exercise</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Creative Page -->
+            <div class="demo-page" id="demo-creative">
+              <div class="demo-creative-header">
+                <h3>✨ Creative Space</h3>
+                <p>Choose your exploration mode</p>
+              </div>
+              <div class="demo-creative-grid">
+                <div class="demo-mode-card selected" onclick="selectDemoMode(this); showToast('✨ Entering Constellation mode...')">
+                  <div class="icon">✨</div>
+                  <h4>Constellation</h4>
+                  <p>Creations float like stars in space. Drift and explore freely.</p>
+                </div>
+                <div class="demo-mode-card" onclick="selectDemoMode(this); showToast('🌿 Entering Garden mode...')">
+                  <div class="icon">🌿</div>
+                  <h4>Garden</h4>
+                  <p>Design your own room. Visitors knock before entering.</p>
+                </div>
+                <div class="demo-mode-card" onclick="selectDemoMode(this); showToast('🎨 Entering Canvas mode...')">
+                  <div class="icon">🎨</div>
+                  <h4>Infinite Canvas</h4>
+                  <p>One shared space. Place your work anywhere you like.</p>
+                </div>
+                <div class="demo-mode-card" onclick="selectDemoMode(this); showToast('🌙 Entering Seasonal mode...')">
+                  <div class="icon">🌙</div>
+                  <h4>Seasonal Flow</h4>
+                  <p>Content by moods and themes. Slower, intentional discovery.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Blog Page -->
+            <div class="demo-page" id="demo-blog">
+              <div class="demo-blog-header">
+                <h3>📖 Blog</h3>
+                <p>Stories from quiet minds</p>
+                <p class="subtitle">Read, write, and connect through words</p>
+              </div>
+
+              <div class="demo-blog-tabs">
+                <button class="demo-blog-tab active" onclick="switchBlogTab(this, 'discover')">Discover</button>
+                <button class="demo-blog-tab" onclick="switchBlogTab(this, 'write')">Write</button>
+                <button class="demo-blog-tab" onclick="switchBlogTab(this, 'saved')">Saved</button>
+              </div>
+
+              <!-- Discover Tab -->
+              <div class="demo-blog-content active" id="demo-blog-discover">
+                <div class="demo-categories">
+                  <span class="demo-category active">All</span>
+                  <span class="demo-category">Solitude</span>
+                  <span class="demo-category">Energy</span>
+                  <span class="demo-category">Creativity</span>
+                  <span class="demo-category">Quiet Living</span>
+                </div>
+                <div class="demo-article-card" onclick="showToast('📖 Opening article...')">
+                  <div class="demo-article-meta">
+                    <span class="demo-article-tag">Solitude</span>
+                    <span>by quiet_forest · 2 days ago</span>
+                  </div>
+                  <h4>The Art of Being Alone Without Feeling Lonely</h4>
+                  <p>There's a profound difference between solitude and loneliness. One is a choice, the other a circumstance...</p>
+                </div>
+                <div class="demo-article-card" onclick="showToast('📖 Opening article...')">
+                  <div class="demo-article-meta">
+                    <span class="demo-article-tag">Energy</span>
+                    <span>by moon_child · 5 days ago</span>
+                  </div>
+                  <h4>Managing Your Social Battery</h4>
+                  <p>We all have different capacities for social interaction. Learning to honor your limits is not selfish...</p>
+                </div>
+              </div>
+
+              <!-- Write Tab -->
+              <div class="demo-blog-content" id="demo-blog-write">
+                <div class="demo-write-section">
+                  <div class="icon">✍️</div>
+                  <h4>Share Your Story</h4>
+                  <p>Your experiences matter. Write for fellow introverts who understand.</p>
+                  <button class="demo-write-btn" onclick="showToast('✍️ Opening editor...')">Start Writing</button>
+                  <button class="demo-upload-btn" onclick="showToast('📄 Upload file...')">📄 Upload Existing</button>
+                </div>
+              </div>
+
+              <!-- Saved Tab -->
+              <div class="demo-blog-content" id="demo-blog-saved">
+                <div style="text-align: center; padding: 30px;">
+                  <div style="font-size: 36px; margin-bottom: 12px;">📚</div>
+                  <h4 style="font-size: 16px; margin-bottom: 8px;">Your Saved Articles</h4>
+                  <p style="font-size: 12px; color: var(--text-muted);">Articles you save will appear here for easy access.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Connect Page -->
+            <div class="demo-page" id="demo-connect">
+              <div class="demo-connect-header">
+                <h3>🤝 Connect</h3>
+                <p>Find your people. No small talk required.</p>
+                <p class="subtitle">Communities for quiet connection. Join when ready.</p>
+              </div>
+
+              <div class="demo-search-box">
+                <span>🔍</span>
+                <input type="text" placeholder="Search communities, interests, or similar souls..." disabled>
+              </div>
+
+              <div class="demo-connect-tabs">
+                <button class="demo-connect-tab active" onclick="switchConnectTab(this, 'communities')">🏠 Communities</button>
+                <button class="demo-connect-tab" onclick="switchConnectTab(this, 'souls')">✨ Find Souls</button>
+                <button class="demo-connect-tab" onclick="switchConnectTab(this, 'messages')">💬 Messages <span class="badge">2</span></button>
+              </div>
+
+              <!-- Communities Tab -->
+              <div class="demo-tab-content active" id="demo-communities">
+                <div class="demo-section-header">
+                  <h4>Discover Communities</h4>
+                  <button class="demo-create-btn" onclick="showToast('✨ Opening create community...')">✨ Create Community</button>
+                </div>
+                <div class="demo-community-card" onclick="showToast('🏠 Viewing community...')">
+                  <div class="demo-community-top">
+                    <div class="demo-community-icon">📚</div>
+                    <div class="demo-community-info">
+                      <h4>Quiet Readers</h4>
+                      <p>234 members</p>
+                    </div>
+                  </div>
+                  <div class="demo-community-desc">A space for book lovers who prefer the company of fictional characters.</div>
+                  <div class="demo-community-footer">
+                    <div class="demo-activity"><span class="demo-activity-dot"></span> Active now</div>
+                    <button class="demo-join-btn" onclick="event.stopPropagation(); showToast('🏠 Joined community!')">Join</button>
+                  </div>
+                </div>
+                <div class="demo-community-card" onclick="showToast('🏠 Viewing community...')">
+                  <div class="demo-community-top">
+                    <div class="demo-community-icon">🌙</div>
+                    <div class="demo-community-info">
+                      <h4>Night Owls</h4>
+                      <p>189 members</p>
+                    </div>
+                  </div>
+                  <div class="demo-community-desc">For those who find peace in the quiet hours when the world sleeps.</div>
+                  <div class="demo-community-footer">
+                    <div class="demo-activity"><span class="demo-activity-dot"></span> Active now</div>
+                    <button class="demo-join-btn" onclick="event.stopPropagation(); showToast('🏠 Joined community!')">Join</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Find Souls Tab -->
+              <div class="demo-tab-content" id="demo-souls">
+                <div style="text-align: center; padding: 20px;">
+                  <div style="font-size: 36px; margin-bottom: 12px;">✨</div>
+                  <h4 style="font-size: 16px; margin-bottom: 8px;">Find Similar Souls</h4>
+                  <p style="font-size: 12px; color: var(--text-muted);">Connect with people who share your interests and energy.</p>
+                  <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--bg-elevated); border-radius: 20px; font-size: 11px; color: var(--text-muted); margin-top: 12px;">🔒 Your profile is only shown to compatible matches</div>
+                </div>
+              </div>
+
+              <!-- Messages Tab -->
+              <div class="demo-tab-content" id="demo-messages">
+                <div class="demo-async-banner">
+                  <div class="icon">💬</div>
+                  <div>
+                    <h4>Async-First Messaging</h4>
+                    <p>Take your time. No pressure to respond quickly.</p>
+                  </div>
+                </div>
+                <div class="demo-message-item" onclick="showToast('💬 Opening conversation...')">
+                  <div class="demo-message-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">🌿</div>
+                  <div class="demo-message-content">
+                    <div class="demo-message-name">quiet_forest</div>
+                    <div class="demo-message-preview">That book recommendation was perfect...</div>
+                  </div>
+                  <div class="demo-unread-dot"></div>
+                </div>
+                <div class="demo-message-item" onclick="showToast('💬 Opening conversation...')">
+                  <div class="demo-message-avatar" style="background: linear-gradient(135deg, #f093fb, #f5576c);">🌙</div>
+                  <div class="demo-message-content">
+                    <div class="demo-message-name">moon_child</div>
+                    <div class="demo-message-preview">Thanks for the thoughtful reply!</div>
+                  </div>
+                  <div class="demo-unread-dot"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div class="demo-page" id="demo-profile">
+              <div class="demo-profile-header">
+                <div class="demo-profile-avatar">
+                  🌸
+                  <span class="edit-badge">✏️</span>
+                </div>
+                <h3 class="demo-profile-name">quiet_soul</h3>
+                <div class="demo-profile-status">🌿 Taking it slow today</div>
+                <p class="demo-profile-tagline">"In a world full of noise, silence is my superpower"</p>
+              </div>
+
+              <div class="demo-profile-tabs">
+                <button class="demo-profile-tab active" onclick="switchProfileTab(this, 'about')">✨ About</button>
+                <button class="demo-profile-tab" onclick="switchProfileTab(this, 'spaces')">🏠 Spaces</button>
+                <button class="demo-profile-tab" onclick="switchProfileTab(this, 'prefs')">⚙️ Preferences</button>
+              </div>
+
+              <!-- About Tab -->
+              <div class="demo-profile-content active" id="demo-prof-about">
+                <div class="demo-profile-card">
+                  <div class="demo-profile-card-header">
+                    <span class="emoji">💭</span> A Little About Me
+                  </div>
+                  <div class="demo-profile-bio">
+                    Quiet soul who finds joy in rainy afternoons, good books, and meaningful conversations. I believe the best connections happen slowly.
+                  </div>
+                </div>
+
+                <div class="demo-profile-card">
+                  <div class="demo-profile-card-header">
+                    <span class="emoji">🔋</span> Things That Recharge Me
+                  </div>
+                  <div class="demo-profile-tags">
+                    <span class="demo-profile-tag selected">📚 Reading</span>
+                    <span class="demo-profile-tag selected">🌧️ Rain sounds</span>
+                    <span class="demo-profile-tag selected">☕ Hot tea</span>
+                    <span class="demo-profile-tag selected">🎧 Music</span>
+                    <span class="demo-profile-tag">🌿 Nature</span>
+                    <span class="demo-profile-tag">🎨 Creating</span>
+                  </div>
+                </div>
+
+                <div class="demo-profile-card">
+                  <div class="demo-profile-card-header">
+                    <span class="emoji">🎯</span> Currently Into
+                  </div>
+                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                    <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; text-align: center;">
+                      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">📚 Reading</div>
+                      <div style="font-size: 12px;">The Midnight Library</div>
+                    </div>
+                    <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; text-align: center;">
+                      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">🎵 Listening</div>
+                      <div style="font-size: 12px;">Lo-fi beats</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Spaces Tab -->
+              <div class="demo-profile-content" id="demo-prof-spaces">
+                <div style="text-align: center; padding: 24px;">
+                  <div style="font-size: 36px; margin-bottom: 12px;">🏠</div>
+                  <h4 style="font-size: 14px; margin-bottom: 8px;">My Spaces</h4>
+                  <p style="font-size: 12px; color: var(--text-muted);">Communities you've joined and created will appear here.</p>
+                </div>
+              </div>
+
+              <!-- Preferences Tab -->
+              <div class="demo-profile-content" id="demo-prof-prefs">
+                <div class="demo-profile-card">
+                  <div class="demo-profile-card-header">
+                    <span class="emoji">🔔</span> Notifications
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+                    <span style="font-size: 12px; color: var(--text-secondary);">Quiet hours enabled</span>
+                    <div style="width: 36px; height: 20px; background: var(--accent-green); border-radius: 10px; position: relative;">
+                      <div style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; right: 2px; top: 2px;"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="demo-profile-card">
+                  <div class="demo-profile-card-header">
+                    <span class="emoji">🎨</span> Appearance
+                  </div>
+                  <div style="font-size: 12px; color: var(--text-secondary);">Dark mode · Minimal animations</div>
+                </div>
+                <div class="demo-profile-card">
+                  <div class="demo-profile-card-header">
+                    <span class="emoji">⚙️</span> Account Actions
+                  </div>
+                  <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button style="padding: 8px 14px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-secondary); font-size: 11px; cursor: pointer;" onclick="showToast('📦 Downloading data...')">📦 Download Data</button>
+                    <button style="padding: 8px 14px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-secondary); font-size: 11px; cursor: pointer;" onclick="showToast('🚪 Logging out...')">🚪 Log Out</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section id="testimonials">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-label" data-i18n="testimonials.label">Stories</span>
+        <h2 data-i18n="testimonials.title">What Quiet Souls Are Saying</h2>
+        <p data-i18n="testimonials.subtitle">Real experiences from our community of introverts.</p>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <p class="testimonial-quote" data-i18n="testimonials.t1.quote">"Finally, a place where I don't feel guilty for not responding immediately. The async-first approach changed everything for me."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">🌿</div>
+            <div class="testimonial-info">
+              <h4>quiet_forest</h4>
+              <p data-i18n="testimonials.t1.role">Writer & Artist</p>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-quote" data-i18n="testimonials.t2.quote">"The social battery tracker is genius. I finally have language to explain my energy levels to friends and family."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">🌙</div>
+            <div class="testimonial-info">
+              <h4>midnight_thinker</h4>
+              <p data-i18n="testimonials.t2.role">Software Developer</p>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-quote" data-i18n="testimonials.t3.quote">"No follower counts, no likes, no anxiety. Just sharing my art with people who actually care. This is what social media should be."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">🎨</div>
+            <div class="testimonial-info">
+              <h4>soft_palette</h4>
+              <p data-i18n="testimonials.t3.role">Digital Artist</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-card">
+      <h2 data-i18n="cta.title">Ready to Find Your Quiet Space?</h2>
+      <p data-i18n="cta.subtitle">Join thousands of introverts who've found their corner of the internet. No pressure, no rush.</p>
+      <div class="cta-buttons">
+        <button class="cta-primary" onclick="openModal('signup')" data-i18n="cta.button.primary">Create Free Account</button>
+        <button class="cta-secondary" onclick="scrollToDemo()" data-i18n="cta.button.secondary">Try Demo First</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <span class="logo-text">Introvert Place</span>
+        </a>
+        <p data-i18n="footer.desc">A social sanctuary designed for introverts. Connection without exhaustion.</p>
+      </div>
+
+      <div class="footer-column">
+        <h4 data-i18n="footer.product">Product</h4>
+        <a href="#features" data-i18n="footer.features">Features</a>
+        <a href="#demo" data-i18n="footer.demo">Demo</a>
+        <a href="#" onclick="openModal('pricing'); return false;" data-i18n="footer.pricing">Pricing</a>
+        <a href="#" onclick="openModal('roadmap'); return false;" data-i18n="footer.roadmap">Roadmap</a>
+      </div>
+
+      <div class="footer-column">
+        <h4 data-i18n="footer.resources">Resources</h4>
+        <a href="#" onclick="openModal('blog'); return false;" data-i18n="footer.blog">Blog</a>
+        <a href="#" onclick="openModal('help'); return false;" data-i18n="footer.help">Help Center</a>
+        <a href="#" onclick="openModal('community'); return false;" data-i18n="footer.community">Community</a>
+        <a href="#" onclick="openModal('guidelines'); return false;" data-i18n="footer.guidelines">Guidelines</a>
+      </div>
+
+      <div class="footer-column">
+        <h4 data-i18n="footer.company">Company</h4>
+        <a href="#" onclick="openModal('about'); return false;" data-i18n="footer.about">About</a>
+        <a href="#" onclick="openModal('privacy'); return false;" data-i18n="footer.privacy">Privacy</a>
+        <a href="#" onclick="openModal('terms'); return false;" data-i18n="footer.terms">Terms</a>
+        <a href="#" onclick="openModal('contact'); return false;" data-i18n="footer.contact">Contact</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2025 Introvert Place. Made with 🤍 for quiet souls.</p>
+    </div>
+  </footer>
+
+  <!-- Sign In Modal -->
+  <div class="modal-overlay" id="signinModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('signin')">✕</button>
+      <div class="modal-header">
+        <div class="modal-icon">🌙</div>
+        <h2 data-i18n="signin.title">Welcome Back</h2>
+        <p data-i18n="signin.subtitle">Return to your quiet space</p>
+      </div>
+
+      <form onsubmit="handleSignIn(event)">
+        <div class="form-group">
+          <label class="form-label" data-i18n="signin.email">Email</label>
+          <input type="email" class="form-input" placeholder="your@email.com" required>
+        </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="signin.password">Password</label>
+        <div class="password-field">
+          <input type="password" class="form-input password-input" placeholder="••••••••" required>
+          <button type="button" class="eye-btn" aria-label="Toggle password visibility" onclick="togglePassword(this)">👁</button>
+        </div>
+      </div>
+        <div class="form-checkbox">
+          <input type="checkbox" id="remember">
+          <label for="remember" data-i18n="signin.remember">Remember me</label>
+        </div>
+        <button type="submit" class="form-submit" data-i18n="signin.button">Sign In</button>
+      </form>
+
+      <div class="form-divider">
+        <span data-i18n="signin.or">or continue with</span>
+      </div>
+
+      <div class="social-login">
+        <button class="social-btn" onclick="signInWithGoogle()">G</button>
+        <button class="social-btn" onclick="signInWithApple()">🍎</button>
+        <button class="social-btn" onclick="showMagicLinkPrompt()">✉️</button>
+      </div>
+
+      <div class="modal-footer">
+        <span data-i18n="signin.noaccount">Don't have an account?</span>
+        <a href="#" onclick="switchModal('signin', 'signup')" data-i18n="signin.signup">Sign up</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sign Up Modal -->
+  <div class="modal-overlay" id="signupModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('signup')">✕</button>
+      <div class="modal-header">
+        <div class="modal-icon">✨</div>
+        <h2 data-i18n="signup.title">Create Your Space</h2>
+        <p data-i18n="signup.subtitle">Join our community of quiet souls</p>
+      </div>
+
+      <form onsubmit="handleSignUp(event)">
+        <div class="form-group">
+          <label class="form-label" data-i18n="signup.username">Username</label>
+          <input type="text" class="form-input" placeholder="peaceful_soul" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="signup.email">Email</label>
+          <input type="email" class="form-input" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="signup.password">Password</label>
+          <div class="password-field">
+            <input type="password" class="form-input password-input" placeholder="••••••••" required>
+            <button type="button" class="eye-btn" aria-label="Toggle password visibility" onclick="togglePassword(this)">👁</button>
+          </div>
+        </div>
+        <div class="form-checkbox">
+          <input type="checkbox" id="terms" required>
+          <label for="terms" data-i18n="signup.terms">I agree to the Terms & Privacy Policy</label>
+        </div>
+        <button type="submit" class="form-submit" data-i18n="signup.button">Create Account</button>
+      </form>
+
+      <div class="form-divider">
+        <span data-i18n="signup.or">or sign up with</span>
+      </div>
+
+      <div class="social-login">
+        <button class="social-btn" onclick="signInWithGoogle()">G</button>
+        <button class="social-btn" onclick="signInWithApple()">🍎</button>
+        <button class="social-btn" onclick="showMagicLinkPrompt()">✉️</button>
+      </div>
+
+      <div class="modal-footer">
+        <span data-i18n="signup.hasaccount">Already have an account?</span>
+        <a href="#" onclick="switchModal('signup', 'signin')" data-i18n="signup.signin">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Modal -->
+  <div class="modal-overlay" id="aboutModal">
+    <div class="modal-content info-modal">
+      <button class="modal-close" onclick="closeModal('about')">✕</button>
+      <div class="info-modal-header">
+        <h2>About Introvert Place</h2>
+      </div>
+      <div class="info-modal-body">
+        <p class="intro">We believe introverts deserve a digital home that respects their energy and honors their need for meaningful connection.</p>
+
+        <h3>Our Mission</h3>
+        <p>Introvert Place was created by introverts, for introverts. We understand the exhaustion of performative social media, the pressure to constantly engage, and the longing for authentic connections that don't drain your energy.</p>
+
+        <h3>What Makes Us Different</h3>
+        <ul>
+          <li><strong>No engagement metrics</strong> — Your worth isn't measured in likes</li>
+          <li><strong>Async-first communication</strong> — Respond when you're ready</li>
+          <li><strong>Energy-aware design</strong> — We help you protect your social battery</li>
+          <li><strong>Private by default</strong> — You control who sees what</li>
+        </ul>
+
+        <h3>Our Values</h3>
+        <p>Quiet strength. Thoughtful connection. Sustainable wellness. We're building the internet introverts always wished existed.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Modal -->
+  <div class="modal-overlay" id="privacyModal">
+    <div class="modal-content info-modal">
+      <button class="modal-close" onclick="closeModal('privacy')">✕</button>
+      <div class="info-modal-header">
+        <h2>Privacy Policy</h2>
+        <p class="last-updated">Last updated: January 2025</p>
+      </div>
+      <div class="info-modal-body">
+        <p class="intro">Your privacy is sacred to us. As introverts ourselves, we understand the importance of personal boundaries.</p>
+
+        <h3>Data We Collect</h3>
+        <ul>
+          <li>Account information (email, username)</li>
+          <li>Content you create (journals, posts, reflections)</li>
+          <li>Usage preferences (mood data, settings)</li>
+        </ul>
+
+        <h3>How We Use Your Data</h3>
+        <ul>
+          <li>To provide and improve our services</li>
+          <li>To personalize your experience</li>
+          <li>To send important account notifications</li>
+        </ul>
+
+        <h3>What We Never Do</h3>
+        <ul>
+          <li>Sell your data to third parties</li>
+          <li>Show you targeted advertising</li>
+          <li>Share your private content without consent</li>
+          <li>Track you across other websites</li>
+        </ul>
+
+        <h3>Your Rights</h3>
+        <p>You can export, edit, or delete your data at any time from your account settings. Your data belongs to you.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms Modal -->
+  <div class="modal-overlay" id="termsModal">
+    <div class="modal-content info-modal">
+      <button class="modal-close" onclick="closeModal('terms')">✕</button>
+      <div class="info-modal-header">
+        <h2>Terms of Service</h2>
+        <p class="last-updated">Last updated: January 2025</p>
+      </div>
+      <div class="info-modal-body">
+        <p class="intro">By using Introvert Place, you agree to these terms. We've kept them simple and human-readable.</p>
+
+        <h3>Your Account</h3>
+        <ul>
+          <li>You must be 13 years or older to use this service</li>
+          <li>Keep your login credentials secure</li>
+          <li>You're responsible for activity under your account</li>
+        </ul>
+
+        <h3>Community Guidelines</h3>
+        <ul>
+          <li>Be respectful of others' boundaries and energy</li>
+          <li>No harassment, hate speech, or harmful content</li>
+          <li>Don't spam or exploit other users</li>
+          <li>Respect intellectual property rights</li>
+        </ul>
+
+        <h3>Content Ownership</h3>
+        <p>You own the content you create. By posting, you grant us permission to display it within the platform. You can delete your content anytime.</p>
+
+        <h3>Service Availability</h3>
+        <p>We strive for 99.9% uptime but cannot guarantee uninterrupted service. We may update features or pricing with reasonable notice.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Modal -->
+  <div class="modal-overlay" id="contactModal">
+    <div class="modal-content info-modal">
+      <button class="modal-close" onclick="closeModal('contact')">✕</button>
+      <div class="info-modal-header">
+        <h2>Contact Us</h2>
+      </div>
+      <div class="info-modal-body">
+        <p class="intro">We'd love to hear from you. Reach out whenever you're ready — no pressure for immediate responses.</p>
+
+        <div class="contact-options">
+          <div class="contact-option">
+            <span class="contact-icon">📧</span>
+            <div>
+              <h4>Email</h4>
+              <p>hello@introvertplace.com</p>
+              <span class="response-time">We respond within 24-48 hours</span>
+            </div>
+          </div>
+
+          <div class="contact-option">
+            <span class="contact-icon">💬</span>
+            <div>
+              <h4>Community Support</h4>
+              <p>Ask questions in our community forums</p>
+              <span class="response-time">Help from fellow introverts</span>
+            </div>
+          </div>
+
+          <div class="contact-option">
+            <span class="contact-icon">🐛</span>
+            <div>
+              <h4>Bug Reports</h4>
+              <p>bugs@introvertplace.com</p>
+              <span class="response-time">We appreciate detailed reports</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="note">For account-specific issues, please include your username (not password) in your message.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blog Modal -->
+  <div class="modal-overlay" id="blogModal">
+    <div class="modal-content info-modal">
+      <button class="modal-close" onclick="closeModal('blog')">✕</button>
+      <div class="info-modal-header">
+        <h2>Blog</h2>
+        <p class="subtitle">Thoughts for quiet minds</p>
+      </div>
+      <div class="info-modal-body">
+        <p class="intro">Our blog is available inside the app. Sign up to access articles on introvert life, wellness tips, and community stories.</p>
+
+        <div class="preview-articles">
+          <div class="preview-article">
+            <span class="article-tag">Wellness</span>
+            <h4>The Art of Protecting Your Energy</h4>
+            <p>Learn to recognize energy drains and build sustainable boundaries.</p>
+          </div>
+
+          <div class="preview-article">
+            <span class="article-tag">Community</span>
+            <h4>Finding Your Tribe as an Introvert</h4>
+            <p>Quality over quantity: building meaningful connections.</p>
+          </div>
+
+          <div class="preview-article">
+            <span class="article-tag">Self-Care</span>
+            <h4>Recharge Rituals for Quiet Souls</h4>
+            <p>Simple practices to restore your mental energy.</p>
+          </div>
+        </div>
+
+        <button class="cta-btn" onclick="closeModal('blog'); openModal('signup');">Sign Up to Read More</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Center Modal -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal-content info-modal">
+      <button class="modal-close" onclick="closeModal('help')">✕</button>
+      <div class="info-modal-header">
+        <h2>Help Center</h2>
+      </div>
+      <div class="info-modal-body">
+        <p class="intro">Find answers to common questions about using Introvert Place.</p>
+
+        <div class="faq-section">
+          <div class="faq-item">
+            <h4>How do I track my mood?</h4>
+            <p>When you sign in, you'll be prompted to select your current mood. You can also update it anytime from the Sanctuary page.</p>
+          </div>
+
+          <div class="faq-item">
+            <h4>What is the Social Battery?</h4>
+            <p>It's a visual representation of your social energy. Track it in Wellness to understand your interaction patterns.</p>
+          </div>
+
+          <div class="faq-item">
+            <h4>Are my journal entries private?</h4>
+            <p>Yes, absolutely. Your journal is private by default. Only you can see your entries unless you explicitly share them.</p>
+          </div>
+
+          <div class="faq-item">
+            <h4>How do communities work?</h4>
+            <p>Communities are small, interest-based groups. Join ones that match your passions and connect at your own pace.</p>
+          </div>
+
+          <div class="faq-item">
+            <h4>Can I delete my account?</h4>
+            <p>Yes. Go to Profile → Preferences → Account Actions to delete your account and all associated data.</p>
+          </div>
+        </div>
+
+        <p class="note">Can't find what you're looking for? <a href="#" onclick="closeModal('help'); openModal('contact'); return false;">Contact us</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Community Modal -->
+  <div class="modal-overlay" id="communityModal">
+    <div class="modal-content info-modal">
+      <button class="modal-close" onclick="closeModal('community')">✕</button>
+      <div class="info-modal-header">
+        <h2>Community</h2>
+        <p class="subtitle">Find your people</p>
+      </div>
+      <div class="info-modal-body">
+        <p class="intro">Join small, thoughtful communities of like-minded introverts. No pressure, no performance.</p>
+
+        <h3>Featured Communities</h3>
+        <div class="community-previews">
+          <div class="community-preview">
+            <span class="community-icon">📚</span>
+            <div>
+              <h4>Quiet Readers</h4>
+              <p>Book lovers sharing recommendations</p>
+            </div>
+          </div>
+
+          <div class="community-preview">
+            <span class="community-icon">🎨</span>
+            <div>
+              <h4>Creative Introverts</h4>
+              <p>Art, writing, and creative expression</p>
+            </div>
+          </div>
+
+          <div class="community-preview">
+            <span class="community-icon">🌿</span>
+            <div>
+              <h4>Mindful Living</h4>
+              <p>Wellness and self-care discussions</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="cta-btn" onclick="closeModal('community'); openModal('signup');">Join the Community</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guidelines Modal -->
+  <div class="modal-overlay" id="guidelinesModal">
+    <div class="modal-content info-modal">
+      <button class="modal-close" onclick="closeModal('guidelines')">✕</button>
+      <div class="info-modal-header">
+        <h2>Community Guidelines</h2>
+      </div>
+      <div class="info-modal-body">
+        <p class="intro">These guidelines help keep Introvert Place a safe, respectful space for everyone.</p>
+
+        <h3>Be Respectful</h3>
+        <ul>
+          <li>Honor others' boundaries and response times</li>
+          <li>Use kind, thoughtful language</li>
+          <li>Respect different perspectives and experiences</li>
+        </ul>
+
+        <h3>Protect Privacy</h3>
+        <ul>
+          <li>Don't share others' private information</li>
+          <li>Ask permission before sharing conversations</li>
+          <li>Respect "do not disturb" statuses</li>
+        </ul>
+
+        <h3>Keep It Safe</h3>
+        <ul>
+          <li>No harassment, bullying, or hate speech</li>
+          <li>No spam, scams, or misleading content</li>
+          <li>No explicit or harmful material</li>
+          <li>Report concerning behavior to our team</li>
+        </ul>
+
+        <h3>Be Authentic</h3>
+        <ul>
+          <li>Be yourself — no need to perform</li>
+          <li>Share genuinely, without pressure</li>
+          <li>Support others in their journey</li>
+        </ul>
+
+        <p class="note">Violations may result in content removal or account suspension. We're here to help — <a href="#" onclick="closeModal('guidelines'); openModal('contact'); return false;">contact us</a> with concerns.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing Modal -->
+  <div class="modal-overlay" id="pricingModal">
+    <div class="modal-content info-modal">
+      <button class="modal-close" onclick="closeModal('pricing')">✕</button>
+      <div class="info-modal-header">
+        <h2>Pricing</h2>
+        <p class="subtitle">Simple, honest pricing</p>
+      </div>
+      <div class="info-modal-body">
+        <div class="pricing-cards">
+          <div class="pricing-card featured">
+            <div class="pricing-badge">Current Offer</div>
+            <h3>Free</h3>
+            <p class="pricing-desc">One month free trial</p>
+            <ul class="pricing-features">
+              <li>✓ Full access to Sanctuary</li>
+              <li>✓ Wellness tools & tracking</li>
+              <li>✓ Creative spaces</li>
+              <li>✓ Community access</li>
+              <li>✓ Unlimited journaling</li>
+              <li>✓ Mood tracking</li>
+            </ul>
+            <button class="cta-btn" onclick="closeModal('pricing'); openModal('signup');">Start Free Trial</button>
+          </div>
+        </div>
+
+        <p class="pricing-note">After your free month, choose a plan that works for you. We'll never surprise you with charges.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Roadmap Modal -->
+  <div class="modal-overlay" id="roadmapModal">
+    <div class="modal-content info-modal">
+      <button class="modal-close" onclick="closeModal('roadmap')">✕</button>
+      <div class="info-modal-header">
+        <h2>Roadmap</h2>
+        <p class="subtitle">What we're building next</p>
+      </div>
+      <div class="info-modal-body">
+        <p class="intro">We're constantly improving Introvert Place based on community feedback. Here's what's coming:</p>
+
+        <div class="roadmap-section">
+          <div class="roadmap-status now">Now</div>
+          <div class="roadmap-items">
+            <div class="roadmap-item">✓ Mood tracking & insights</div>
+            <div class="roadmap-item">✓ Journal with prompts</div>
+            <div class="roadmap-item">✓ Breathing exercises</div>
+            <div class="roadmap-item">✓ Community spaces</div>
+          </div>
+        </div>
+
+        <div class="roadmap-section">
+          <div class="roadmap-status next">Next</div>
+          <div class="roadmap-items">
+            <div class="roadmap-item">◦ Mobile app (iOS & Android)</div>
+            <div class="roadmap-item">◦ Audio meditations</div>
+            <div class="roadmap-item">◦ Reading challenges</div>
+            <div class="roadmap-item">◦ Custom themes</div>
+          </div>
+        </div>
+
+        <div class="roadmap-section">
+          <div class="roadmap-status later">Later</div>
+          <div class="roadmap-items">
+            <div class="roadmap-item">◦ Introvert meetups (virtual)</div>
+            <div class="roadmap-item">◦ API for developers</div>
+            <div class="roadmap-item">◦ Integration with wellness apps</div>
+          </div>
+        </div>
+
+        <p class="note">Have a feature request? We'd love to hear it. <a href="#" onclick="closeModal('roadmap'); openModal('contact'); return false;">Contact us</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);padding:14px 28px;background:var(--accent-green);color:var(--bg-deep);border-radius:100px;font-size:14px;font-weight:500;opacity:0;transition:all 0.3s ease;z-index:1001;"></div>
+
+  <script>
+    // ============ CORE UI FUNCTIONS (Load First) ============
+
+    // Toast notification
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(100px)';
+        toast.style.opacity = '0';
+      }, 2500);
+    }
+
+    // Modals
+    function openModal(type) {
+      const modal = document.getElementById(type + 'Modal');
+      if (!modal) {
+        showToast('Something went wrong. Please reload.');
+        return;
+      }
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(type) {
+      const modal = document.getElementById(type + 'Modal');
+      if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function switchModal(from, to) {
+      closeModal(from);
+      setTimeout(() => openModal(to), 200);
+    }
+
+    // Close modal on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+    });
+
+    // Stars
+    function createStars() {
+      const container = document.getElementById('stars');
+      if (!container) return;
+      for (let i = 0; i < 50; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 4 + 's';
+        star.style.animationDuration = (3 + Math.random() * 3) + 's';
+        container.appendChild(star);
+      }
+    }
+    createStars();
+
+    // Header scroll
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('header');
+      if (header) {
+        if (window.scrollY > 50) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      }
+    });
+  </script>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // ============ SUPABASE AUTHENTICATION ============
+    const SUPABASE_URL = 'https://inpziyxjznikinqqputz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlucHppeXhqem5pa2lucXFwdXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MzQ0MTcsImV4cCI6MjA4NDAxMDQxN30.5QoXaD5vNcuteEmwmo82l_OIklVbGGCRpNtV0PMuSyY';
+    let db = null;
+
+    try {
+      if (window.supabase && window.supabase.createClient) {
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+    } catch (err) {
+      console.error('Supabase init error:', err);
+    }
+
+    // Check if user is already logged in and redirect to app
+    if (db) {
+      db.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          window.location.href = 'app.html';
+        }
+      }).catch(err => console.error('Session check error:', err));
+    }
+
+    // Form handlers (Supabase)
+    async function handleSignIn(e) {
+      e.preventDefault();
+      if (!db) {
+        showToast('Connection error. Please refresh the page.');
+        return;
+      }
+      const form = e.target;
+      const email = form.querySelector('input[type="email"]')?.value;
+      const password = form.querySelector('input[type="password"]')?.value;
+      if (!email || !password) {
+        showToast('Enter email and password');
+        return;
+      }
+      showToast('🌙 Signing in...');
+      const { data, error } = await db.auth.signInWithPassword({ email, password });
+      if (error) {
+        if (error.message.includes('Email not confirmed')) {
+          showToast('Please confirm your email first. Check your inbox.');
+        } else if (error.message.includes('Invalid login')) {
+          showToast('Invalid email or password');
+        } else {
+          showToast(error.message || 'Sign in failed');
+        }
+        return;
+      }
+      if (data?.session) {
+        closeModal('signin');
+        window.location.href = 'app.html';
+      }
+    }
+
+    async function handleSignUp(e) {
+      e.preventDefault();
+      if (!db) {
+        showToast('Connection error. Please refresh the page.');
+        return;
+      }
+      const form = e.target;
+      const username = form.querySelector('input[type="text"]')?.value;
+      const email = form.querySelector('input[type="email"]')?.value;
+      const password = form.querySelector('input[type="password"]')?.value;
+      if (!email || !password) {
+        showToast('Enter email and password');
+        return;
+      }
+      showToast('✨ Creating your space...');
+
+      try {
+        const { data, error } = await db.auth.signUp({
+          email,
+          password,
+          options: { data: { username } }
+        });
+
+        if (error) {
+          showToast(error.message || 'Signup failed');
+          return;
+        }
+
+        // Check if email already registered
+        if (data?.user?.identities?.length === 0) {
+          showToast('This email is already registered. Try signing in.');
+          return;
+        }
+
+        // Try to sign in immediately after signup
+        const { data: signInData, error: signInError } = await db.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (signInError) {
+          showToast('Account created! ' + signInError.message);
+          closeModal('signup');
+          return;
+        }
+
+        if (signInData?.session) {
+          closeModal('signup');
+          showToast('Welcome to your sanctuary!');
+          setTimeout(() => {
+            window.location.href = 'app.html';
+          }, 500);
+        } else {
+          closeModal('signup');
+          showToast('✉️ Please check your email to confirm your account');
+        }
+      } catch (err) {
+        console.error('Signup error:', err);
+        showToast('Something went wrong. Please try again.');
+      }
+    }
+
+    // OAuth Sign-in Functions
+    async function signInWithGoogle() {
+      if (!db) {
+        showToast('Connection error. Please refresh the page.');
+        return;
+      }
+      showToast('🔗 Connecting to Google...');
+      const { data, error } = await db.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/app.html'
+        }
+      });
+      if (error) {
+        showToast(error.message || 'Google sign-in failed');
+      }
+    }
+
+    async function signInWithApple() {
+      if (!db) {
+        showToast('Connection error. Please refresh the page.');
+        return;
+      }
+      showToast('🍎 Connecting to Apple...');
+      const { data, error } = await db.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: window.location.origin + '/app.html'
+        }
+      });
+      if (error) {
+        showToast(error.message || 'Apple sign-in failed');
+      }
+    }
+
+    function showMagicLinkPrompt() {
+      const email = prompt('Enter your email for a magic link:');
+      if (email && email.includes('@')) {
+        signInWithMagicLink(email);
+      } else if (email) {
+        showToast('Please enter a valid email address');
+      }
+    }
+
+    async function signInWithMagicLink(email) {
+      if (!db) {
+        showToast('Connection error. Please refresh the page.');
+        return;
+      }
+      showToast('✉️ Sending magic link...');
+      const { data, error } = await db.auth.signInWithOtp({
+        email: email,
+        options: {
+          emailRedirectTo: window.location.origin + '/app.html'
+        }
+      });
+      if (error) {
+        showToast(error.message || 'Failed to send magic link');
+      } else {
+        showToast('✨ Check your email for the magic link!');
+        closeModal('signin');
+        closeModal('signup');
+      }
+    }
+
+    // Language
+    function toggleLangDropdown() {
+      document.getElementById('langDropdown').classList.toggle('active');
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.lang-btn') && !e.target.closest('.lang-dropdown')) {
+        document.getElementById('langDropdown').classList.remove('active');
+      }
+    });
+
+    const translations = {
+      en: {
+        'nav.features': 'Features',
+        'nav.why': 'Why Us',
+        'nav.demo': 'Demo',
+        'nav.testimonials': 'Stories',
+        'nav.signin': 'Sign In',
+        'nav.getstarted': 'Get Started',
+        'hero.badge': 'A sanctuary for quiet souls',
+        'hero.title': 'Your Quiet Corner of the Internet',
+        'hero.subtitle': 'A social space designed for introverts. No algorithms, no likes, no pressure. Just authentic connection at your own pace.',
+        'hero.cta.primary': 'Create Your Sanctuary',
+        'hero.cta.secondary': 'See How It Works',
+        'hero.stats.souls': 'Quiet Souls',
+        'hero.stats.free': 'Free Forever',
+        'hero.stats.ads': 'Ads & Trackers',
+        'hero.scroll': 'Scroll to explore'
+      },
+      es: {
+        'nav.features': 'Características',
+        'nav.why': 'Por Qué',
+        'nav.demo': 'Demo',
+        'nav.testimonials': 'Historias',
+        'nav.signin': 'Iniciar Sesión',
+        'nav.getstarted': 'Comenzar',
+        'hero.badge': 'Un santuario para almas tranquilas',
+        'hero.title': 'Tu Rincón Tranquilo de Internet',
+        'hero.subtitle': 'Un espacio social diseñado para introvertidos. Sin algoritmos, sin likes, sin presión. Solo conexión auténtica a tu ritmo.',
+        'hero.cta.primary': 'Crea Tu Santuario',
+        'hero.cta.secondary': 'Ver Cómo Funciona',
+        'hero.stats.souls': 'Almas Tranquilas',
+        'hero.stats.free': 'Gratis Siempre',
+        'hero.stats.ads': 'Anuncios',
+        'hero.scroll': 'Desplázate para explorar'
+      },
+      fr: {
+        'nav.features': 'Fonctionnalités',
+        'nav.why': 'Pourquoi Nous',
+        'nav.demo': 'Démo',
+        'nav.testimonials': 'Témoignages',
+        'nav.signin': 'Connexion',
+        'nav.getstarted': 'Commencer',
+        'hero.badge': 'Un sanctuaire pour les âmes calmes',
+        'hero.title': 'Votre Coin Tranquille d\'Internet',
+        'hero.subtitle': 'Un espace social conçu pour les introvertis. Sans algorithmes, sans likes, sans pression. Juste une connexion authentique à votre rythme.',
+        'hero.cta.primary': 'Créer Votre Sanctuaire',
+        'hero.cta.secondary': 'Voir Comment Ça Marche',
+        'hero.stats.souls': 'Âmes Calmes',
+        'hero.stats.free': 'Gratuit Pour Toujours',
+        'hero.stats.ads': 'Publicités',
+        'hero.scroll': 'Faites défiler pour explorer'
+      },
+      ja: {
+        'nav.features': '機能',
+        'nav.why': '特徴',
+        'nav.demo': 'デモ',
+        'nav.testimonials': '体験談',
+        'nav.signin': 'ログイン',
+        'nav.getstarted': '始める',
+        'hero.badge': '静かな魂のための聖域',
+        'hero.title': 'インターネットの静かな場所',
+        'hero.subtitle': '内向的な人のためのソーシャルスペース。アルゴリズムなし、いいねなし、プレッシャーなし。自分のペースで本物のつながりを。',
+        'hero.cta.primary': 'サンクチュアリを作る',
+        'hero.cta.secondary': '使い方を見る',
+        'hero.stats.souls': '静かな魂',
+        'hero.stats.free': '永久無料',
+        'hero.stats.ads': '広告なし',
+        'hero.scroll': 'スクロールして探索'
+      }
+    };
+
+    function setLanguage(lang, event) {
+      document.getElementById('currentLang').textContent = lang.toUpperCase();
+      document.querySelectorAll('.lang-option').forEach(opt => opt.classList.remove('active'));
+      if (event && event.target) {
+        event.target.classList.add('active');
+      }
+      document.getElementById('langDropdown').classList.remove('active');
+
+      // Apply translations
+      if (translations[lang]) {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          if (translations[lang][key]) {
+            el.textContent = translations[lang][key];
+          }
+        });
+      }
+
+      showToast('🌐 Language changed!');
+    }
+
+    // Demo interactions
+    function switchDemoTab(el, tab) {
+      document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+
+      // Map tabs to pages
+      const tabToPage = {
+        'sanctuary': 'sanctuary',
+        'creative': 'creative',
+        'profile': 'sanctuary' // Profile shows sanctuary for demo
+      };
+
+      const page = tabToPage[tab] || 'sanctuary';
+      setDemoNav(document.querySelector(`.demo-nav-item[data-page="${page}"]`), page);
+    }
+
+    function setDemoNav(el, page) {
+      // Update active nav item
+      document.querySelectorAll('.demo-nav-item').forEach(n => n.classList.remove('active'));
+      if (el) el.classList.add('active');
+
+      // Switch demo page
+      document.querySelectorAll('.demo-page').forEach(p => p.classList.remove('active'));
+      const targetPage = document.getElementById('demo-' + page);
+      if (targetPage) {
+        targetPage.classList.add('active');
+      }
+    }
+
+    function selectDemoMode(el) {
+      document.querySelectorAll('.demo-mode-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function switchConnectTab(el, tab) {
+      // Update active tab
+      document.querySelectorAll('.demo-connect-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      // Switch content
+      document.querySelectorAll('.demo-tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('demo-' + tab).classList.add('active');
+    }
+
+    function switchWellnessTab(el, tab) {
+      document.querySelectorAll('.demo-wellness-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelectorAll('.demo-wellness-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('demo-well-' + tab).classList.add('active');
+    }
+
+    function switchBlogTab(el, tab) {
+      document.querySelectorAll('.demo-blog-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelectorAll('.demo-blog-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('demo-blog-' + tab).classList.add('active');
+    }
+
+    function switchProfileTab(el, tab) {
+      document.querySelectorAll('.demo-profile-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelectorAll('.demo-profile-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('demo-prof-' + tab).classList.add('active');
+    }
+
+    function switchSanctuaryTab(el, tab) {
+      document.querySelectorAll('.demo-sanctuary-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelectorAll('.demo-sanctuary-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('demo-sanc-' + tab).classList.add('active');
+    }
+
+    // Scroll to demo
+    function scrollToDemo() {
+      document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function togglePassword(btn) {
+      const input = btn.parentElement.querySelector('.password-input');
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁';
+      }
+    }
+
+    // Escape key closes modals
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+          modal.classList.remove('active');
+        });
+        document.body.style.overflow = '';
+      }
+    });
+  </script>
+
+</body>
+</html>
+

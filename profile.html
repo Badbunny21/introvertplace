@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - Introvert Place</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-black: #000000;
+      --bg-gray-900: #111827;
+      --bg-gray-800: #1f2937;
+      --bg-surface: #12151c;
+      --bg-elevated: #1a1e28;
+      --bg-hover: #242a36;
+      --text-white: #ffffff;
+      --text-gray-400: #9ca3af;
+      --text-gray-500: #6b7280;
+      --text-muted: #6b7280;
+      --accent-warm: #e8a87c;
+      --accent-soft: #c4a1ff;
+      --accent-calm: #7cb8e8;
+      --accent-green: #7ce8a8;
+      --border-subtle: rgba(255,255,255,0.06);
+      --border-white-10: rgba(255,255,255,0.1);
+      --border-white-20: rgba(255,255,255,0.2);
+      --border-white-40: rgba(255,255,255,0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      background: linear-gradient(135deg, var(--bg-black) 0%, var(--bg-gray-900) 100%);
+      color: var(--text-white);
+      min-height: 100vh;
+      letter-spacing: 0.025em;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+    }
+
+    .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .particle {
+      position: absolute; width: 2px; height: 2px;
+      background: rgba(255,255,255,0.2); border-radius: 50%;
+      animation: float 25s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100% { transform: translateY(0) translateX(0); opacity: 0.2; } 50% { transform: translateY(-80px) translateX(40px); opacity: 0.4; } }
+
+    .container {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto; padding: 40px 24px 100px;
+    }
+
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-10);
+      border-radius: 24px;
+      color: var(--text-gray-400);
+      font-size: 14px; cursor: pointer; transition: all 0.3s ease;
+      margin-bottom: 40px;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-white); }
+
+    .profile-header { text-align: center; margin-bottom: 48px; }
+    .avatar-section { position: relative; width: 120px; height: 120px; margin: 0 auto 24px; }
+    .avatar {
+      width: 120px; height: 120px; border-radius: 24px;
+      background: linear-gradient(135deg, rgba(196,161,255,0.3) 0%, rgba(124,184,232,0.3) 100%);
+      border: 2px solid var(--border-white-20);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 56px; cursor: pointer; transition: all 0.3s ease;
+    }
+    .avatar:hover { border-color: var(--border-white-40); transform: scale(1.02); }
+    .avatar-edit {
+      position: absolute; bottom: -8px; right: -8px;
+      width: 36px; height: 36px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-white-20);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; cursor: pointer; transition: all 0.3s ease;
+    }
+    .avatar-edit:hover { background: var(--accent-soft); border-color: var(--accent-soft); }
+
+    .username { font-size: 42px; margin-bottom: 8px; }
+    .username-edit { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+    .username-edit:hover .edit-icon { opacity: 1; }
+    .edit-icon { font-size: 18px; opacity: 0; transition: opacity 0.3s ease; }
+
+    .rhythm-status {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 14px 28px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-20);
+      border-radius: 16px;
+      margin-bottom: 16px; cursor: pointer; transition: all 0.3s ease;
+    }
+    .rhythm-status:hover { background: rgba(255,255,255,0.08); border-color: var(--border-white-40); }
+    .rhythm-icon { font-size: 24px; }
+    .rhythm-text { font-size: 15px; color: var(--text-gray-400); }
+    .rhythm-label { color: var(--text-white); }
+    .profile-tagline { font-size: 18px; color: var(--text-gray-500); font-style: italic; max-width: 400px; margin: 0 auto; }
+
+    .profile-tabs {
+      display: flex; justify-content: center; gap: 8px; margin-bottom: 40px; flex-wrap: wrap;
+    }
+    .profile-tab {
+      padding: 12px 28px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-white-10);
+      border-radius: 100px;
+      color: var(--text-gray-400); font-size: 14px;
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    .profile-tab:hover { background: rgba(255,255,255,0.06); color: var(--text-white); }
+    .profile-tab.active { background: var(--text-white); color: var(--bg-black); border-color: var(--text-white); }
+
+    .tab-content { display: none; animation: fadeIn 0.4s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .glass-card {
+      background: rgba(31,41,55,0.3);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-white-10);
+      border-radius: 20px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .glass-card:hover { border-color: var(--border-white-20); }
+    .section-header-simple {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 28px; border-bottom: 1px solid var(--border-white-10);
+    }
+    .section-title-row { display: flex; align-items: center; gap: 14px; }
+    .section-emoji { font-size: 24px; }
+    .section-title { font-size: 20px; }
+    .optional-badge {
+      padding: 4px 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 100px;
+      font-size: 11px; color: var(--text-gray-500);
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .section-body { padding: 28px; }
+
+    .bio-input {
+      width: 100%; min-height: 100px; padding: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-white-10);
+      border-radius: 14px;
+      color: var(--text-white);
+      font-family: inherit; font-size: 15px; line-height: 1.7;
+      resize: vertical; transition: all 0.3s ease;
+    }
+    .bio-input:focus { outline: none; border-color: var(--border-white-40); background: rgba(255,255,255,0.05); }
+    .bio-input::placeholder { color: var(--text-gray-500); font-style: italic; }
+    .char-count { text-align: right; font-size: 12px; color: var(--text-gray-500); margin-top: 8px; }
+
+    .quote-input-wrapper { position: relative; }
+    .quote-mark {
+      position: absolute; top: 16px; left: 18px;
+      font-size: 32px; color: var(--accent-soft); opacity: 0.5;
+      font-family: 'Cormorant Garamond', serif;
+    }
+    .quote-input {
+      width: 100%; padding: 24px 24px 18px 56px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-white-10);
+      border-radius: 14px;
+      color: var(--text-white);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px; font-style: italic; line-height: 1.6;
+      resize: none; transition: all 0.3s ease;
+    }
+    .quote-input:focus { outline: none; border-color: var(--accent-soft); }
+    .quote-input::placeholder { color: var(--text-gray-500); }
+
+    .tags-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .tag {
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-white-10);
+      border-radius: 100px;
+      font-size: 14px;
+      color: var(--text-gray-400);
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    .tag:hover { background: rgba(255,255,255,0.06); color: var(--text-white); }
+    .tag.selected {
+      background: rgba(196,161,255,0.15);
+      border-color: rgba(196,161,255,0.4);
+      color: var(--accent-soft);
+    }
+    .tag-input-wrapper { display: flex; gap: 10px; margin-top: 16px; }
+    .tag-input {
+      flex: 1; padding: 12px 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-white-10);
+      border-radius: 100px;
+      color: var(--text-white);
+      font-size: 14px;
+    }
+    .tag-input:focus { outline: none; border-color: var(--border-white-40); }
+    .tag-input::placeholder { color: var(--text-gray-500); }
+    .add-tag-btn {
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-20);
+      border-radius: 100px;
+      color: var(--text-gray-400);
+      font-size: 14px;
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    .add-tag-btn:hover { background: var(--text-white); color: var(--bg-black); }
+
+    .currently-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .currently-item {
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-white-10);
+      border-radius: 14px;
+      transition: all 0.3s ease;
+    }
+    .currently-item:hover { border-color: var(--border-white-20); }
+    .currently-label {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: var(--text-gray-500); margin-bottom: 10px;
+    }
+    .currently-input {
+      width: 100%; padding: 12px 0; background: transparent; border: none;
+      border-bottom: 1px solid var(--border-white-10);
+      color: var(--text-white); font-size: 15px; transition: all 0.3s ease;
+    }
+    .currently-input:focus { outline: none; border-color: var(--border-white-40); }
+    .currently-input::placeholder { color: var(--text-gray-500); }
+
+    .pinned-creation {
+      padding: 40px;
+      border: 2px dashed var(--border-white-20);
+      border-radius: 16px;
+      text-align: center;
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    .pinned-creation:hover { border-color: var(--accent-soft); background: rgba(196,161,255,0.05); }
+    .pinned-creation.has-content {
+      border-style: solid; border-color: var(--border-white-20);
+      text-align: left; padding: 24px;
+    }
+    .pinned-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+    .pinned-title { font-size: 18px; margin-bottom: 8px; }
+    .pinned-desc { font-size: 14px; color: var(--text-gray-500); }
+    .pinned-preview { display: flex; gap: 20px; align-items: flex-start; }
+    .pinned-image {
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; flex-shrink: 0;
+    }
+    .pinned-info { flex: 1; }
+    .pinned-info h4 { font-size: 20px; margin-bottom: 8px; }
+    .pinned-info p { font-size: 14px; color: var(--text-gray-400); line-height: 1.6; }
+    .pinned-meta { font-size: 12px; color: var(--text-gray-500); margin-top: 12px; }
+    .change-pinned {
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-10);
+      border-radius: 8px;
+      color: var(--text-gray-400);
+      font-size: 12px; cursor: pointer; margin-top: 12px;
+    }
+    .change-pinned:hover { background: rgba(255,255,255,0.1); color: var(--text-white); }
+
+    .spaces-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .space-link {
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px; background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-white-10);
+      border-radius: 14px;
+      cursor: pointer; transition: all 0.3s ease;
+      text-decoration: none; color: inherit;
+    }
+    .space-link:hover { background: rgba(255,255,255,0.05); border-color: var(--border-white-20); transform: translateX(4px); }
+    .space-icon {
+      width: 48px; height: 48px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+    .space-info h4 { font-size: 16px; margin-bottom: 4px; }
+    .space-info p { font-size: 13px; color: var(--text-gray-500); }
+    .space-arrow { margin-left: auto; font-size: 18px; color: var(--text-gray-500); }
+
+    .pref-section { overflow: hidden; }
+    .pref-header {
+      padding: 24px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    .pref-header:hover { background: rgba(255,255,255,0.02); }
+    .pref-title-group { display: flex; align-items: center; gap: 14px; }
+    .pref-icon { font-size: 22px; opacity: 0.8; }
+    .pref-title { font-size: 18px; }
+    .pref-subtitle { font-size: 13px; color: var(--text-gray-500); margin-top: 2px; }
+    .pref-toggle { font-size: 14px; color: var(--text-gray-500); transition: transform 0.3s ease; }
+    .pref-section.open .pref-toggle { transform: rotate(180deg); }
+    .pref-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; }
+    .pref-section.open .pref-content { max-height: 600px; }
+    .pref-body { padding: 0 28px 28px; }
+
+    .radio-group { display: flex; flex-direction: column; gap: 10px; }
+    .radio-option {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-white-10);
+      border-radius: 12px;
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    .radio-option:hover { background: rgba(255,255,255,0.04); }
+    .radio-option.selected { background: rgba(255,255,255,0.06); border-color: var(--border-white-40); }
+    .radio-circle {
+      width: 18px; height: 18px; border: 2px solid var(--border-white-20);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .radio-option.selected .radio-circle { border-color: var(--text-white); }
+    .radio-option.selected .radio-circle::after {
+      content: ''; width: 8px; height: 8px; background: var(--text-white); border-radius: 50%;
+    }
+    .radio-label { font-size: 14px; }
+
+    .checkbox-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .checkbox-option {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-white-10);
+      border-radius: 10px;
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    .checkbox-option:hover { background: rgba(255,255,255,0.04); }
+    .checkbox-option.checked { background: rgba(255,255,255,0.05); border-color: var(--border-white-40); }
+    .checkbox-box {
+      width: 18px; height: 18px; border: 2px solid var(--border-white-20);
+      border-radius: 5px; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: transparent; flex-shrink: 0;
+    }
+    .checkbox-option.checked .checkbox-box { background: var(--text-white); border-color: var(--text-white); color: var(--bg-black); }
+    .checkbox-label { font-size: 13px; color: var(--text-gray-400); }
+    .checkbox-option.checked .checkbox-label { color: var(--text-white); }
+
+    .footer-actions {
+      display: flex; gap: 16px; justify-content: center;
+      margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border-white-10);
+    }
+    .footer-btn {
+      padding: 16px 32px; border-radius: 12px;
+      font-size: 15px; cursor: pointer; transition: all 0.3s ease; font-family: inherit;
+    }
+    .footer-btn.secondary {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-20);
+      color: var(--text-gray-400);
+    }
+    .footer-btn.secondary:hover { background: rgba(255,255,255,0.1); color: var(--text-white); }
+    .footer-btn.primary { background: var(--text-white); border: none; color: var(--bg-black); }
+    .footer-btn.primary:hover { box-shadow: 0 0 30px rgba(255,255,255,0.3); transform: translateY(-2px); }
+
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: 14px 28px;
+      background: rgba(255,255,255,0.95);
+      color: var(--bg-black);
+      border-radius: 100px;
+      font-size: 14px;
+      opacity: 0; transition: all 0.4s ease; z-index: 1000;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+
+    .delete-account-btn {
+      padding: 12px 24px;
+      background: transparent;
+      border: 1px solid rgba(255,100,100,0.4);
+      border-radius: 8px;
+      color: #ff6b6b;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .delete-account-btn:hover {
+      background: rgba(255,100,100,0.2);
+      border-color: #ff6b6b;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal {
+      background: var(--bg-gray-900);
+      border: 1px solid var(--border-white-20);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    .modal-overlay.show .modal {
+      transform: scale(1);
+    }
+    .modal-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .modal h3 {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: #ff6b6b;
+    }
+    .modal p {
+      font-size: 14px;
+      color: var(--text-gray-400);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .modal-input {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-20);
+      border-radius: 10px;
+      color: var(--text-white);
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .modal-input:focus {
+      outline: none;
+      border-color: #ff6b6b;
+    }
+    .modal-input::placeholder {
+      color: var(--text-gray-500);
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+    .modal-btn.cancel {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-20);
+      color: var(--text-gray-400);
+    }
+    .modal-btn.cancel:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-white);
+    }
+    .modal-btn.delete {
+      background: #ff6b6b;
+      border: none;
+      color: white;
+    }
+    .modal-btn.delete:hover {
+      background: #ff5252;
+    }
+    .modal-btn.delete:disabled {
+      background: rgba(255,100,100,0.3);
+      cursor: not-allowed;
+    }
+
+    /* Avatar Picker */
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .avatar-option {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .avatar-option:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--border-white-20);
+      transform: scale(1.1);
+    }
+    .avatar-option.selected {
+      border-color: var(--accent-soft);
+      background: rgba(196,161,255,0.2);
+    }
+
+    /* Username Edit */
+    .username-input {
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-20);
+      border-radius: 12px;
+      color: var(--text-white);
+      font-size: 18px;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .username-input:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+    }
+    .modal-btn.save {
+      background: var(--accent-soft);
+      border: none;
+      color: var(--bg-black);
+    }
+    .modal-btn.save:hover {
+      background: #d4b8ff;
+    }
+
+    /* Settings Styles */
+    .setting-group {
+      margin-bottom: 24px;
+    }
+    .setting-group:last-child {
+      margin-bottom: 0;
+    }
+    .setting-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-white);
+      margin-bottom: 12px;
+    }
+    .setting-desc {
+      font-size: 13px;
+      color: var(--text-gray-500);
+      margin-top: 2px;
+    }
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Theme Options */
+    .theme-options {
+      display: flex;
+      gap: 12px;
+    }
+    .theme-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 2px solid var(--border-white-10);
+      border-radius: 12px;
+      color: var(--text-gray-400);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .theme-btn:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: var(--border-white-20);
+    }
+    .theme-btn.active {
+      border-color: var(--accent-soft);
+      background: rgba(196,161,255,0.1);
+      color: var(--text-white);
+    }
+    .theme-preview {
+      width: 48px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--border-white-20);
+    }
+    .dark-preview {
+      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    }
+    .darker-preview {
+      background: linear-gradient(135deg, #0a0c10 0%, #000000 100%);
+    }
+    .light-preview {
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    }
+
+    /* Toggle Button */
+    .toggle-btn {
+      width: 52px;
+      height: 28px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    .toggle-btn.active {
+      background: var(--accent-soft);
+    }
+    .toggle-slider {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      background: var(--text-white);
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+    .toggle-btn.active .toggle-slider {
+      left: 27px;
+    }
+
+    /* Font Size Options */
+    .font-size-options {
+      display: flex;
+      gap: 10px;
+    }
+    .font-btn {
+      flex: 1;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-white-10);
+      border-radius: 8px;
+      color: var(--text-gray-400);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .font-btn:hover {
+      background: rgba(255,255,255,0.06);
+    }
+    .font-btn.active {
+      border-color: var(--accent-soft);
+      background: rgba(196,161,255,0.1);
+      color: var(--text-white);
+    }
+
+    /* Quiet Hours */
+    .quiet-hours-config {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-white-10);
+    }
+    .time-range {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: center;
+    }
+    .time-input-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .time-input-group label {
+      font-size: 12px;
+      color: var(--text-gray-500);
+    }
+    .time-input-group input[type="time"] {
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-20);
+      border-radius: 10px;
+      color: var(--text-white);
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .time-input-group input[type="time"]:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+    }
+    .time-separator {
+      font-size: 20px;
+      color: var(--text-gray-500);
+      margin-top: 20px;
+    }
+    .quiet-summary {
+      text-align: center;
+      font-size: 13px;
+      color: var(--accent-soft);
+      margin-top: 16px;
+    }
+
+    /* Security Options */
+    .security-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .security-btn {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      padding: 18px 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-white-10);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .security-btn:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: var(--border-white-20);
+    }
+    .security-icon {
+      font-size: 24px;
+    }
+    .security-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .security-title {
+      font-size: 15px;
+      color: var(--text-white);
+      font-weight: 500;
+    }
+    .security-desc {
+      font-size: 13px;
+      color: var(--text-gray-500);
+    }
+    .security-arrow {
+      font-size: 18px;
+      color: var(--text-gray-500);
+    }
+
+    /* Account Actions */
+    .account-action-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-white-10);
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    .account-action-card:last-child {
+      margin-bottom: 0;
+    }
+    .account-action-card.danger {
+      background: rgba(255,100,100,0.05);
+      border-color: rgba(255,100,100,0.2);
+    }
+    .action-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .action-icon {
+      font-size: 28px;
+    }
+    .action-info h4 {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-white);
+      margin-bottom: 4px;
+      font-family: inherit;
+    }
+    .action-info p {
+      font-size: 13px;
+      color: var(--text-gray-500);
+    }
+    .action-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .action-btn.primary-action {
+      background: rgba(196,161,255,0.15);
+      border: 1px solid rgba(196,161,255,0.3);
+      color: var(--accent-soft);
+    }
+    .action-btn.primary-action:hover {
+      background: rgba(196,161,255,0.25);
+    }
+    .action-btn.danger-action {
+      background: transparent;
+      border: 1px solid rgba(255,100,100,0.4);
+      color: #ff6b6b;
+    }
+    .action-btn.danger-action:hover {
+      background: rgba(255,100,100,0.2);
+    }
+
+    /* Input Modal Styles */
+    .modal-input-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+    .modal-input-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-gray-400);
+      margin-bottom: 8px;
+    }
+    .modal-input-field {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-white-20);
+      border-radius: 10px;
+      color: var(--text-white);
+      font-size: 15px;
+    }
+    .modal-input-field:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+    }
+    .modal-input-field::placeholder {
+      color: var(--text-gray-500);
+    }
+
+    /* Theme Variations */
+    .theme-darker {
+      --bg-black: #000000;
+      --bg-gray-900: #050508;
+      --bg-surface: #08090c;
+      --bg-elevated: #0c0d12;
+    }
+    .theme-light {
+      --bg-black: #f8fafc;
+      --bg-gray-900: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f8fafc;
+      --text-white: #1e293b;
+      --text-gray-400: #64748b;
+      --text-gray-500: #94a3b8;
+      --border-white-10: rgba(0,0,0,0.1);
+      --border-white-20: rgba(0,0,0,0.15);
+      --border-white-40: rgba(0,0,0,0.25);
+    }
+    .theme-light .glass-card {
+      background: rgba(255,255,255,0.8);
+    }
+
+    /* Font Size Variations */
+    .font-small {
+      font-size: 14px;
+    }
+    .font-small h1 { font-size: 36px; }
+    .font-small h3 { font-size: 16px; }
+
+    .font-large {
+      font-size: 18px;
+    }
+    .font-large h1 { font-size: 48px; }
+    .font-large h3 { font-size: 22px; }
+
+    /* Reduce Motion */
+    .reduce-motion,
+    .reduce-motion * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 24px 16px 80px; }
+      .username { font-size: 32px; }
+      .profile-tabs { gap: 6px; }
+      .profile-tab { padding: 10px 20px; font-size: 13px; }
+      .currently-grid, .spaces-grid, .checkbox-grid { grid-template-columns: 1fr; }
+      .footer-actions { flex-direction: column; }
+      .footer-btn { width: 100%; text-align: center; }
+    }
+  </style>
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="particles" id="particles"></div>
+  <div class="container">
+    <button class="back-btn" onclick="goBack()"><span>←</span> Back</button>
+
+    <header class="profile-header">
+      <div class="avatar-section">
+        <div class="avatar" onclick="showAvatarModal()">🌸</div>
+        <div class="avatar-edit" onclick="showAvatarModal()">✏️</div>
+      </div>
+      <h1 class="username">
+        <span class="username-edit" onclick="showUsernameModal()">
+          your_username
+          <span class="edit-icon">✏️</span>
+        </span>
+      </h1>
+      <div class="rhythm-status" onclick="toggleSection('rhythm-modal')">
+        <span class="rhythm-icon">🌿</span>
+        <span class="rhythm-text"><span class="rhythm-label">Set status</span></span>
+      </div>
+      <p class="profile-tagline" id="taglineDisplay" onclick="editTagline()" style="color: var(--text-gray-500); font-style: italic;">Click to add a tagline...</p>
+    </header>
+
+    <div class="profile-tabs">
+      <button class="profile-tab active" data-tab="about" onclick="switchTab('about')">✨ About Me</button>
+      <button class="profile-tab" data-tab="spaces" onclick="switchTab('spaces')">🏠 My Spaces</button>
+      <button class="profile-tab" data-tab="preferences" onclick="switchTab('preferences')">⚙️ Preferences</button>
+    </div>
+
+    <div class="tab-content active" id="tab-about">
+      <div class="glass-card">
+        <div class="section-header-simple">
+          <div class="section-title-row"><span class="section-emoji">💭</span><h3 class="section-title">A Little About Me</h3></div>
+          <span class="optional-badge">Optional</span>
+        </div>
+        <div class="section-body">
+          <textarea class="bio-input" placeholder="Share a little about yourself... or not, that's okay too. This is your space." maxlength="300" oninput="updateCharCount(this, 'bioCount')"></textarea>
+          <div class="char-count"><span id="bioCount">0</span>/300</div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="section-header-simple">
+          <div class="section-title-row"><span class="section-emoji">✨</span><h3 class="section-title">A Quote That Resonates</h3></div>
+          <span class="optional-badge">Optional</span>
+        </div>
+        <div class="section-body">
+          <div class="quote-input-wrapper">
+            <span class="quote-mark">"</span>
+            <textarea class="quote-input" rows="2" placeholder="A quote that speaks to your soul..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="section-header-simple">
+          <div class="section-title-row"><span class="section-emoji">🔋</span><h3 class="section-title">Things That Recharge Me</h3></div>
+        </div>
+        <div class="section-body">
+          <div class="tags-container" id="rechargeTags">
+            <span class="tag">📚 Reading</span><span class="tag">🌧️ Rain sounds</span><span class="tag">☕ Hot tea</span><span class="tag">🎧 Music</span><span class="tag">🌿 Nature</span><span class="tag">🐱 Pets</span><span class="tag">🎨 Creating</span><span class="tag">🛁 Long baths</span><span class="tag">🌙 Night time</span><span class="tag">🧘 Meditation</span><span class="tag">📝 Journaling</span><span class="tag">🎮 Gaming</span>
+          </div>
+          <div class="tag-input-wrapper">
+            <input type="text" class="tag-input" placeholder="Add your own..." id="customTagInput">
+            <button class="add-tag-btn" onclick="addCustomTag()">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="section-header-simple">
+          <div class="section-title-row"><span class="section-emoji">🎯</span><h3 class="section-title">Currently Into</h3></div>
+          <span class="optional-badge">Optional</span>
+        </div>
+        <div class="section-body">
+          <div class="currently-grid">
+            <div class="currently-item">
+              <div class="currently-label"><span>📖</span> Reading</div>
+              <input type="text" class="currently-input" placeholder="What book?">
+            </div>
+            <div class="currently-item">
+              <div class="currently-label"><span>📺</span> Watching</div>
+              <input type="text" class="currently-input" placeholder="Show or movie?">
+            </div>
+            <div class="currently-item">
+              <div class="currently-label"><span>🎵</span> Listening to</div>
+              <input type="text" class="currently-input" placeholder="Music or podcast?">
+            </div>
+            <div class="currently-item">
+              <div class="currently-label"><span>🎮</span> Playing</div>
+              <input type="text" class="currently-input" placeholder="Game or hobby?">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="section-header-simple">
+          <div class="section-title-row"><span class="section-emoji">🎨</span><h3 class="section-title">My Creative Mediums</h3></div>
+        </div>
+        <div class="section-body">
+          <div class="tags-container">
+            <span class="tag">✍️ Writing</span><span class="tag">📸 Photography</span><span class="tag">🎨 Digital Art</span><span class="tag">🎵 Music</span><span class="tag">📝 Poetry</span><span class="tag">🖌️ Illustration</span><span class="tag">🎬 Video</span><span class="tag">🧶 Crafts</span><span class="tag">💻 Coding</span><span class="tag">📖 Journaling</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="section-header-simple">
+          <div class="section-title-row"><span class="section-emoji">📌</span><h3 class="section-title">Pinned Creation</h3></div>
+          <span class="optional-badge">Optional</span>
+        </div>
+        <div class="section-body">
+          <div class="pinned-creation" onclick="showToast('🎨 Opening creation picker...')">
+            <div class="pinned-icon">📌</div>
+            <h4 class="pinned-title">Pin a creation</h4>
+            <p class="pinned-desc">Showcase your favorite work on your profile</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-spaces">
+      <div class="glass-card">
+        <div class="section-header-simple">
+          <div class="section-title-row"><span class="section-emoji">🏠</span><h3 class="section-title">My Spaces</h3></div>
+        </div>
+        <div class="section-body">
+          <div class="spaces-grid">
+            <a class="space-link" href="#creative"><div class="space-icon">✨</div><div class="space-info"><h4>Creative Space</h4><p>0 creations</p></div><span class="space-arrow">→</span></a>
+            <a class="space-link" href="#garden"><div class="space-icon">🌿</div><div class="space-info"><h4>My Garden Room</h4><p>Personal gallery</p></div><span class="space-arrow">→</span></a>
+            <a class="space-link" href="#blog"><div class="space-icon">📖</div><div class="space-info"><h4>Blog Posts</h4><p>0 published</p></div><span class="space-arrow">→</span></a>
+            <a class="space-link" href="#saved"><div class="space-icon">🔖</div><div class="space-info"><h4>Saved Items</h4><p>Nothing saved yet</p></div><span class="space-arrow">→</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="section-header-simple">
+          <div class="section-title-row"><span class="section-emoji">👥</span><h3 class="section-title">Communities I'm In</h3></div>
+        </div>
+        <div class="section-body">
+          <div style="padding: 40px 20px; text-align: center;">
+            <span style="font-size: 40px; opacity: 0.5;">👥</span>
+            <h4 style="margin-top: 12px; font-size: 16px;">No communities yet</h4>
+            <p style="color: var(--text-gray-500); font-size: 14px; margin-top: 8px;">Join communities in the Connect section to see them here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-preferences">
+      <div class="glass-card pref-section" id="pref-discovery">
+        <div class="pref-header" onclick="togglePref('discovery')">
+          <div class="pref-title-group">
+            <span class="pref-icon">🔍</span>
+            <div>
+              <h3 class="pref-title">Discovery</h3>
+              <p class="pref-subtitle">How do you want to be found?</p>
+            </div>
+          </div>
+          <span class="pref-toggle">▼</span>
+        </div>
+        <div class="pref-content">
+          <div class="pref-body">
+            <div class="radio-group">
+              <div class="radio-option" onclick="selectRadio(this)"><div class="radio-circle"></div><span class="radio-label">Open Discovery — Anyone can find me</span></div>
+              <div class="radio-option" onclick="selectRadio(this)"><div class="radio-circle"></div><span class="radio-label">Selective — Only similar souls can find me</span></div>
+              <div class="radio-option" onclick="selectRadio(this)"><div class="radio-circle"></div><span class="radio-label">Invitation Only — Must approve requests</span></div>
+              <div class="radio-option" onclick="selectRadio(this)"><div class="radio-circle"></div><span class="radio-label">Quiet Presence — Not searchable</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card pref-section" id="pref-responses">
+        <div class="pref-header" onclick="togglePref('responses')">
+          <div class="pref-title-group">
+            <span class="pref-icon">💬</span>
+            <div>
+              <h3 class="pref-title">Responses I Welcome</h3>
+              <p class="pref-subtitle">What interactions feel good?</p>
+            </div>
+          </div>
+          <span class="pref-toggle">▼</span>
+        </div>
+        <div class="pref-content">
+          <div class="pref-body">
+            <div class="checkbox-grid">
+              <div class="checkbox-option" onclick="toggleCheckbox(this)"><div class="checkbox-box">✓</div><span class="checkbox-label">Creative responses</span></div>
+              <div class="checkbox-option" onclick="toggleCheckbox(this)"><div class="checkbox-box">✓</div><span class="checkbox-label">Thoughtful reflections</span></div>
+              <div class="checkbox-option" onclick="toggleCheckbox(this)"><div class="checkbox-box">✓</div><span class="checkbox-label">Abstract tokens</span></div>
+              <div class="checkbox-option" onclick="toggleCheckbox(this)"><div class="checkbox-box">✓</div><span class="checkbox-label">Silent appreciation</span></div>
+              <div class="checkbox-option" onclick="toggleCheckbox(this)"><div class="checkbox-box">✓</div><span class="checkbox-label">Process questions</span></div>
+              <div class="checkbox-option" onclick="toggleCheckbox(this)"><div class="checkbox-box">✓</div><span class="checkbox-label">Collaboration proposals</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card pref-section" id="pref-time">
+        <div class="pref-header" onclick="togglePref('time')">
+          <div class="pref-title-group">
+            <span class="pref-icon">⏰</span>
+            <div>
+              <h3 class="pref-title">Response Time</h3>
+              <p class="pref-subtitle">Set expectations</p>
+            </div>
+          </div>
+          <span class="pref-toggle">▼</span>
+        </div>
+        <div class="pref-content">
+          <div class="pref-body">
+            <div class="radio-group">
+              <div class="radio-option" onclick="selectRadio(this)"><div class="radio-circle"></div><span class="radio-label">Within hours</span></div>
+              <div class="radio-option" onclick="selectRadio(this)"><div class="radio-circle"></div><span class="radio-label">Within days</span></div>
+              <div class="radio-option" onclick="selectRadio(this)"><div class="radio-circle"></div><span class="radio-label">Within weeks</span></div>
+              <div class="radio-option" onclick="selectRadio(this)"><div class="radio-circle"></div><span class="radio-label">I read everything but may not reply</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card pref-section" id="pref-boundaries">
+        <div class="pref-header" onclick="togglePref('boundaries')">
+          <div class="pref-title-group">
+            <span class="pref-icon">🛡️</span>
+            <div>
+              <h3 class="pref-title">Boundaries & Comfort</h3>
+              <p class="pref-subtitle">What helps you feel safe?</p>
+            </div>
+          </div>
+          <span class="pref-toggle">▼</span>
+        </div>
+        <div class="pref-content">
+          <div class="pref-body">
+            <div class="checkbox-grid">
+              <div class="checkbox-option" onclick="toggleCheckbox(this)"><div class="checkbox-box">✓</div><span class="checkbox-label">Prefer async communication</span></div>
+              <div class="checkbox-option" onclick="toggleCheckbox(this)"><div class="checkbox-box">✓</div><span class="checkbox-label">Don't share my work externally</span></div>
+              <div class="checkbox-option" onclick="toggleCheckbox(this)"><div class="checkbox-box">✓</div><span class="checkbox-label">Neurodivergent — patience appreciated</span></div>
+              <div class="checkbox-option" onclick="toggleCheckbox(this)"><div class="checkbox-box">✓</div><span class="checkbox-label">Sensitive to harsh critique</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appearance Settings -->
+      <div class="glass-card pref-section" id="pref-appearance">
+        <div class="pref-header" onclick="togglePref('appearance')">
+          <div class="pref-title-group">
+            <span class="pref-icon">🎨</span>
+            <div>
+              <h3 class="pref-title">Appearance</h3>
+              <p class="pref-subtitle">Customize your visual experience</p>
+            </div>
+          </div>
+          <span class="pref-toggle">▼</span>
+        </div>
+        <div class="pref-content">
+          <div class="pref-body">
+            <!-- Theme -->
+            <div class="setting-group">
+              <label class="setting-label">Theme</label>
+              <div class="theme-options">
+                <button class="theme-btn active" data-theme="dark" onclick="setTheme('dark')">
+                  <span class="theme-preview dark-preview"></span>
+                  <span>Dark</span>
+                </button>
+                <button class="theme-btn" data-theme="darker" onclick="setTheme('darker')">
+                  <span class="theme-preview darker-preview"></span>
+                  <span>Darker</span>
+                </button>
+                <button class="theme-btn" data-theme="light" onclick="setTheme('light')">
+                  <span class="theme-preview light-preview"></span>
+                  <span>Light</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Reduce Animations -->
+            <div class="setting-group">
+              <div class="setting-row">
+                <div>
+                  <label class="setting-label">Reduce Animations</label>
+                  <p class="setting-desc">Minimize motion for comfort</p>
+                </div>
+                <button class="toggle-btn" id="animationToggle" onclick="toggleAnimations()">
+                  <span class="toggle-slider"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Font Size -->
+            <div class="setting-group">
+              <label class="setting-label">Font Size</label>
+              <div class="font-size-options">
+                <button class="font-btn" data-size="small" onclick="setFontSize('small')">Small</button>
+                <button class="font-btn active" data-size="medium" onclick="setFontSize('medium')">Medium</button>
+                <button class="font-btn" data-size="large" onclick="setFontSize('large')">Large</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quiet Hours -->
+      <div class="glass-card pref-section" id="pref-quiet">
+        <div class="pref-header" onclick="togglePref('quiet')">
+          <div class="pref-title-group">
+            <span class="pref-icon">🌙</span>
+            <div>
+              <h3 class="pref-title">Quiet Hours</h3>
+              <p class="pref-subtitle">Set your do-not-disturb times</p>
+            </div>
+          </div>
+          <span class="pref-toggle">▼</span>
+        </div>
+        <div class="pref-content">
+          <div class="pref-body">
+            <div class="setting-group">
+              <div class="setting-row">
+                <div>
+                  <label class="setting-label">Enable Quiet Hours</label>
+                  <p class="setting-desc">No notifications during these times</p>
+                </div>
+                <button class="toggle-btn" id="quietToggle" onclick="toggleQuietHours()">
+                  <span class="toggle-slider"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="quiet-hours-config" id="quietHoursConfig" style="display: none;">
+              <div class="time-range">
+                <div class="time-input-group">
+                  <label>From</label>
+                  <input type="time" id="quietStart" value="22:00" onchange="saveQuietHours()">
+                </div>
+                <span class="time-separator">→</span>
+                <div class="time-input-group">
+                  <label>To</label>
+                  <input type="time" id="quietEnd" value="08:00" onchange="saveQuietHours()">
+                </div>
+              </div>
+              <p class="quiet-summary" id="quietSummary">Quiet from 10:00 PM to 8:00 AM</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Settings -->
+      <div class="glass-card pref-section" id="pref-security">
+        <div class="pref-header" onclick="togglePref('security')">
+          <div class="pref-title-group">
+            <span class="pref-icon">🔐</span>
+            <div>
+              <h3 class="pref-title">Security</h3>
+              <p class="pref-subtitle">Manage your login credentials</p>
+            </div>
+          </div>
+          <span class="pref-toggle">▼</span>
+        </div>
+        <div class="pref-content">
+          <div class="pref-body">
+            <div class="security-options">
+              <button class="security-btn" onclick="showChangeEmailModal()">
+                <span class="security-icon">📧</span>
+                <div class="security-info">
+                  <span class="security-title">Change Email</span>
+                  <span class="security-desc" id="currentEmailDisplay">Loading...</span>
+                </div>
+                <span class="security-arrow">→</span>
+              </button>
+
+              <button class="security-btn" onclick="showChangePasswordModal()">
+                <span class="security-icon">🔑</span>
+                <div class="security-info">
+                  <span class="security-title">Change Password</span>
+                  <span class="security-desc">Update your password</span>
+                </div>
+                <span class="security-arrow">→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Actions -->
+      <div class="glass-card pref-section" id="pref-account">
+        <div class="pref-header" onclick="togglePref('account')">
+          <div class="pref-title-group">
+            <span class="pref-icon">⚙️</span>
+            <div>
+              <h3 class="pref-title">Account Actions</h3>
+              <p class="pref-subtitle">Manage your account status</p>
+            </div>
+          </div>
+          <span class="pref-toggle">▼</span>
+        </div>
+        <div class="pref-content">
+          <div class="pref-body">
+            <!-- Download Data -->
+            <div class="account-action-card">
+              <div class="action-info">
+                <span class="action-icon">📦</span>
+                <div>
+                  <h4>Download My Data</h4>
+                  <p>Export all your journal entries, moods, and reflections</p>
+                </div>
+              </div>
+              <button class="action-btn primary-action" onclick="downloadMyData()">Download</button>
+            </div>
+
+            <!-- Pause Account -->
+            <div class="account-action-card">
+              <div class="action-info">
+                <span class="action-icon">⏸️</span>
+                <div>
+                  <h4>Pause Account</h4>
+                  <p>Temporarily hide your profile (vacation mode)</p>
+                </div>
+              </div>
+              <button class="toggle-btn" id="pauseToggle" onclick="togglePauseAccount()">
+                <span class="toggle-slider"></span>
+              </button>
+            </div>
+
+            <!-- Log Out -->
+            <div class="account-action-card">
+              <div class="action-info">
+                <span class="action-icon">🚪</span>
+                <div>
+                  <h4>Log Out</h4>
+                  <p>Sign out of your account on this device</p>
+                </div>
+              </div>
+              <button class="action-btn" onclick="logout()">Log Out</button>
+            </div>
+
+            <!-- Delete Account -->
+            <div class="account-action-card danger">
+              <div class="action-info">
+                <span class="action-icon">🗑️</span>
+                <div>
+                  <h4>Delete Account</h4>
+                  <p>Permanently delete your account and all data</p>
+                </div>
+              </div>
+              <button class="action-btn danger-action" onclick="showDeleteModal()">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-actions">
+      <button class="footer-btn secondary" onclick="showToast('👁️ Preview mode')">Preview as Visitor</button>
+      <button class="footer-btn primary" onclick="goToCreative()">Visit My Creative Space →</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Delete Account Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <div class="modal-icon">⚠️</div>
+      <h3>Delete Account?</h3>
+      <p>This will permanently delete your account and all your data. This action cannot be undone. Type <strong>DELETE</strong> to confirm.</p>
+      <input type="text" class="modal-input" id="deleteConfirmInput" placeholder="Type DELETE to confirm" oninput="checkDeleteConfirm()">
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" onclick="hideDeleteModal()">Cancel</button>
+        <button class="modal-btn delete" id="confirmDeleteBtn" onclick="deleteAccount()" disabled>Delete Forever</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avatar Picker Modal -->
+  <div class="modal-overlay" id="avatarModal">
+    <div class="modal">
+      <div class="modal-icon">🎨</div>
+      <h3 style="color: var(--text-white);">Choose Your Avatar</h3>
+      <p>Pick an emoji that represents you</p>
+      <div class="avatar-grid" id="avatarGrid">
+        <div class="avatar-option" data-emoji="🌸">🌸</div>
+        <div class="avatar-option" data-emoji="🌙">🌙</div>
+        <div class="avatar-option" data-emoji="🌿">🌿</div>
+        <div class="avatar-option" data-emoji="✨">✨</div>
+        <div class="avatar-option" data-emoji="🦋">🦋</div>
+        <div class="avatar-option" data-emoji="🐱">🐱</div>
+        <div class="avatar-option" data-emoji="🌊">🌊</div>
+        <div class="avatar-option" data-emoji="🍃">🍃</div>
+        <div class="avatar-option" data-emoji="☁️">☁️</div>
+        <div class="avatar-option" data-emoji="🌈">🌈</div>
+        <div class="avatar-option" data-emoji="🔮">🔮</div>
+        <div class="avatar-option" data-emoji="🎭">🎭</div>
+        <div class="avatar-option" data-emoji="🎪">🎪</div>
+        <div class="avatar-option" data-emoji="🌻">🌻</div>
+        <div class="avatar-option" data-emoji="🍄">🍄</div>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" onclick="hideAvatarModal()">Cancel</button>
+        <button class="modal-btn save" id="saveAvatarBtn" onclick="saveAvatar()">Save Avatar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Email Modal -->
+  <div class="modal-overlay" id="emailModal">
+    <div class="modal">
+      <div class="modal-icon">📧</div>
+      <h3 style="color: var(--text-white);">Change Email</h3>
+      <p>Enter your new email address</p>
+      <div class="modal-input-group">
+        <label>New Email</label>
+        <input type="email" class="modal-input-field" id="newEmailInput" placeholder="your@email.com">
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" onclick="hideEmailModal()">Cancel</button>
+        <button class="modal-btn save" onclick="changeEmail()">Update Email</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal-overlay" id="passwordModal">
+    <div class="modal">
+      <div class="modal-icon">🔑</div>
+      <h3 style="color: var(--text-white);">Change Password</h3>
+      <p>Enter your new password</p>
+      <div class="modal-input-group">
+        <label>New Password</label>
+        <input type="password" class="modal-input-field" id="newPasswordInput" placeholder="New password (min 6 characters)">
+      </div>
+      <div class="modal-input-group">
+        <label>Confirm Password</label>
+        <input type="password" class="modal-input-field" id="confirmPasswordInput" placeholder="Confirm new password">
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" onclick="hidePasswordModal()">Cancel</button>
+        <button class="modal-btn save" onclick="changePassword()">Update Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Username Edit Modal -->
+  <div class="modal-overlay" id="usernameModal">
+    <div class="modal">
+      <div class="modal-icon">✏️</div>
+      <h3 style="color: var(--text-white);">Edit Username</h3>
+      <p>Choose a unique username</p>
+      <input type="text" class="username-input" id="usernameInput" placeholder="Enter username" maxlength="20">
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" onclick="hideUsernameModal()">Cancel</button>
+        <button class="modal-btn save" onclick="saveUsername()">Save Username</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Go back to previous page (works with iframe)
+    function goBack() {
+      // Tell parent to exit fullscreen profile mode
+      if (window.parent !== window) {
+        window.parent.postMessage({ action: 'exitProfile' }, '*');
+      } else {
+        window.location.href = 'app.html';
+      }
+    }
+
+    // Supabase initialization
+    const SUPABASE_URL = 'https://inpziyxjznikinqqputz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlucHppeXhqem5pa2lucXFwdXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MzQ0MTcsImV4cCI6MjA4NDAxMDQxN30.5QoXaD5vNcuteEmwmo82l_OIklVbGGCRpNtV0PMuSyY';
+
+    let db = null;
+    let currentUser = null;
+    let saveTimeout = null;
+
+    try {
+      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch (err) {
+      console.error('Supabase init error:', err);
+    }
+
+    // Initialize auth and load profile
+    async function initAuth() {
+      // Always load from localStorage first (works without database)
+      loadProfileFromLocalStorage();
+
+      if (!db) return;
+      try {
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) {
+          // Don't redirect - allow local usage
+          return;
+        }
+        currentUser = session.user;
+
+        // Update username display from auth metadata
+        const username = currentUser.user_metadata?.username || localStorage.getItem('introvert_username') || 'your_username';
+        document.querySelector('.username-edit').childNodes[0].textContent = username + ' ';
+
+        // Load profile from database
+        loadProfile();
+      } catch (err) {
+        console.error('Auth error:', err);
+      }
+    }
+
+    // Load profile from localStorage (always works)
+    function loadProfileFromLocalStorage() {
+      const savedProfile = localStorage.getItem('introvert_profile');
+      if (savedProfile) {
+        const data = JSON.parse(savedProfile);
+
+        // Avatar
+        if (data.avatar) {
+          document.querySelector('.avatar').textContent = data.avatar;
+        }
+
+        // Username
+        if (data.username) {
+          document.querySelector('.username-edit').childNodes[0].textContent = data.username + ' ';
+        }
+
+        // Bio
+        const bioInput = document.querySelector('.bio-input');
+        if (bioInput && data.bio) {
+          bioInput.value = data.bio;
+          document.getElementById('bioCount').textContent = data.bio.length;
+        }
+
+        // Quote
+        const quoteInput = document.querySelector('.quote-input');
+        if (quoteInput && data.quote) {
+          quoteInput.value = data.quote;
+        }
+
+        // Tagline
+        const taglineEl = document.getElementById('taglineDisplay');
+        if (taglineEl && data.tagline) {
+          taglineEl.textContent = data.tagline;
+          taglineEl.style.color = 'var(--text-gray-400)';
+        }
+
+        // Currently into
+        if (data.currently_reading) {
+          const input = document.querySelector('.currently-input[placeholder="What book?"]');
+          if (input) input.value = data.currently_reading;
+        }
+        if (data.currently_watching) {
+          const input = document.querySelector('.currently-input[placeholder="Show or movie?"]');
+          if (input) input.value = data.currently_watching;
+        }
+        if (data.currently_listening) {
+          const input = document.querySelector('.currently-input[placeholder="Music or podcast?"]');
+          if (input) input.value = data.currently_listening;
+        }
+        if (data.currently_playing) {
+          const input = document.querySelector('.currently-input[placeholder="Game or hobby?"]');
+          if (input) input.value = data.currently_playing;
+        }
+
+        // Recharge tags
+        if (data.recharge_tags && data.recharge_tags.length > 0) {
+          document.querySelectorAll('#rechargeTags .tag').forEach(tag => {
+            if (data.recharge_tags.includes(tag.textContent)) {
+              tag.classList.add('selected');
+            }
+          });
+        }
+
+        // Creative mediums
+        if (data.creative_mediums && data.creative_mediums.length > 0) {
+          document.querySelectorAll('.glass-card').forEach(card => {
+            const title = card.querySelector('.section-title');
+            if (title && title.textContent.includes('Creative Mediums')) {
+              card.querySelectorAll('.tag').forEach(tag => {
+                if (data.creative_mediums.includes(tag.textContent)) {
+                  tag.classList.add('selected');
+                }
+              });
+            }
+          });
+        }
+      }
+    }
+
+    // Load profile from database
+    async function loadProfile() {
+      if (!currentUser || !db) return;
+
+      try {
+        const { data, error } = await db
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') throw error; // PGRST116 = not found
+
+        if (data) {
+          // Populate bio
+          const bioInput = document.querySelector('.bio-input');
+          if (bioInput && data.bio) {
+            bioInput.value = data.bio;
+            document.getElementById('bioCount').textContent = data.bio.length;
+          }
+
+          // Populate quote
+          const quoteInput = document.querySelector('.quote-input');
+          if (quoteInput && data.quote) {
+            quoteInput.value = data.quote;
+          }
+
+          // Populate tagline
+          const taglineEl = document.getElementById('taglineDisplay');
+          if (taglineEl && data.tagline) {
+            taglineEl.textContent = data.tagline;
+            taglineEl.style.color = 'var(--text-gray-400)';
+          }
+
+          // Populate currently into
+          if (data.currently_reading) {
+            const input = document.querySelector('.currently-input[placeholder="What book?"]');
+            if (input) input.value = data.currently_reading;
+          }
+          if (data.currently_watching) {
+            const input = document.querySelector('.currently-input[placeholder="Show or movie?"]');
+            if (input) input.value = data.currently_watching;
+          }
+          if (data.currently_listening) {
+            const input = document.querySelector('.currently-input[placeholder="Music or podcast?"]');
+            if (input) input.value = data.currently_listening;
+          }
+          if (data.currently_playing) {
+            const input = document.querySelector('.currently-input[placeholder="Game or hobby?"]');
+            if (input) input.value = data.currently_playing;
+          }
+
+          // Populate recharge tags
+          if (data.recharge_tags && data.recharge_tags.length > 0) {
+            document.querySelectorAll('#rechargeTags .tag').forEach(tag => {
+              if (data.recharge_tags.includes(tag.textContent)) {
+                tag.classList.add('selected');
+              }
+            });
+          }
+
+          // Populate creative mediums
+          if (data.creative_mediums && data.creative_mediums.length > 0) {
+            document.querySelectorAll('.glass-card').forEach(card => {
+              const title = card.querySelector('.section-title');
+              if (title && title.textContent.includes('Creative Mediums')) {
+                card.querySelectorAll('.tag').forEach(tag => {
+                  if (data.creative_mediums.includes(tag.textContent)) {
+                    tag.classList.add('selected');
+                  }
+                });
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Load profile error:', err);
+      }
+    }
+
+    // Save profile to database (debounced)
+    async function saveProfile() {
+      if (!currentUser || !db) return;
+
+      // Get all values
+      const bioInput = document.querySelector('.bio-input');
+      const quoteInput = document.querySelector('.quote-input');
+      const taglineEl = document.getElementById('taglineDisplay');
+
+      // Get recharge tags
+      const rechargeTags = [];
+      document.querySelectorAll('#rechargeTags .tag.selected').forEach(tag => {
+        rechargeTags.push(tag.textContent);
+      });
+
+      // Get creative mediums (find by section title)
+      const creativeMediums = [];
+      const creativeSections = document.querySelectorAll('.glass-card');
+      creativeSections.forEach(section => {
+        const title = section.querySelector('.section-title');
+        if (title && title.textContent.includes('Creative Mediums')) {
+          section.querySelectorAll('.tag.selected').forEach(tag => {
+            creativeMediums.push(tag.textContent);
+          });
+        }
+      });
+
+      // Get currently into values
+      const currentlyReading = document.querySelector('.currently-input[placeholder="What book?"]')?.value || null;
+      const currentlyWatching = document.querySelector('.currently-input[placeholder="Show or movie?"]')?.value || null;
+      const currentlyListening = document.querySelector('.currently-input[placeholder="Music or podcast?"]')?.value || null;
+      const currentlyPlaying = document.querySelector('.currently-input[placeholder="Game or hobby?"]')?.value || null;
+
+      // Get current avatar and username
+      const currentAvatar = document.querySelector('.avatar')?.textContent || '🌙';
+      const currentUsername = document.querySelector('.username-edit')?.childNodes[0]?.textContent?.trim() || 'your_username';
+
+      const profileData = {
+        avatar: currentAvatar,
+        username: currentUsername,
+        bio: bioInput?.value || null,
+        quote: quoteInput?.value || null,
+        tagline: taglineEl?.textContent !== 'Click to add a tagline...' ? taglineEl?.textContent : null,
+        recharge_tags: rechargeTags.length > 0 ? rechargeTags : null,
+        creative_mediums: creativeMediums.length > 0 ? creativeMediums : null,
+        currently_reading: currentlyReading,
+        currently_watching: currentlyWatching,
+        currently_listening: currentlyListening,
+        currently_playing: currentlyPlaying,
+        updated_at: new Date().toISOString()
+      };
+
+      // Always save to localStorage
+      localStorage.setItem('introvert_profile', JSON.stringify(profileData));
+
+      // Also save to database if available
+      if (currentUser && db) {
+        try {
+          profileData.id = currentUser.id;
+          const { error } = await db
+            .from('profiles')
+            .upsert(profileData);
+
+          if (error) throw error;
+        } catch (err) {
+          console.error('Save profile error:', err);
+        }
+      }
+    }
+
+    // Debounced save
+    function triggerSave() {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveProfile();
+        showToast('✓ Saved');
+      }, 1000);
+    }
+
+    // Initialize on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuth();
+    });
+
+    function createParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (20 + Math.random() * 10) + 's';
+        container.appendChild(particle);
+      }
+    }
+    createParticles();
+
+    function switchTab(tab) {
+      document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+    }
+
+    document.querySelectorAll('.tag').forEach(tag => {
+      tag.addEventListener('click', function() {
+        this.classList.toggle('selected');
+        triggerSave();
+      });
+    });
+
+    function addCustomTag() {
+      const input = document.getElementById('customTagInput');
+      if (input.value.trim()) {
+        const container = document.getElementById('rechargeTags');
+        const newTag = document.createElement('span');
+        newTag.className = 'tag selected';
+        newTag.textContent = input.value.trim();
+        newTag.onclick = function() { this.classList.toggle('selected'); showToast('✓ Saved'); };
+        container.appendChild(newTag);
+        input.value = '';
+        showToast('✓ Tag added');
+      }
+    }
+
+    function updateCharCount(textarea, countId) {
+      document.getElementById(countId).textContent = textarea.value.length;
+    }
+
+    function togglePref(id) {
+      document.getElementById('pref-' + id).classList.toggle('open');
+    }
+
+    function selectRadio(el) {
+      const group = el.parentElement;
+      group.querySelectorAll('.radio-option').forEach(opt => opt.classList.remove('selected'));
+      el.classList.add('selected');
+      showToast('✓ Saved');
+    }
+
+    function toggleCheckbox(el) {
+      el.classList.toggle('checked');
+      showToast('✓ Saved');
+    }
+
+    function goToCreative() {
+      showToast('✨ Opening Creative Space...');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    document.querySelectorAll('input, textarea').forEach(el => {
+      el.addEventListener('input', () => {
+        triggerSave();
+      });
+    });
+
+    // Delete Account Functions
+    function showDeleteModal() {
+      document.getElementById('deleteModal').classList.add('show');
+      document.getElementById('deleteConfirmInput').value = '';
+      document.getElementById('confirmDeleteBtn').disabled = true;
+    }
+
+    function hideDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('show');
+    }
+
+    function checkDeleteConfirm() {
+      const input = document.getElementById('deleteConfirmInput');
+      const btn = document.getElementById('confirmDeleteBtn');
+      btn.disabled = input.value.toUpperCase() !== 'DELETE';
+    }
+
+    // Logout function
+    async function logout() {
+      try {
+        await db.auth.signOut();
+        // Clear local storage
+        localStorage.removeItem('currentMood');
+        localStorage.removeItem('lastMoodDate');
+        sessionStorage.removeItem('currentMood');
+        // Redirect to login page (use parent window if in iframe)
+        if (window.parent !== window) {
+          window.parent.location.href = 'index.html';
+        } else {
+          window.location.href = 'index.html';
+        }
+      } catch (err) {
+        console.error('Logout error:', err);
+        showToast('Failed to log out. Please try again.');
+      }
+    }
+
+    async function deleteAccount() {
+      const btn = document.getElementById('confirmDeleteBtn');
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+
+      try {
+        // Get the current session token
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) {
+          throw new Error('Not authenticated');
+        }
+
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/delete-account`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to delete account');
+        }
+
+        // Sign out and redirect
+        await db.auth.signOut();
+        localStorage.clear();
+
+        showToast('Account deleted. Goodbye!');
+
+        setTimeout(() => {
+          window.top.location.href = 'index.html';
+        }, 1500);
+
+      } catch (err) {
+        console.error('Delete error:', err);
+        showToast('Failed to delete account. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Delete Forever';
+      }
+    }
+
+    // Close modal on outside click
+    document.getElementById('deleteModal').addEventListener('click', (e) => {
+      if (e.target.id === 'deleteModal') {
+        hideDeleteModal();
+      }
+    });
+
+    // Tagline edit function
+    function editTagline() {
+      const el = document.getElementById('taglineDisplay');
+      const current = el.textContent === 'Click to add a tagline...' ? '' : el.textContent;
+      const newTagline = prompt('Enter your tagline:', current);
+      if (newTagline !== null) {
+        el.textContent = newTagline || 'Click to add a tagline...';
+        el.style.color = newTagline ? 'var(--text-gray-400)' : 'var(--text-gray-500)';
+        triggerSave();
+      }
+    }
+
+    // Avatar Modal Functions
+    let selectedAvatar = '🌸';
+
+    function showAvatarModal() {
+      document.getElementById('avatarModal').classList.add('show');
+      // Mark current avatar as selected
+      const currentEmoji = document.querySelector('.avatar').textContent;
+      document.querySelectorAll('.avatar-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.emoji === currentEmoji);
+        if (opt.dataset.emoji === currentEmoji) {
+          selectedAvatar = currentEmoji;
+        }
+      });
+    }
+
+    function hideAvatarModal() {
+      document.getElementById('avatarModal').classList.remove('show');
+    }
+
+    // Avatar option click handlers
+    document.querySelectorAll('.avatar-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedAvatar = this.dataset.emoji;
+      });
+    });
+
+    async function saveAvatar() {
+      document.querySelector('.avatar').textContent = selectedAvatar;
+
+      // Always save to localStorage
+      const savedProfile = JSON.parse(localStorage.getItem('introvert_profile') || '{}');
+      savedProfile.avatar = selectedAvatar;
+      savedProfile.updated_at = new Date().toISOString();
+      localStorage.setItem('introvert_profile', JSON.stringify(savedProfile));
+
+      // Also save to database if available
+      if (currentUser && db) {
+        try {
+          await db.from('profiles').upsert({
+            id: currentUser.id,
+            avatar: selectedAvatar,
+            updated_at: new Date().toISOString()
+          });
+        } catch (err) {
+          console.error('Save avatar error:', err);
+        }
+      }
+
+      hideAvatarModal();
+      showToast('✓ Avatar updated!');
+
+      // Notify parent window (app.html) to update avatar
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'profileUpdate', avatar: selectedAvatar }, '*');
+      }
+    }
+
+    document.getElementById('avatarModal').addEventListener('click', (e) => {
+      if (e.target.id === 'avatarModal') hideAvatarModal();
+    });
+
+    // Username Modal Functions
+    function showUsernameModal() {
+      const currentUsername = document.querySelector('.username-edit').childNodes[0].textContent.trim();
+      document.getElementById('usernameInput').value = currentUsername;
+      document.getElementById('usernameModal').classList.add('show');
+    }
+
+    function hideUsernameModal() {
+      document.getElementById('usernameModal').classList.remove('show');
+    }
+
+    async function saveUsername() {
+      const newUsername = document.getElementById('usernameInput').value.trim();
+
+      if (!newUsername) {
+        showToast('Username cannot be empty');
+        return;
+      }
+
+      if (newUsername.length < 3) {
+        showToast('Username must be at least 3 characters');
+        return;
+      }
+
+      // Update display
+      document.querySelector('.username-edit').childNodes[0].textContent = newUsername + ' ';
+
+      // Always save to localStorage
+      const savedProfile = JSON.parse(localStorage.getItem('introvert_profile') || '{}');
+      savedProfile.username = newUsername;
+      savedProfile.updated_at = new Date().toISOString();
+      localStorage.setItem('introvert_profile', JSON.stringify(savedProfile));
+
+      // Update auth metadata if available
+      if (currentUser && db) {
+        try {
+          await db.auth.updateUser({
+            data: { username: newUsername }
+          });
+        } catch (err) {
+          console.error('Save username error:', err);
+        }
+      }
+
+      hideUsernameModal();
+      showToast('✓ Username updated!');
+
+      // Notify parent window (app.html) to update username
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'profileUpdate', username: newUsername }, '*');
+      }
+    }
+
+    document.getElementById('usernameModal').addEventListener('click', (e) => {
+      if (e.target.id === 'usernameModal') hideUsernameModal();
+    });
+
+    // ============ APPEARANCE SETTINGS ============
+    function loadAppearanceSettings() {
+      // Theme
+      const theme = localStorage.getItem('theme') || 'dark';
+      setTheme(theme, false);
+
+      // Reduce Animations
+      const reduceAnimations = localStorage.getItem('reduceAnimations') === 'true';
+      if (reduceAnimations) {
+        document.getElementById('animationToggle').classList.add('active');
+        document.body.classList.add('reduce-motion');
+      }
+
+      // Font Size
+      const fontSize = localStorage.getItem('fontSize') || 'medium';
+      setFontSize(fontSize, false);
+    }
+
+    function setTheme(theme, save = true) {
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === theme);
+      });
+
+      document.body.classList.remove('theme-dark', 'theme-darker', 'theme-light');
+      document.body.classList.add('theme-' + theme);
+
+      if (save) {
+        localStorage.setItem('theme', theme);
+        showToast('Theme updated');
+      }
+    }
+
+    function toggleAnimations() {
+      const toggle = document.getElementById('animationToggle');
+      toggle.classList.toggle('active');
+      const isReduced = toggle.classList.contains('active');
+      document.body.classList.toggle('reduce-motion', isReduced);
+      localStorage.setItem('reduceAnimations', isReduced);
+      showToast(isReduced ? 'Animations reduced' : 'Animations enabled');
+    }
+
+    function setFontSize(size, save = true) {
+      document.querySelectorAll('.font-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.size === size);
+      });
+
+      document.body.classList.remove('font-small', 'font-medium', 'font-large');
+      document.body.classList.add('font-' + size);
+
+      if (save) {
+        localStorage.setItem('fontSize', size);
+        showToast('Font size updated');
+      }
+    }
+
+    // ============ QUIET HOURS ============
+    function loadQuietHours() {
+      const quietEnabled = localStorage.getItem('quietHoursEnabled') === 'true';
+      const quietStart = localStorage.getItem('quietStart') || '22:00';
+      const quietEnd = localStorage.getItem('quietEnd') || '08:00';
+
+      if (quietEnabled) {
+        document.getElementById('quietToggle').classList.add('active');
+        document.getElementById('quietHoursConfig').style.display = 'block';
+      }
+
+      document.getElementById('quietStart').value = quietStart;
+      document.getElementById('quietEnd').value = quietEnd;
+      updateQuietSummary();
+    }
+
+    function toggleQuietHours() {
+      const toggle = document.getElementById('quietToggle');
+      toggle.classList.toggle('active');
+      const isEnabled = toggle.classList.contains('active');
+      document.getElementById('quietHoursConfig').style.display = isEnabled ? 'block' : 'none';
+      localStorage.setItem('quietHoursEnabled', isEnabled);
+      showToast(isEnabled ? 'Quiet hours enabled' : 'Quiet hours disabled');
+    }
+
+    function saveQuietHours() {
+      const start = document.getElementById('quietStart').value;
+      const end = document.getElementById('quietEnd').value;
+      localStorage.setItem('quietStart', start);
+      localStorage.setItem('quietEnd', end);
+      updateQuietSummary();
+    }
+
+    function updateQuietSummary() {
+      const start = document.getElementById('quietStart').value;
+      const end = document.getElementById('quietEnd').value;
+      const formatTime = (time) => {
+        const [h, m] = time.split(':');
+        const hour = parseInt(h);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 || 12;
+        return `${hour12}:${m} ${ampm}`;
+      };
+      document.getElementById('quietSummary').textContent = `Quiet from ${formatTime(start)} to ${formatTime(end)}`;
+    }
+
+    // ============ SECURITY SETTINGS ============
+    function updateSecurityDisplay() {
+      if (currentUser) {
+        document.getElementById('currentEmailDisplay').textContent = currentUser.email;
+      }
+    }
+
+    function showChangeEmailModal() {
+      document.getElementById('emailModal').classList.add('show');
+      document.getElementById('newEmailInput').value = '';
+    }
+
+    function hideEmailModal() {
+      document.getElementById('emailModal').classList.remove('show');
+    }
+
+    async function changeEmail() {
+      const newEmail = document.getElementById('newEmailInput').value.trim();
+
+      if (!newEmail) {
+        showToast('Please enter an email address');
+        return;
+      }
+
+      if (!newEmail.includes('@')) {
+        showToast('Please enter a valid email');
+        return;
+      }
+
+      try {
+        const { error } = await db.auth.updateUser({ email: newEmail });
+
+        if (error) throw error;
+
+        hideEmailModal();
+        showToast('Check your email to confirm the change');
+      } catch (err) {
+        console.error('Change email error:', err);
+        showToast(err.message || 'Failed to update email');
+      }
+    }
+
+    function showChangePasswordModal() {
+      document.getElementById('passwordModal').classList.add('show');
+      document.getElementById('newPasswordInput').value = '';
+      document.getElementById('confirmPasswordInput').value = '';
+    }
+
+    function hidePasswordModal() {
+      document.getElementById('passwordModal').classList.remove('show');
+    }
+
+    async function changePassword() {
+      const newPassword = document.getElementById('newPasswordInput').value;
+      const confirmPassword = document.getElementById('confirmPasswordInput').value;
+
+      if (!newPassword) {
+        showToast('Please enter a password');
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        showToast('Password must be at least 6 characters');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        showToast('Passwords do not match');
+        return;
+      }
+
+      try {
+        const { error } = await db.auth.updateUser({ password: newPassword });
+
+        if (error) throw error;
+
+        hidePasswordModal();
+        showToast('Password updated successfully');
+      } catch (err) {
+        console.error('Change password error:', err);
+        showToast(err.message || 'Failed to update password');
+      }
+    }
+
+    document.getElementById('emailModal').addEventListener('click', (e) => {
+      if (e.target.id === 'emailModal') hideEmailModal();
+    });
+
+    document.getElementById('passwordModal').addEventListener('click', (e) => {
+      if (e.target.id === 'passwordModal') hidePasswordModal();
+    });
+
+    // ============ ACCOUNT ACTIONS ============
+    async function downloadMyData() {
+      if (!currentUser) {
+        showToast('Please log in first');
+        return;
+      }
+
+      showToast('Preparing your data...');
+
+      try {
+        // Fetch all user data
+        const [journalRes, moodRes, reflectionsRes, profileRes] = await Promise.all([
+          db.from('journal_entries').select('*').eq('user_id', currentUser.id),
+          db.from('mood_entries').select('*').eq('user_id', currentUser.id),
+          db.from('reflections').select('*').eq('user_id', currentUser.id),
+          db.from('profiles').select('*').eq('id', currentUser.id).single()
+        ]);
+
+        const userData = {
+          exportDate: new Date().toISOString(),
+          user: {
+            id: currentUser.id,
+            email: currentUser.email,
+            username: currentUser.user_metadata?.username
+          },
+          profile: profileRes.data,
+          journalEntries: journalRes.data || [],
+          moodEntries: moodRes.data || [],
+          reflections: reflectionsRes.data || []
+        };
+
+        // Create and download file
+        const blob = new Blob([JSON.stringify(userData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `introvert-place-data-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast('Data downloaded successfully!');
+      } catch (err) {
+        console.error('Download error:', err);
+        showToast('Failed to download data');
+      }
+    }
+
+    async function togglePauseAccount() {
+      const toggle = document.getElementById('pauseToggle');
+      toggle.classList.toggle('active');
+      const isPaused = toggle.classList.contains('active');
+
+      try {
+        await db.from('profiles').upsert({
+          id: currentUser.id,
+          is_paused: isPaused,
+          updated_at: new Date().toISOString()
+        });
+
+        showToast(isPaused ? 'Account paused - your profile is hidden' : 'Account active - your profile is visible');
+      } catch (err) {
+        console.error('Pause account error:', err);
+        toggle.classList.toggle('active'); // Revert
+        showToast('Failed to update account status');
+      }
+    }
+
+    async function loadAccountStatus() {
+      if (!currentUser) return;
+
+      try {
+        const { data } = await db
+          .from('profiles')
+          .select('is_paused')
+          .eq('id', currentUser.id)
+          .single();
+
+        if (data?.is_paused) {
+          document.getElementById('pauseToggle').classList.add('active');
+        }
+      } catch (err) {
+        // Profile might not exist yet
+      }
+    }
+
+    // ============ INITIALIZE SETTINGS ============
+    function initSettings() {
+      loadAppearanceSettings();
+      loadQuietHours();
+      updateSecurityDisplay();
+      loadAccountStatus();
+    }
+
+    // Call after auth is initialized
+    const originalInitAuth = initAuth;
+    initAuth = async function() {
+      await originalInitAuth();
+      initSettings();
+    };
+  </script>
+</body>
+</html>
+

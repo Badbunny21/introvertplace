@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Introvert Place — App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f16;
+      --bg-deep: #0a0c10;
+      --bg-surface: #12151c;
+      --bg-elevated: #1a1e28;
+      --surface: #111624;
+      --text: #f0eeeb;
+      --text-secondary: #9ca3af;
+      --muted: #6b7280;
+      --border: rgba(255,255,255,0.08);
+      --border-subtle: rgba(255,255,255,0.06);
+      --accent: #c4a1ff;
+      --accent-warm: #e8a87c;
+      --accent-soft: #c4a1ff;
+      --accent-green: #7ce8a8;
+      --accent-calm: #7cb8e8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ============ MOOD OVERLAY (Full Screen) ============ */
+    .mood-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg-deep);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .mood-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .mood-ambient {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .mood-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.5;
+      animation: float 20s ease-in-out infinite;
+    }
+    .mood-orb-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(232,168,124,0.4) 0%, transparent 70%);
+      top: -200px;
+      right: -100px;
+    }
+    .mood-orb-2 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(196,161,255,0.35) 0%, transparent 70%);
+      bottom: -150px;
+      left: 5%;
+      animation-delay: -10s;
+    }
+    .mood-orb-3 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(124,232,168,0.25) 0%, transparent 70%);
+      top: 40%;
+      left: 40%;
+      animation-delay: -5s;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -30px) scale(1.05); }
+      66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    .mood-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 750px;
+      padding: 40px 24px;
+    }
+    .greeting-time {
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+    }
+    .greeting-name {
+      font-family: 'Fraunces', serif;
+      font-size: 48px;
+      font-weight: 300;
+      margin-bottom: 12px;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+    .greeting-name span {
+      background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-soft) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .mood-question {
+      font-family: 'Fraunces', serif;
+      font-size: 24px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+    }
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .mood-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 28px 20px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .mood-option::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, var(--mood-color, var(--accent)) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .mood-option:hover {
+      transform: translateY(-6px);
+      border-color: var(--mood-color, var(--accent));
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px var(--mood-color, var(--accent));
+    }
+    .mood-option:hover::before { opacity: 0.15; }
+    .mood-emoji {
+      font-size: 44px;
+      transition: transform 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .mood-option:hover .mood-emoji { transform: scale(1.2); }
+    .mood-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      position: relative;
+      z-index: 1;
+    }
+    .mood-grid-secondary {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+    .mood-option-small {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 22px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .mood-option-small:hover {
+      background: var(--bg-elevated);
+      border-color: var(--mood-color, var(--accent));
+      transform: translateY(-2px);
+    }
+    .mood-option-small .mood-emoji { font-size: 26px; }
+    .mood-option-small .mood-label { font-size: 14px; }
+    .mood-skip {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 14px;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      padding: 12px 20px;
+    }
+    .mood-skip:hover { color: var(--text-secondary); }
+
+    /* ============ MAIN APP ============ */
+    .app-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    nav.app-nav {
+      width: 240px;
+      background: #0d111a;
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+    }
+    .nav-spacer { flex: 1; }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-link {
+      padding: 12px 14px;
+      border-radius: 10px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-link:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+    }
+    .nav-link.active {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .profile-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+    }
+    .nav-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .nav-user {
+      display: inline-flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .nav-name { font-size: 13px; color: var(--text); }
+    .nav-mood { font-size: 11px; color: var(--muted); }
+
+    /* Full screen mode (for profile) */
+    .app-wrapper.fullscreen nav.app-nav {
+      display: none;
+    }
+    .app-wrapper.fullscreen main.app-content {
+      width: 100%;
+    }
+
+    main.app-content {
+      flex: 1;
+      overflow: auto;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0b0f16 0%, #0c0f1a 60%, #0c0d14 100%);
+    }
+    iframe.app-frame {
+      width: 100%;
+      height: 100vh;
+      border: none;
+    }
+
+    @media (max-width: 900px) {
+      .mood-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .greeting-name { font-size: 32px; }
+      .mood-question { font-size: 18px; }
+      .mood-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .mood-option { padding: 20px 16px; }
+      .mood-emoji { font-size: 36px; }
+    }
+  </style>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- Full-Screen Mood Selection Overlay -->
+  <div class="mood-overlay" id="moodOverlay">
+    <div class="mood-ambient">
+      <div class="mood-orb mood-orb-1"></div>
+      <div class="mood-orb mood-orb-2"></div>
+      <div class="mood-orb mood-orb-3"></div>
+    </div>
+    <div class="mood-content">
+      <div class="greeting-time" id="greetingTime">Good evening</div>
+      <h1 class="greeting-name">Welcome back, <span id="userName">friend</span></h1>
+      <p class="mood-question">How are you arriving this evening?</p>
+
+      <div class="mood-grid">
+        <div class="mood-option" style="--mood-color: #7ce8a8;" onclick="selectMood('peaceful', 'Peaceful', '😌')">
+          <span class="mood-emoji">😌</span>
+          <span class="mood-label">Peaceful</span>
+        </div>
+        <div class="mood-option" style="--mood-color: #e8a87c;" onclick="selectMood('anxious', 'Anxious', '😰')">
+          <span class="mood-emoji">😰</span>
+          <span class="mood-label">Anxious</span>
+        </div>
+        <div class="mood-option" style="--mood-color: #7cb8e8;" onclick="selectMood('low', 'Low Energy', '😔')">
+          <span class="mood-emoji">😔</span>
+          <span class="mood-label">Low Energy</span>
+        </div>
+        <div class="mood-option" style="--mood-color: #c4a1ff;" onclick="selectMood('reflective', 'Reflective', '🤔')">
+          <span class="mood-emoji">🤔</span>
+          <span class="mood-label">Reflective</span>
+        </div>
+      </div>
+
+      <div class="mood-grid-secondary">
+        <div class="mood-option-small" style="--mood-color: #f0e87c;" onclick="selectMood('happy', 'Happy', '😊')">
+          <span class="mood-emoji">😊</span>
+          <span class="mood-label">Happy</span>
+        </div>
+        <div class="mood-option-small" style="--mood-color: #e87c7c;" onclick="selectMood('tired', 'Tired', '😴')">
+          <span class="mood-emoji">😴</span>
+          <span class="mood-label">Tired</span>
+        </div>
+        <div class="mood-option-small" style="--mood-color: #7ce8e8;" onclick="selectMood('calm', 'Calm', '😇')">
+          <span class="mood-emoji">😇</span>
+          <span class="mood-label">Calm</span>
+        </div>
+        <div class="mood-option-small" style="--mood-color: #9ca3af;" onclick="selectMood('neutral', 'Neutral', '😐')">
+          <span class="mood-emoji">😐</span>
+          <span class="mood-label">Neutral</span>
+        </div>
+      </div>
+
+      <button class="mood-skip" onclick="selectMood('neutral', 'Neutral', '😐')">Skip for now →</button>
+    </div>
+  </div>
+
+  <!-- Main App (hidden until mood selected) -->
+  <div class="app-wrapper">
+    <nav class="app-nav">
+      <div class="nav-logo">🌙 Introvert Place</div>
+      <div class="nav-links">
+        <a class="nav-link active" href="#" onclick="loadPage('sanctuary', event)">🧘 Sanctuary</a>
+        <a class="nav-link" href="#" onclick="loadPage('wellness', event)">🌿 Wellness</a>
+        <a class="nav-link" href="#" onclick="loadPage('creative', event)">✨ Creative</a>
+        <a class="nav-link" href="#" onclick="loadPage('blog', event)">📖 Blog</a>
+        <a class="nav-link" href="#" onclick="loadPage('connect', event)">🤝 Connect</a>
+        <div class="nav-spacer"></div>
+        <a class="nav-link profile-link" href="#" onclick="loadPage('profile', event)">
+          <span class="nav-avatar" id="navUserAvatar">🌸</span>
+          <span class="nav-user">
+            <span class="nav-name" id="navUserName">peaceful_soul</span>
+            <span class="nav-mood" id="navUserMood">😌 Feeling calm</span>
+          </span>
+        </a>
+      </div>
+    </nav>
+    <main class="app-content">
+      <iframe id="appFrame" class="app-frame" src="sanctuary.html"></iframe>
+    </main>
+  </div>
+
+  <script>
+    // Supabase init
+    const db = window.supabase.createClient(
+      'https://inpziyxjznikinqqputz.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlucHppeXhqem5pa2lucXFwdXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MzQ0MTcsImV4cCI6MjA4NDAxMDQxN30.5QoXaD5vNcuteEmwmo82l_OIklVbGGCRpNtV0PMuSyY'
+    );
+
+    let currentUser = null;
+
+    // Set greeting based on time
+    function setGreeting() {
+      const hour = new Date().getHours();
+      let greeting = 'Good evening';
+      if (hour < 12) greeting = 'Good morning';
+      else if (hour < 17) greeting = 'Good afternoon';
+      document.getElementById('greetingTime').textContent = greeting;
+    }
+
+    // Check session and show mood screen or redirect
+    async function init() {
+      setGreeting();
+
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      currentUser = session.user;
+      const username = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
+
+      // Set username in mood screen and nav
+      document.getElementById('userName').textContent = username;
+      document.getElementById('navUserName').textContent = username;
+
+      // Load saved profile from localStorage
+      loadSavedProfile();
+
+      // Check if mood already selected today
+      const lastMood = localStorage.getItem('lastMoodDate');
+      const today = new Date().toDateString();
+
+      if (lastMood === today) {
+        // Already selected mood today, skip to app
+        const savedMood = JSON.parse(localStorage.getItem('currentMood') || '{}');
+        if (savedMood.emoji) {
+          document.getElementById('navUserMood').textContent = savedMood.emoji + ' Feeling ' + savedMood.label.toLowerCase();
+        }
+        document.getElementById('moodOverlay').classList.add('hidden');
+      }
+    }
+
+    // Handle mood selection
+    function selectMood(moodId, label, emoji) {
+      // Save mood
+      localStorage.setItem('currentMood', JSON.stringify({ id: moodId, label, emoji }));
+      localStorage.setItem('lastMoodDate', new Date().toDateString());
+
+      // Update nav
+      document.getElementById('navUserMood').textContent = emoji + ' Feeling ' + label.toLowerCase();
+
+      // Hide mood overlay with animation
+      document.getElementById('moodOverlay').classList.add('hidden');
+
+      // Load sanctuary with mood parameter
+      const frame = document.getElementById('appFrame');
+      frame.src = 'sanctuary.html?mood=' + moodId;
+    }
+
+    // Navigation
+    function setActive(link) {
+      document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
+      link.classList.add('active');
+    }
+
+    function loadPage(page, evt) {
+      const frame = document.getElementById('appFrame');
+      const appWrapper = document.querySelector('.app-wrapper');
+      const map = {
+        sanctuary: 'sanctuary.html',
+        wellness: 'wellness.html',
+        creative: 'creative.html',
+        blog: 'blog.html',
+        connect: 'connect.html',
+        profile: 'profile.html',
+      };
+      const mood = JSON.parse(localStorage.getItem('currentMood') || '{}');
+      let url = map[page] || 'sanctuary.html';
+      // Add cache buster
+      const cacheBuster = 'v=' + Date.now();
+      if (page === 'sanctuary' && mood.id) {
+        url += '?mood=' + mood.id + '&' + cacheBuster;
+      } else {
+        url += '?' + cacheBuster;
+      }
+      frame.src = url;
+
+      // Toggle fullscreen mode for profile page
+      if (page === 'profile') {
+        appWrapper.classList.add('fullscreen');
+      } else {
+        appWrapper.classList.remove('fullscreen');
+      }
+
+      if (evt && evt.target) {
+        setActive(evt.target.closest('.nav-link'));
+      }
+    }
+
+    // Exit fullscreen mode (called from profile back button)
+    function exitFullscreen() {
+      const appWrapper = document.querySelector('.app-wrapper');
+      appWrapper.classList.remove('fullscreen');
+      loadPage('sanctuary');
+      // Set sanctuary as active
+      document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
+      document.querySelector('.nav-link').classList.add('active');
+    }
+
+    // Logout
+    async function logout() {
+      await db.auth.signOut();
+      localStorage.removeItem('currentMood');
+      localStorage.removeItem('lastMoodDate');
+      window.location.href = 'index.html';
+    }
+
+    // Listen for navigation messages from iframes
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.action === 'navigate') {
+        loadPage(event.data.page);
+        // Update active nav link
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.classList.remove('active');
+          if (link.textContent.toLowerCase().includes(event.data.page)) {
+            link.classList.add('active');
+          }
+        });
+      }
+      // Handle back from profile (exit fullscreen)
+      if (event.data && event.data.action === 'exitProfile') {
+        exitFullscreen();
+        // Default to sanctuary active
+        if (event.data.page === 'sanctuary') {
+          document.querySelector('.nav-link').classList.add('active');
+        }
+      }
+    });
+
+    // Load saved profile from localStorage
+    function loadSavedProfile() {
+      const savedProfile = localStorage.getItem('introvert_profile');
+      if (savedProfile) {
+        const profile = JSON.parse(savedProfile);
+
+        // Update avatar
+        if (profile.avatar) {
+          document.getElementById('navUserAvatar').textContent = profile.avatar;
+        }
+
+        // Update username
+        if (profile.username) {
+          document.getElementById('userName').textContent = profile.username;
+          document.getElementById('navUserName').textContent = profile.username;
+        }
+      }
+    }
+
+    // Listen for profile updates from iframe (profile page)
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'profileUpdate') {
+        if (event.data.avatar) {
+          document.getElementById('navUserAvatar').textContent = event.data.avatar;
+        }
+        if (event.data.username) {
+          document.getElementById('navUserName').textContent = event.data.username;
+        }
+      }
+    });
+
+    // Initialize
+    init();
+  </script>
+</body>
+</html>
+

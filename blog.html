@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog - Introvert Place</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0c10;
+      --bg-surface: #12151c;
+      --bg-elevated: #1a1e28;
+      --bg-hover: #242a36;
+      --accent-warm: #e8a87c;
+      --accent-soft: #c4a1ff;
+      --accent-calm: #7cb8e8;
+      --accent-green: #7ce8a8;
+      --accent-gold: #f0e87c;
+      --accent-rose: #e87c9a;
+      --text-primary: #f0eeeb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --border-subtle: rgba(255,255,255,0.06);
+      --border-light: rgba(255,255,255,0.1);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-full: 9999px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 { font-family: 'Fraunces', serif; font-weight: 400; }
+
+    /* Layout */
+    .app { min-height: 100vh; }
+    .main { position: relative; min-height: 100vh; }
+
+    /* Ambient */
+    .ambient {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      animation: drift 25s ease-in-out infinite;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(232,168,124,0.15) 0%, transparent 70%);
+      top: -150px; right: -100px;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(196,161,255,0.12) 0%, transparent 70%);
+      bottom: -100px; left: 10%;
+      animation-direction: reverse;
+    }
+    @keyframes drift { 0%,100%{transform:translate(0,0);} 50%{transform:translate(30px,-30px);} }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      padding: 40px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .page-header { margin-bottom: 40px; }
+    .page-header h1 {
+      font-size: 42px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .page-header p { font-size: 18px; color: var(--text-secondary); }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
+    .tab {
+      padding: 12px 24px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .tab.active {
+      background: var(--accent-warm);
+      color: var(--bg-deep);
+      border-color: var(--accent-warm);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Categories */
+    .categories { display: flex; gap: 10px; margin-bottom: 32px; flex-wrap: wrap; }
+    .category {
+      padding: 8px 18px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .category:hover { color: var(--text-primary); border-color: var(--border-light); }
+    .category.active { background: var(--bg-elevated); color: var(--text-primary); border-color: var(--accent-soft); }
+
+    /* Featured */
+    .featured {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-bottom: 40px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .featured:hover {
+      border-color: var(--accent-warm);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .featured-image {
+      height: 300px;
+      background: linear-gradient(135deg, rgba(232,168,124,0.3) 0%, rgba(196,161,255,0.2) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      position: relative;
+    }
+    .featured-badge {
+      position: absolute;
+      top: 20px; left: 20px;
+      padding: 8px 16px;
+      background: var(--accent-warm);
+      color: var(--bg-deep);
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .featured-content { padding: 32px; }
+    .featured-meta {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .featured-meta .category-tag {
+      padding: 4px 12px;
+      background: rgba(196,161,255,0.15);
+      color: var(--accent-soft);
+      border-radius: var(--radius-full);
+    }
+    .featured-content h2 { font-size: 32px; margin-bottom: 12px; line-height: 1.3; }
+    .featured-content p { font-size: 16px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
+    .featured-footer { display: flex; align-items: center; justify-content: space-between; }
+    .author { display: flex; align-items: center; gap: 12px; }
+    .author-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .author-info { display: flex; flex-direction: column; }
+    .author-name { font-size: 14px; font-weight: 500; }
+    .author-date { font-size: 12px; color: var(--text-muted); }
+    .reading-time {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Articles */
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 24px;
+    }
+    .article-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .article-card:hover { border-color: var(--border-light); transform: translateY(-4px); }
+    .article-image {
+      height: 180px;
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center; justify-content: center;
+      font-size: 48px; position: relative;
+    }
+    .article-type {
+      position: absolute; top: 12px; right: 12px;
+      padding: 6px 12px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .article-type.editorial { color: var(--accent-warm); }
+    .article-type.community { color: var(--accent-green); }
+    .article-body { padding: 24px; }
+    .article-category {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(124,184,232,0.15);
+      color: var(--accent-calm);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      margin-bottom: 12px;
+    }
+    .article-body h3 { font-size: 20px; margin-bottom: 10px; line-height: 1.4; }
+    .article-body p {
+      font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .article-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 16px; border-top: 1px solid var(--border-subtle);
+    }
+    .article-author { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); }
+    .article-author-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--bg-elevated);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .article-meta { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-muted); }
+    .save-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 18px; cursor: pointer; transition: all 0.2s ease;
+    }
+    .save-btn:hover { color: var(--accent-gold); transform: scale(1.1); }
+    .save-btn.saved { color: var(--accent-gold); }
+
+    /* Write */
+    .write-intro {
+      text-align: center;
+      padding: 60px 40px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      margin-bottom: 40px;
+    }
+    .write-intro .intro-icon { font-size: 64px; margin-bottom: 20px; }
+    .write-intro h2 { font-size: 32px; margin-bottom: 12px; }
+    .write-intro p {
+      font-size: 16px; color: var(--text-secondary);
+      max-width: 500px; margin: 0 auto 28px; line-height: 1.7;
+    }
+    .write-btn {
+      padding: 16px 36px;
+      background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-soft) 100%);
+      border: none; border-radius: var(--radius-md);
+      color: var(--bg-deep); font-size: 16px; font-weight: 500;
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    .write-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(232,168,124,0.3); }
+    .write-btn.secondary {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+    }
+    .write-btn.secondary:hover {
+      background: var(--bg-hover);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .write-options {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .write-divider {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Guidelines */
+    .guidelines {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .guideline-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+    }
+    .guideline-card .icon { font-size: 32px; margin-bottom: 16px; }
+    .guideline-card h4 { font-size: 18px; margin-bottom: 8px; }
+    .guideline-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* Drafts */
+    .drafts-section { margin-top: 40px; }
+    .section-title {
+      font-size: 14px; text-transform: uppercase;
+      letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 20px;
+    }
+    .draft-card {
+      display: flex; align-items: center; gap: 20px;
+      padding: 20px; background: var(--bg-surface);
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+      margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease;
+    }
+    .draft-card:hover { background: var(--bg-elevated); }
+    .draft-icon {
+      width: 48px; height: 48px; background: var(--bg-elevated);
+      border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+    .draft-info { flex: 1; }
+    .draft-title { font-size: 16px; margin-bottom: 4px; }
+    .draft-meta { font-size: 13px; color: var(--text-muted); }
+    .draft-actions { display: flex; gap: 8px; }
+    .draft-btn {
+      padding: 8px 16px; background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+      color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: all 0.2s ease;
+    }
+    .draft-btn:hover { color: var(--text-primary); border-color: var(--border-light); }
+    .draft-btn.primary { background: var(--accent-soft); color: var(--bg-deep); border: none; }
+
+    /* Saved */
+    .saved-empty {
+      text-align: center;
+      padding: 80px 40px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+    }
+    .saved-empty .empty-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
+    .saved-empty h3 { font-size: 24px; margin-bottom: 12px; }
+    .saved-empty p { font-size: 15px; color: var(--text-secondary); }
+
+    /* Reading Modal */
+    .reading-modal {
+      position: fixed; inset: 0; z-index: 1000;
+      background: var(--bg-deep);
+      display: none; overflow-y: auto;
+    }
+    .reading-modal.active { display: block; }
+    .reading-header {
+      position: sticky; top: 0;
+      background: var(--bg-deep);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 16px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 10;
+    }
+    .close-reading {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .close-reading:hover { color: var(--text-primary); }
+    .reading-actions { display: flex; gap: 12px; }
+    .reading-action {
+      width: 44px; height: 44px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 50%;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .reading-action:hover { color: var(--text-primary); border-color: var(--border-light); }
+    .reading-action.active { color: var(--accent-gold); }
+
+    .reading-content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 60px 40px 100px;
+    }
+    .reading-content .category-tag {
+      display: inline-block; padding: 6px 14px;
+      background: rgba(196,161,255,0.15);
+      color: var(--accent-soft);
+      border-radius: var(--radius-full);
+      font-size: 12px; margin-bottom: 20px;
+    }
+    .reading-content h1 { font-size: 42px; line-height: 1.3; margin-bottom: 24px; }
+    .reading-meta {
+      display: flex; align-items: center; gap: 24px;
+      padding-bottom: 32px; border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 40px;
+    }
+    .reading-meta .author { display: flex; align-items: center; gap: 12px; }
+    .reading-meta .reading-time { margin-left: auto; }
+    .article-text { font-size: 18px; line-height: 1.9; color: var(--text-secondary); }
+    .article-text p { margin-bottom: 24px; }
+    .article-text h2 { font-size: 28px; color: var(--text-primary); margin: 48px 0 20px; }
+    .article-text blockquote {
+      border-left: 3px solid var(--accent-warm);
+      padding-left: 24px; margin: 32px 0;
+      font-family: 'Fraunces', serif; font-size: 22px; font-style: italic; color: var(--text-primary);
+    }
+
+    /* Reactions */
+    .quiet-reactions {
+      display: flex; align-items: center; justify-content: center;
+      gap: 16px; padding: 40px; margin-top: 60px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .quiet-reactions p { font-size: 14px; color: var(--text-muted); margin-right: 16px; }
+    .reaction-btn {
+      width: 56px; height: 56px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 50%;
+      font-size: 24px; cursor: pointer; transition: all 0.2s ease;
+    }
+    .reaction-btn:hover { transform: scale(1.1); border-color: var(--border-light); }
+    .reaction-btn.selected {
+      background: var(--bg-elevated);
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 20px rgba(196,161,255,0.2);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: 14px 28px;
+      background: var(--accent-green);
+      color: var(--bg-deep);
+      border-radius: var(--radius-full);
+      font-size: 14px; font-weight: 500;
+      opacity: 0; transition: all 0.3s ease; z-index: 1001;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* Editor Modal */
+    .editor-modal {
+      position: fixed; inset: 0; z-index: 1000;
+      background: var(--bg-deep);
+      display: none; overflow-y: auto;
+    }
+    .editor-modal.active { display: block; }
+    .editor-header {
+      position: sticky; top: 0;
+      background: var(--bg-deep);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 16px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 10;
+    }
+    .close-editor {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .close-editor:hover { color: var(--text-primary); }
+    .editor-actions { display: flex; gap: 12px; }
+    .editor-btn {
+      padding: 10px 24px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .editor-btn:hover { color: var(--text-primary); border-color: var(--border-light); }
+    .editor-btn.primary {
+      background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-soft) 100%);
+      color: var(--bg-deep);
+      border: none;
+      font-weight: 500;
+    }
+    .editor-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(232,168,124,0.3); }
+
+    .editor-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+    .editor-field { margin-bottom: 24px; }
+    .editor-field label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .editor-title {
+      width: 100%;
+      background: transparent;
+      border: none;
+      font-family: 'Fraunces', serif;
+      font-size: 36px;
+      color: var(--text-primary);
+      outline: none;
+      padding: 12px 0;
+      border-bottom: 2px solid var(--border-subtle);
+      transition: border-color 0.2s ease;
+    }
+    .editor-title::placeholder { color: var(--text-muted); }
+    .editor-title:focus { border-bottom-color: var(--accent-warm); }
+
+    .category-select {
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .category-option {
+      padding: 10px 20px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .category-option:hover { color: var(--text-primary); border-color: var(--border-light); }
+    .category-option.selected {
+      background: rgba(196,161,255,0.15);
+      color: var(--accent-soft);
+      border-color: var(--accent-soft);
+    }
+
+    .editor-textarea {
+      width: 100%;
+      min-height: 400px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 17px;
+      line-height: 1.8;
+      color: var(--text-primary);
+      outline: none;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+    }
+    .editor-textarea::placeholder { color: var(--text-muted); }
+    .editor-textarea:focus { border-color: var(--accent-soft); }
+
+    .editor-tips {
+      margin-top: 32px;
+      padding: 20px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+    }
+    .editor-tips h4 {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .editor-tips ul {
+      list-style: none;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .editor-tips li { padding: 6px 0; padding-left: 20px; position: relative; }
+    .editor-tips li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--accent-soft);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .content { padding: 24px; }
+      .articles-grid { grid-template-columns: 1fr; }
+      .featured-content h2 { font-size: 26px; }
+      .reading-content { padding: 40px 24px; }
+      .reading-content h1 { font-size: 32px; }
+    }
+    @media (max-width: 600px) {
+      .page-header h1 { font-size: 32px; }
+      .tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; }
+      .featured-image { height: 200px; }
+      .guidelines { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app">
+    <main class="main">
+      <div class="ambient">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+      </div>
+
+      <div class="content">
+        <header class="page-header">
+          <h1>📖 Blog</h1>
+          <p>Thoughtful reads for quiet minds. Take your time.</p>
+        </header>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="discover">Discover</button>
+          <button class="tab" data-tab="write">Write</button>
+          <button class="tab" data-tab="saved">Saved</button>
+        </div>
+
+        <div class="tab-content active" id="tab-discover">
+          <div class="categories">
+            <button class="category active">All</button>
+            <button class="category">Solitude</button>
+            <button class="category">Creativity</button>
+            <button class="category">Energy</button>
+            <button class="category">Quiet Living</button>
+            <button class="category">Deep Thoughts</button>
+            <button class="category">Relationships</button>
+          </div>
+
+          <div class="empty-featured" style="padding: 60px; text-align: center; background: var(--bg-elevated); border-radius: 20px; border: 1px dashed var(--border-subtle);">
+            <span style="font-size: 64px;">📖</span>
+            <h2 style="margin-top: 16px; font-size: 24px;">No articles yet</h2>
+            <p style="color: var(--text-secondary); margin-top: 8px; max-width: 400px; margin-left: auto; margin-right: auto;">Be the first to share your story! Articles from the community will appear here.</p>
+            <button class="write-btn" style="margin-top: 24px;" onclick="openEditor(); loadDraft();">✍️ Start Writing</button>
+          </div>
+
+          <div class="articles-grid">
+            <!-- Articles from the community will appear here -->
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-write">
+          <div class="write-intro">
+            <div class="intro-icon">✍️</div>
+            <h2>Share Your Story</h2>
+            <p>Your experiences matter. Write for fellow introverts who understand. No pressure to go viral — just genuine connection through words.</p>
+            <div class="write-options">
+              <button class="write-btn" onclick="openEditor(); loadDraft();">Start Writing</button>
+              <span class="write-divider">or</span>
+              <button class="write-btn secondary" onclick="document.getElementById('fileUpload').click();">📄 Upload Existing</button>
+              <input type="file" id="fileUpload" accept=".txt,.md,.doc,.docx" style="display: none;" onchange="handleFileUpload(event)">
+            </div>
+          </div>
+
+          <div class="guidelines">
+            <div class="guideline-card">
+              <div class="icon">💭</div>
+              <h4>Be Authentic</h4>
+              <p>Share your real experiences. Vulnerability connects us more than perfection ever could.</p>
+            </div>
+            <div class="guideline-card">
+              <div class="icon">🌿</div>
+              <h4>Take Your Time</h4>
+              <p>No deadlines, no pressure. Save drafts, revisit later. Publish when it feels right.</p>
+            </div>
+            <div class="guideline-card">
+              <div class="icon">🤝</div>
+              <h4>Respect & Support</h4>
+              <p>This is a safe space. We lift each other up. No judgment, only understanding.</p>
+            </div>
+            <div class="guideline-card">
+              <div class="icon">📖</div>
+              <h4>Any Length Welcome</h4>
+              <p>From short reflections to deep dives. Every story deserves to be told, however long it takes.</p>
+            </div>
+          </div>
+
+          <div class="drafts-section">
+            <div class="section-title">Your Drafts</div>
+            <div style="padding: 24px; text-align: center; color: var(--text-muted); background: var(--bg-elevated); border-radius: 12px;">
+              <span style="font-size: 32px;">✏️</span>
+              <p style="margin-top: 8px;">No drafts yet. Start writing and your work-in-progress will be saved here.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-saved">
+          <div class="articles-grid">
+            <!-- Saved articles will appear here -->
+          </div>
+          <div style="text-align: center; padding: 60px 24px;">
+            <span style="font-size: 48px;">🔖</span>
+            <h3 style="margin-top: 16px;">No saved articles</h3>
+            <p style="color: var(--text-muted); margin-top: 8px;">Save articles with the 🔖 bookmark icon to read later</p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <div class="reading-modal" id="readingModal">
+    <div class="reading-header">
+      <button class="close-reading" onclick="closeArticle()"><span>←</span> Back to Blog</button>
+      <div class="reading-actions">
+        <button class="reading-action" onclick="toggleSave(this)" title="Save for later">🔖</button>
+        <button class="reading-action" title="Share quietly">↗️</button>
+      </div>
+    </div>
+    <div class="reading-content">
+      <span class="category-tag">Solitude</span>
+      <h1>The Art of Doing Nothing: A Guide to Productive Rest</h1>
+      <div class="reading-meta">
+        <div class="author">
+          <div class="author-avatar">🌿</div>
+          <div class="author-info">
+            <span class="author-name">The Introvert Place Team</span>
+            <span class="author-date">December 28, 2025</span>
+          </div>
+        </div>
+        <div class="reading-time"><span>📚</span><span>8 min read</span></div>
+      </div>
+      <div class="article-text">
+        <p>In a world that glorifies constant hustle, the idea of doing nothing feels almost rebellious. We're taught that every moment should be optimized, every minute productive. But what if the most productive thing you could do is... nothing at all?</p>
+        <p>As introverts, we understand something that the productivity culture often misses: rest isn't the absence of doing — it's an essential part of being. Our minds are always working, processing, creating. The external stillness allows for internal richness.</p>
+        <h2>The Science of Doing Nothing</h2>
+        <p>Neuroscience has shown that our brains are incredibly active during periods of rest. The "default mode network" — the brain's resting state — is where we process emotions, consolidate memories, and generate creative insights. When we're constantly stimulated, we never give this network the chance to work its magic.</p>
+        <blockquote>"Almost everything will work again if you unplug it for a few minutes, including you."</blockquote>
+        <p>For introverts, this understanding is intuitive. We've always known that solitude isn't empty — it's full. Full of thoughts, reflections, and the quiet work of understanding ourselves and the world around us.</p>
+        <h2>Reclaiming Rest</h2>
+        <p>The first step is letting go of guilt. Rest is not laziness. Solitude is not antisocial. Taking time to do nothing is not wasting time — it's investing in your mental and emotional wellbeing.</p>
+        <p>Start small. Five minutes of sitting with your thoughts. An afternoon without plans. A weekend where you say no to everything. Notice how it feels. Notice the initial discomfort, then the settling, then the peace.</p>
+        <p>You don't have to justify your need for rest. You don't have to be recovering from something or preparing for something. The rest itself is enough. You are enough, even when you're doing nothing.</p>
+      </div>
+      <div class="quiet-reactions">
+        <p>How did this resonate?</p>
+        <button class="reaction-btn" onclick="selectReaction(this)">🌿</button>
+        <button class="reaction-btn" onclick="selectReaction(this)">💜</button>
+        <button class="reaction-btn" onclick="selectReaction(this)">✨</button>
+        <button class="reaction-btn" onclick="selectReaction(this)">🙏</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="editor-modal" id="editorModal">
+    <div class="editor-header">
+      <button class="close-editor" onclick="closeEditor()"><span>←</span> Back to Blog</button>
+      <div class="editor-actions">
+        <button class="editor-btn" onclick="saveDraft()">Save Draft</button>
+        <button class="editor-btn primary" onclick="publishPost()">Publish</button>
+      </div>
+    </div>
+    <div class="editor-content">
+      <div class="editor-field">
+        <input type="text" class="editor-title" id="postTitle" placeholder="Your story title...">
+      </div>
+
+      <div class="editor-field">
+        <label>Category</label>
+        <div class="category-select">
+          <button class="category-option" onclick="selectCategory(this)">Solitude</button>
+          <button class="category-option" onclick="selectCategory(this)">Creativity</button>
+          <button class="category-option" onclick="selectCategory(this)">Energy</button>
+          <button class="category-option" onclick="selectCategory(this)">Quiet Living</button>
+          <button class="category-option" onclick="selectCategory(this)">Deep Thoughts</button>
+          <button class="category-option" onclick="selectCategory(this)">Relationships</button>
+        </div>
+      </div>
+
+      <div class="editor-field">
+        <label>Your Story</label>
+        <textarea class="editor-textarea" id="postContent" placeholder="Start writing your story here... Take your time, there's no rush."></textarea>
+      </div>
+
+      <div class="editor-tips">
+        <h4>💡 Writing Tips</h4>
+        <ul>
+          <li>Write from the heart — authenticity resonates</li>
+          <li>Use paragraphs to give readers breathing room</li>
+          <li>Your draft auto-saves as you type</li>
+          <li>Press Escape anytime to return to the blog</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.onclick = function() {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+      };
+    });
+
+    document.querySelectorAll('.category').forEach(cat => {
+      cat.onclick = function() {
+        document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+      };
+    });
+
+    function toggleSave(btn) {
+      btn.classList.toggle('saved');
+      if (btn.classList.contains('saved')) {
+        showToast('🔖 Saved for later');
+      } else {
+        showToast('Removed from saved');
+      }
+    }
+
+    function openArticle() {
+      document.getElementById('readingModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeArticle() {
+      document.getElementById('readingModal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function selectReaction(btn) {
+      document.querySelectorAll('.reaction-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      showToast('💜 Thank you for your reaction');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+
+    // Editor functions
+    function openEditor() {
+      document.getElementById('editorModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('postTitle').focus();
+    }
+
+    function closeEditor() {
+      document.getElementById('editorModal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // File upload handler
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        let content = e.target.result;
+
+        // Extract title from first line if it looks like a heading
+        let title = '';
+        const lines = content.split('\n');
+        const firstLine = lines[0].trim();
+
+        // Check for markdown heading or just use first line as title
+        if (firstLine.startsWith('# ')) {
+          title = firstLine.substring(2);
+          content = lines.slice(1).join('\n').trim();
+        } else if (firstLine.length > 0 && firstLine.length < 100) {
+          title = firstLine;
+          content = lines.slice(1).join('\n').trim();
+        }
+
+        // Open editor and populate with file content
+        openEditor();
+        document.getElementById('postTitle').value = title;
+        document.getElementById('postContent').value = content;
+
+        showToast('📄 File imported successfully');
+      };
+
+      reader.onerror = function() {
+        showToast('Error reading file');
+      };
+
+      reader.readAsText(file);
+      event.target.value = ''; // Reset input for re-upload
+    }
+
+    function selectCategory(btn) {
+      document.querySelectorAll('.category-option').forEach(c => c.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function saveDraft() {
+      const title = document.getElementById('postTitle').value;
+      const content = document.getElementById('postContent').value;
+      const category = document.querySelector('.category-option.selected')?.textContent || '';
+
+      if (!title && !content) {
+        showToast('Nothing to save yet');
+        return;
+      }
+
+      localStorage.setItem('blogDraft', JSON.stringify({ title, content, category, savedAt: new Date().toISOString() }));
+      showToast('✨ Draft saved');
+    }
+
+    function publishPost() {
+      const title = document.getElementById('postTitle').value;
+      const content = document.getElementById('postContent').value;
+      const category = document.querySelector('.category-option.selected')?.textContent || '';
+
+      if (!title.trim()) {
+        showToast('Please add a title');
+        return;
+      }
+      if (!content.trim()) {
+        showToast('Please write some content');
+        return;
+      }
+      if (!category) {
+        showToast('Please select a category');
+        return;
+      }
+
+      showToast('🎉 Your story has been published!');
+      localStorage.removeItem('blogDraft');
+
+      document.getElementById('postTitle').value = '';
+      document.getElementById('postContent').value = '';
+      document.querySelectorAll('.category-option').forEach(c => c.classList.remove('selected'));
+
+      setTimeout(() => {
+        closeEditor();
+        switchTab('discover');
+      }, 1500);
+    }
+
+    // Load draft on editor open
+    function loadDraft() {
+      const draft = localStorage.getItem('blogDraft');
+      if (draft) {
+        const { title, content, category } = JSON.parse(draft);
+        document.getElementById('postTitle').value = title || '';
+        document.getElementById('postContent').value = content || '';
+        if (category) {
+          document.querySelectorAll('.category-option').forEach(btn => {
+            if (btn.textContent === category) btn.classList.add('selected');
+          });
+        }
+      }
+    }
+
+    // Auto-save draft
+    let autoSaveTimer;
+    document.getElementById('postContent')?.addEventListener('input', () => {
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(saveDraft, 2000);
+    });
+    document.getElementById('postTitle')?.addEventListener('input', () => {
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(saveDraft, 2000);
+    });
+
+    // Update escape key handler
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeArticle();
+        closeEditor();
+      }
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Sanctuary - Introvert Place</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0c10;
+      --bg-surface: #12151c;
+      --bg-elevated: #1a1e28;
+      --bg-hover: #242a36;
+      --accent-warm: #e8a87c;
+      --accent-soft: #c4a1ff;
+      --accent-calm: #7cb8e8;
+      --accent-green: #7ce8a8;
+      --accent-gold: #f0e87c;
+      --text-primary: #f0eeeb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --border-subtle: rgba(255,255,255,0.06);
+      --border-light: rgba(255,255,255,0.1);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-full: 9999px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, h4 { font-family: 'Fraunces', serif; font-weight: 400; }
+
+    /* Mood screen */
+    .mood-screen {
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 40px 24px; position: relative; overflow: hidden;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .mood-screen.hidden { opacity: 0; transform: scale(0.95); pointer-events: none; position: absolute; inset: 0; }
+    .mood-screen .ambient-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .ambient-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.5; animation: float 20s ease-in-out infinite; }
+    .mood-screen .orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(232,168,124,0.4) 0%, transparent 70%); top: -200px; right: -100px; }
+    .mood-screen .orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(196,161,255,0.35) 0%, transparent 70%); bottom: -150px; left: 5%; animation-delay: -10s; }
+    .mood-screen .orb-3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(124,232,168,0.25) 0%, transparent 70%); top: 40%; left: 40%; animation-delay: -5s; }
+    @keyframes float { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(30px,-30px) scale(1.05);} 66%{transform:translate(-20px,20px) scale(0.95);} }
+    .mood-content { position: relative; z-index: 1; text-align: center; max-width: 750px; }
+    .greeting-time { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; }
+    .greeting-name { font-size: 48px; font-weight: 300; margin-bottom: 12px; letter-spacing: -0.03em; line-height: 1.2; }
+    .greeting-name span { background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-soft) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .mood-question { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 300; font-style: italic; color: var(--text-secondary); margin-bottom: 48px; }
+    .mood-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
+    .mood-option {
+      display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 20px;
+      background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl);
+      cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;
+    }
+    .mood-option::before { content:''; position:absolute; inset:0; background: radial-gradient(circle at center, var(--mood-color) 0%, transparent 70%); opacity:0; transition: opacity 0.3s ease; }
+    .mood-option:hover { transform: translateY(-6px); border-color: var(--mood-color); box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px var(--mood-color); }
+    .mood-option:hover::before { opacity: 0.15; }
+    .mood-emoji { font-size: 44px; transition: transform 0.3s ease; position: relative; z-index: 1; }
+    .mood-option:hover .mood-emoji { transform: scale(1.2); }
+    .mood-label { font-size: 14px; color: var(--text-secondary); font-weight: 500; position: relative; z-index: 1; }
+    .mood-grid-secondary { display: flex; justify-content: center; gap: 12px; margin-bottom: 36px; flex-wrap: wrap; }
+    .mood-option-small {
+      display: flex; align-items: center; gap: 10px; padding: 14px 22px;
+      background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+      cursor: pointer; transition: all 0.25s ease;
+    }
+    .mood-option-small:hover { background: var(--bg-elevated); border-color: var(--mood-color); transform: translateY(-2px); }
+    .mood-option-small .mood-emoji { font-size: 26px; }
+    .mood-option-small .mood-label { font-size: 14px; }
+    .mood-skip { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; transition: color 0.2s ease; padding: 12px 20px; }
+    .mood-skip:hover { color: var(--text-secondary); }
+
+    /* App layout */
+    .app-container { display: none; min-height: 100vh; }
+    .app-container.visible { display: block; }
+    .main-content { min-height: 100vh; position: relative; }
+    .sanctuary-ambient {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none; z-index: 0; overflow: hidden; transition: opacity 0.5s ease;
+    }
+    .sanctuary-ambient .orb-1, .sanctuary-ambient .orb-2 {
+      position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.35;
+    }
+    .sanctuary-ambient .orb-1 { width: 600px; height: 600px; top: -200px; right: -100px; animation: float 25s ease-in-out infinite; }
+    .sanctuary-ambient .orb-2 { width: 500px; height: 500px; bottom: -150px; left: 20%; animation: float 20s ease-in-out infinite reverse; opacity: 0.25; }
+    /* Mood ambient variants */
+    .sanctuary-ambient.mood-peaceful .orb-1 { background: radial-gradient(circle, rgba(124,232,168,0.5) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-peaceful .orb-2 { background: radial-gradient(circle, rgba(124,184,232,0.4) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-anxious .orb-1 { background: radial-gradient(circle, rgba(232,168,124,0.5) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-anxious .orb-2 { background: radial-gradient(circle, rgba(196,161,255,0.4) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-low .orb-1 { background: radial-gradient(circle, rgba(124,184,232,0.5) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-low .orb-2 { background: radial-gradient(circle, rgba(196,161,255,0.4) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-reflective .orb-1 { background: radial-gradient(circle, rgba(196,161,255,0.5) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-reflective .orb-2 { background: radial-gradient(circle, rgba(232,168,124,0.4) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-happy .orb-1 { background: radial-gradient(circle, rgba(240,232,124,0.5) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-happy .orb-2 { background: radial-gradient(circle, rgba(124,232,168,0.4) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-tired .orb-1 { background: radial-gradient(circle, rgba(161,184,196,0.4) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-tired .orb-2 { background: radial-gradient(circle, rgba(124,184,232,0.3) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-calm .orb-1 { background: radial-gradient(circle, rgba(152,212,187,0.5) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-calm .orb-2 { background: radial-gradient(circle, rgba(124,232,168,0.4) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-neutral .orb-1 { background: radial-gradient(circle, rgba(156,163,175,0.4) 0%, transparent 70%); }
+    .sanctuary-ambient.mood-neutral .orb-2 { background: radial-gradient(circle, rgba(196,161,255,0.3) 0%, transparent 70%); }
+
+    .content-wrapper { position: relative; z-index: 1; padding: 36px 48px; max-width: 1400px; margin: 0 auto; }
+
+    /* Header */
+    .sanctuary-header { margin-bottom: 36px; }
+    .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; gap: 24px; flex-wrap: wrap; }
+    .welcome-section h1 { font-size: 34px; font-weight: 300; margin-bottom: 8px; letter-spacing: -0.02em; }
+    .welcome-section h1 span { font-style: italic; color: var(--accent-warm); }
+    .user-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .current-mood-badge {
+      display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px;
+      background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-full);
+      font-size: 14px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease;
+    }
+    .current-mood-badge:hover { background: var(--bg-elevated); border-color: var(--border-light); }
+    .current-mood-badge .emoji { font-size: 20px; }
+    .change-mood { color: var(--text-muted); font-size: 12px; margin-left: 8px; transition: color 0.2s ease; }
+    .current-mood-badge:hover .change-mood { color: var(--accent-warm); }
+    .header-stats { display: flex; gap: 16px; }
+    .stat-card { text-align: center; padding: 18px 26px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); min-width: 110px; }
+    .stat-value { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 400; line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+    .stat-card.battery .mini-battery { width: 100%; height: 4px; background: var(--bg-deep); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+    .stat-card.battery .mini-battery-fill { height: 100%; background: linear-gradient(90deg, var(--accent-warm), var(--accent-gold)); border-radius: 2px; transition: width 0.5s ease; }
+
+    .mood-message { padding: 22px 28px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); border-left: 4px solid var(--mood-accent, var(--accent-warm)); transition: border-color 0.3s ease; }
+    .mood-message p { font-family: 'Fraunces', serif; font-size: 17px; font-style: italic; color: var(--text-secondary); line-height: 1.6; }
+
+    /* Tabs */
+    .sanctuary-tabs { display: flex; gap: 8px; margin-bottom: 28px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px; overflow-x: auto; }
+    .sanctuary-tab {
+      display: flex; align-items: center; gap: 10px; padding: 12px 22px; background: none; border: none;
+      border-radius: var(--radius-md); color: var(--text-secondary); font-size: 14px; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
+    }
+    .sanctuary-tab:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .sanctuary-tab.active { background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-light); }
+    .sanctuary-tab .tab-icon { font-size: 18px; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Sections */
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 20px; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+    .section-subtitle { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 16px; }
+
+    .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+    .action-card {
+      padding: 26px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+      cursor: pointer; transition: all 0.3s ease; text-align: left; position: relative; overflow: hidden;
+    }
+    .action-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--card-glow, rgba(232,168,124,0.1)) 0%, transparent 60%); opacity: 0; transition: opacity 0.3s ease; }
+    .action-card:hover { transform: translateY(-4px); border-color: var(--card-accent, var(--accent-warm)); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+    .action-card:hover::before { opacity: 1; }
+    .action-card.breathing { --card-glow: rgba(124,232,168,0.15); --card-accent: var(--accent-green); }
+    .action-card.journal { --card-glow: rgba(196,161,255,0.15); --card-accent: var(--accent-soft); }
+    .action-card.reflection { --card-glow: rgba(232,168,124,0.15); --card-accent: var(--accent-warm); }
+    .action-card.creative { --card-glow: rgba(124,184,232,0.15); --card-accent: var(--accent-calm); }
+    .action-icon { font-size: 36px; margin-bottom: 18px; position: relative; z-index: 1; }
+    .action-card h3 { font-size: 19px; margin-bottom: 10px; position: relative; z-index: 1; }
+    .action-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px; position: relative; z-index: 1; }
+    .action-time { font-size: 13px; color: var(--text-muted); position: relative; z-index: 1; }
+
+    .energy-card { padding: 28px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); margin-bottom: 40px; }
+    .energy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .energy-current { display: flex; align-items: baseline; gap: 8px; }
+    .energy-value { font-family: 'Fraunces', serif; font-size: 40px; }
+    .energy-max { font-size: 16px; color: var(--text-muted); }
+    .energy-trend { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(124,232,168,0.1); border-radius: var(--radius-full); font-size: 14px; color: var(--accent-green); }
+    .energy-bars { display: flex; gap: 10px; align-items: flex-end; height: 100px; margin-bottom: 12px; }
+    .energy-bar { flex: 1; background: var(--bg-elevated); border-radius: 6px; overflow: hidden; position: relative; height: 100%; }
+    .energy-bar-fill { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, var(--accent-calm), var(--accent-soft)); border-radius: 6px; transition: height 0.5s ease; }
+    .energy-labels { display: flex; justify-content: space-between; }
+    .energy-label { font-size: 12px; color: var(--text-muted); flex: 1; text-align: center; }
+
+    .activity-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+    .activity-card { padding: 22px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); }
+    .activity-header { display: flex; justify-content: space-between; margin-bottom: 14px; }
+    .activity-type { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .activity-time { font-size: 12px; color: var(--text-muted); }
+    .activity-content { font-size: 15px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px; }
+    .ai-insight { padding: 14px; background: var(--bg-elevated); border-radius: var(--radius-sm); border-left: 3px solid var(--accent-soft); }
+    .ai-badge { font-size: 11px; color: var(--accent-soft); display: block; margin-bottom: 8px; }
+    .ai-insight p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+    .gentle-prompt { padding: 28px; background: linear-gradient(135deg, rgba(196,161,255,0.08) 0%, rgba(232,168,124,0.08) 100%); border: 1px solid rgba(196,161,255,0.2); border-radius: var(--radius-lg); }
+    .prompt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .prompt-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .prompt-refresh { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; transition: color 0.2s ease; display: flex; align-items: center; gap: 6px; }
+    .prompt-refresh:hover { color: var(--text-secondary); }
+    .prompt-text { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 300; font-style: italic; line-height: 1.5; margin-bottom: 20px; }
+    .prompt-action { display: inline-flex; align-items: center; gap: 10px; padding: 14px 24px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 15px; cursor: pointer; transition: all 0.2s ease; }
+    .prompt-action:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--accent-soft); }
+
+    .two-column-layout { display: grid; grid-template-columns: 1fr 400px; gap: 28px; }
+    .main-column { min-width: 0; }
+    .side-column { display: flex; flex-direction: column; gap: 24px; }
+    .journal-composer { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 28px; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .btn-primary { padding: 12px 24px; background: linear-gradient(135deg, var(--accent-warm) 0%, #d4956a 100%); color: var(--bg-deep); border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,168,124,0.3); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-secondary { padding: 12px 24px; background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); font-size: 14px; cursor: pointer; transition: all 0.2s ease; width: 100%; }
+    .btn-secondary:hover { background: var(--bg-hover); color: var(--text-primary); }
+    textarea {
+      width: 100%; min-height: 140px; background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md); padding: 18px; color: var(--text-primary); font-family: inherit; font-size: 15px; resize: vertical; line-height: 1.6;
+    }
+    textarea:focus { outline: none; border-color: var(--accent-soft); }
+    textarea::placeholder { color: var(--text-muted); }
+    .composer-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+    .char-count { font-size: 13px; color: var(--text-muted); }
+    .empty-state { text-align: center; padding: 70px 40px; background: var(--bg-surface); border: 1px dashed var(--border-light); border-radius: var(--radius-lg); }
+    .empty-icon { font-size: 52px; display: block; margin-bottom: 18px; }
+    .empty-state h3 { font-size: 22px; margin-bottom: 10px; }
+    .empty-state p { color: var(--text-secondary); font-size: 15px; max-width: 340px; margin: 0 auto; line-height: 1.5; }
+    .side-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 22px; }
+    .side-card h3 { font-size: 17px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .prompt-box { background: var(--bg-elevated); border-radius: var(--radius-md); padding: 18px; margin-bottom: 18px; position: relative; }
+    .prompt-box .sparkle { font-size: 22px; }
+    .new-prompt-btn { position: absolute; top: 14px; right: 14px; padding: 8px 14px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; }
+    .new-prompt-btn:hover { background: var(--bg-hover); color: var(--text-secondary); }
+    .prompt-box .daily-prompt { font-family: 'Fraunces', serif; font-size: 16px; font-style: italic; margin-top: 14px; line-height: 1.5; }
+    .ai-disclaimer { display: flex; gap: 10px; padding: 14px; background: var(--bg-elevated); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-muted); margin-top: 18px; line-height: 1.5; }
+
+    .mood-tracker-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 28px; }
+    .mood-selector-grid { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 28px; }
+    .mood-select-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 18px 24px; background: var(--bg-elevated); border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s ease;
+    }
+    .mood-select-btn:hover { background: var(--bg-hover); border-color: var(--mood-color); }
+    .mood-select-btn.selected { border-color: var(--mood-color); background: rgba(255,255,255,0.03); box-shadow: 0 0 0 3px rgba(255,255,255,0.08); }
+    .mood-select-btn .emoji { font-size: 32px; }
+    .mood-select-btn .label { font-size: 13px; color: var(--text-secondary); }
+    .slider-group { margin-bottom: 28px; }
+    .slider-group label { display: block; font-size: 15px; margin-bottom: 14px; }
+    .range-slider { width: 100%; height: 10px; background: var(--bg-elevated); border-radius: 5px; appearance: none; cursor: pointer; }
+    .range-slider::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; background: var(--accent-calm); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .slider-labels { display: flex; justify-content: space-between; margin-top: 10px; font-size: 13px; color: var(--text-muted); }
+    .notes-group { margin-bottom: 24px; }
+    .notes-group label { display: block; font-size: 15px; margin-bottom: 12px; }
+    .mood-history-section { margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--border-subtle); }
+    .mood-history-section h3 { font-size: 18px; margin-bottom: 20px; }
+    .mood-history-list { display: flex; flex-direction: column; gap: 4px; }
+    .mood-history-item { display: flex; align-items: flex-start; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border-subtle); }
+    .mood-history-item:last-child { border-bottom: none; }
+    .mood-history-item .emoji { font-size: 28px; }
+    .mood-history-details { flex: 1; }
+    .mood-history-date { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+    .mood-history-energy { font-size: 13px; color: var(--text-muted); }
+    .mood-history-note { font-size: 14px; color: var(--text-secondary); margin-top: 8px; line-height: 1.4; }
+
+    .reflections-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+    .filter-tabs { display: flex; gap: 10px; }
+    .filter-tab {
+      padding: 8px 18px; background: var(--bg-surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease;
+    }
+    .filter-tab:hover { background: var(--bg-elevated); }
+    .filter-tab.active { background: var(--bg-elevated); color: var(--text-primary); border-color: var(--border-light); }
+    .reflections-list { display: flex; flex-direction: column; gap: 18px; }
+    .reflection-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px; }
+    .reflection-header { display: flex; justify-content: space-between; margin-bottom: 14px; }
+    .reflection-type { font-size: 13px; color: var(--accent-soft); }
+    .reflection-date { font-size: 13px; color: var(--text-muted); }
+    .reflection-response { font-size: 16px; line-height: 1.6; margin-bottom: 18px; }
+    .ai-insight-box { padding: 18px; background: var(--bg-elevated); border-radius: var(--radius-md); border-left: 3px solid var(--accent-soft); }
+    .ai-insight-box .ai-badge { margin-bottom: 10px; }
+    .ai-insight-box p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* Responsive */
+    @media (max-width: 1200px) { .two-column-layout { grid-template-columns: 1fr; } .side-column { order: -1; } }
+    @media (max-width: 900px) {
+      .content-wrapper { padding: 24px; }
+      .header-top { flex-direction: column; }
+      .header-stats { width: 100%; justify-content: space-between; }
+      .mood-grid { grid-template-columns: repeat(2,1fr); }
+      .greeting-name { font-size: 36px; }
+    }
+    @media (max-width: 600px) {
+      .content-wrapper { padding: 20px 16px; }
+      .actions-grid, .activity-grid { grid-template-columns: 1fr; }
+      .sanctuary-tabs { overflow-x: auto; padding-bottom: 12px; }
+      .sanctuary-tab { white-space: nowrap; }
+    }
+
+    /* Theme Variations */
+    .theme-darker {
+      --bg-deep: #000000;
+      --bg-surface: #08090c;
+      --bg-elevated: #0c0d12;
+    }
+    .theme-light {
+      --bg-deep: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border-subtle: rgba(0,0,0,0.06);
+      --border-light: rgba(0,0,0,0.1);
+    }
+
+    /* Font Size Variations */
+    .font-small { font-size: 14px; }
+    .font-small h1 { font-size: 28px; }
+    .font-small h2 { font-size: 22px; }
+    .font-large { font-size: 18px; }
+    .font-large h1 { font-size: 40px; }
+    .font-large h2 { font-size: 28px; }
+
+    /* Reduce Motion */
+    .reduce-motion, .reduce-motion * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MOOD SELECTION SCREEN -->
+  <div class="mood-screen" id="moodScreen">
+    <div class="ambient-bg">
+      <div class="ambient-orb orb-1"></div>
+      <div class="ambient-orb orb-2"></div>
+      <div class="ambient-orb orb-3"></div>
+    </div>
+    <div class="mood-content">
+      <p class="greeting-time" id="greetingTime">Good evening</p>
+      <h1 class="greeting-name">Welcome back, <span>peaceful_soul</span></h1>
+      <p class="mood-question">How are you arriving this evening?</p>
+      <div class="mood-grid">
+        <button class="mood-option" style="--mood-color: #7ce8a8" onclick="selectMood('peaceful')"><span class="mood-emoji">😌</span><span class="mood-label">Peaceful</span></button>
+        <button class="mood-option" style="--mood-color: #e8a87c" onclick="selectMood('anxious')"><span class="mood-emoji">😰</span><span class="mood-label">Anxious</span></button>
+        <button class="mood-option" style="--mood-color: #7cb8e8" onclick="selectMood('low')"><span class="mood-emoji">😔</span><span class="mood-label">Low Energy</span></button>
+        <button class="mood-option" style="--mood-color: #c4a1ff" onclick="selectMood('reflective')"><span class="mood-emoji">🤔</span><span class="mood-label">Reflective</span></button>
+      </div>
+      <div class="mood-grid-secondary">
+        <button class="mood-option-small" style="--mood-color: #f0e87c" onclick="selectMood('happy')"><span class="mood-emoji">😊</span><span class="mood-label">Happy</span></button>
+        <button class="mood-option-small" style="--mood-color: #a1b8c4" onclick="selectMood('tired')"><span class="mood-emoji">😴</span><span class="mood-label">Tired</span></button>
+        <button class="mood-option-small" style="--mood-color: #98d4bb" onclick="selectMood('calm')"><span class="mood-emoji">☺️</span><span class="mood-label">Calm</span></button>
+        <button class="mood-option-small" style="--mood-color: #9ca3af" onclick="selectMood('neutral')"><span class="mood-emoji">😐</span><span class="mood-label">Neutral</span></button>
+      </div>
+      <button class="mood-skip" onclick="selectMood('neutral')">Skip for now →</button>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div class="app-container" id="appContainer">
+    <main class="main-content">
+      <div class="sanctuary-ambient" id="sanctuaryAmbient">
+        <div class="orb-1"></div>
+        <div class="orb-2"></div>
+      </div>
+
+      <div class="content-wrapper">
+        <header class="sanctuary-header">
+          <div class="header-top">
+            <div class="welcome-section">
+              <h1 id="sanctuaryGreeting">Good evening, <span>peaceful_soul</span></h1>
+              <div class="user-sub" id="userMoodText">😌 Feeling peaceful</div>
+              <div class="current-mood-badge" onclick="showMoodScreen()">
+                <span class="emoji" id="currentMoodEmoji">😌</span>
+                <span id="currentMoodLabel">Feeling peaceful this evening</span>
+                <span class="change-mood">change</span>
+              </div>
+            </div>
+            <div class="header-stats">
+              <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Day streak</div></div>
+              <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Reflections</div></div>
+              <div class="stat-card battery">
+                <div class="stat-value">100%</div>
+                <div class="stat-label">Social Battery</div>
+                <div class="mini-battery"><div class="mini-battery-fill" style="width:100%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="mood-message" id="moodMessage" style="--mood-accent: #7ce8a8">
+            <p>"Your peaceful energy is a gift tonight. This might be a good time for gentle creativity or quiet reflection."</p>
+          </div>
+        </header>
+
+        <div class="sanctuary-tabs">
+          <button class="sanctuary-tab active" onclick="switchTab('foryou', event)"><span class="tab-icon">✨</span>For You</button>
+          <button class="sanctuary-tab" onclick="switchTab('journal', event)"><span class="tab-icon">📓</span>Journal</button>
+          <button class="sanctuary-tab" onclick="switchTab('mood', event)"><span class="tab-icon">💭</span>Mood</button>
+          <button class="sanctuary-tab" onclick="switchTab('reflections', event)"><span class="tab-icon">🪞</span>Reflections</button>
+        </div>
+
+        <!-- FOR YOU TAB -->
+        <div class="tab-content active" id="tab-foryou">
+          <section class="section">
+            <p class="section-subtitle">Suggested for your mood</p>
+            <div class="actions-grid" id="suggestedActions">
+              <button class="action-card breathing">
+                <div class="action-icon">🌬️</div>
+                <h3>Gentle Breathing</h3>
+                <p>A calming 4-7-8 breathing exercise to settle into the evening</p>
+                <span class="action-time">⏱️ 3 min</span>
+              </button>
+              <button class="action-card journal">
+                <div class="action-icon">✍️</div>
+                <h3>Evening Journal</h3>
+                <p>Capture a thought or two from today before it slips away</p>
+                <span class="action-time">⏱️ 5 min</span>
+              </button>
+              <button class="action-card reflection">
+                <div class="action-icon">💭</div>
+                <h3>Quick Reflection</h3>
+                <p>Answer today's prompt and receive a gentle insight</p>
+                <span class="action-time">⏱️ 2 min</span>
+              </button>
+            </div>
+          </section>
+
+          <div class="energy-card">
+            <div class="energy-header">
+              <div>
+                <h2 class="section-title">📊 Your Energy This Week</h2>
+                <div class="energy-current">
+                  <span class="energy-value">--</span><span class="energy-max">/ 10 avg</span>
+                </div>
+              </div>
+              <div class="energy-trend"><span>📈</span> No data yet</div>
+            </div>
+            <div class="energy-bars">
+              <div class="energy-bar"><div class="energy-bar-fill" style="height:0%"></div></div>
+              <div class="energy-bar"><div class="energy-bar-fill" style="height:0%"></div></div>
+              <div class="energy-bar"><div class="energy-bar-fill" style="height:0%"></div></div>
+              <div class="energy-bar"><div class="energy-bar-fill" style="height:0%"></div></div>
+              <div class="energy-bar"><div class="energy-bar-fill" style="height:0%"></div></div>
+              <div class="energy-bar"><div class="energy-bar-fill" style="height:0%"></div></div>
+              <div class="energy-bar"><div class="energy-bar-fill" style="height:0%"></div></div>
+            </div>
+            <div class="energy-labels">
+              <span class="energy-label">Mon</span><span class="energy-label">Tue</span><span class="energy-label">Wed</span><span class="energy-label">Thu</span><span class="energy-label">Fri</span><span class="energy-label">Sat</span><span class="energy-label">Sun</span>
+            </div>
+            <p style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:12px;">Track your daily mood to see patterns here</p>
+          </div>
+
+          <section class="section">
+            <h2 class="section-title">📝 Recent moments</h2>
+            <div class="activity-grid">
+              <div class="empty-state" style="grid-column: 1/-1; padding: 40px;">
+                <span class="empty-icon">🌱</span>
+                <h3>Your journey starts here</h3>
+                <p>Journal entries and reflections will appear here as you add them.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="gentle-prompt">
+            <div class="prompt-header">
+              <span class="prompt-label">💡 Tonight's reflection</span>
+              <button class="prompt-refresh" onclick="refreshPrompt()">🔄 New prompt</button>
+            </div>
+            <p class="prompt-text" id="dailyPrompt">"What do you need more of in your life right now?"</p>
+            <button class="prompt-action" onclick="switchTab('journal', event)">✍️ Reflect on this</button>
+          </section>
+        </div>
+
+        <!-- JOURNAL TAB -->
+        <div class="tab-content" id="tab-journal">
+          <div class="two-column-layout">
+            <div class="main-column">
+              <div class="section-header">
+                <h2 class="section-title">📓 Private Journal</h2>
+                <button class="btn-primary">+ New Entry</button>
+              </div>
+              <div class="journal-composer">
+                <textarea placeholder="What's on your mind? Write freely..."></textarea>
+                <div class="composer-footer">
+                  <span class="char-count">0 characters</span>
+                  <button class="btn-primary" disabled onclick="saveJournalEntry()">Save Entry</button>
+                </div>
+              </div>
+              <div class="journal-entries-list">
+                <div class="empty-state">
+                  <span class="empty-icon">📝</span>
+                  <h3>No entries yet</h3>
+                  <p>Start writing to capture your thoughts. Everything here is private and just for you.</p>
+                </div>
+              </div>
+            </div>
+            <div class="side-column">
+              <div class="side-card">
+                <h3>💡 Daily Prompt</h3>
+                <div class="prompt-box">
+                  <span class="sparkle">✨</span>
+                  <button class="new-prompt-btn" onclick="refreshPrompt()">New Prompt</button>
+                  <p class="daily-prompt" id="sidePrompt">"What do you need more of in your life right now?"</p>
+                </div>
+                <textarea id="journalReflectionTextarea" placeholder="Share your thoughts..."></textarea>
+                <button class="btn-secondary" onclick="saveReflection('#journalReflectionTextarea')">Save Reflection</button>
+              </div>
+              <div class="side-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <h3>🤖 AI Reflection Partner</h3>
+                  <span id="aiLimitCounter" style="font-size:12px; color:var(--text-muted);"></span>
+                </div>
+                <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Share your thoughts and receive gentle insights</p>
+                <textarea id="aiReflectionInput" placeholder="Share what's on your mind, ask for guidance, or reflect on something..."></textarea>
+                <button class="btn-secondary" id="aiInsightBtn" onclick="getAIInsight()">Get Insight</button>
+                <div id="aiResponseContainer" style="display:none; margin-top:16px; padding:16px; background:rgba(124,232,168,0.1); border-radius:12px; border:1px solid rgba(124,232,168,0.2);">
+                  <p id="aiResponseText" style="color:var(--text-primary); font-size:14px; line-height:1.6;"></p>
+                </div>
+                <div class="ai-disclaimer"><span>💡</span><span>This is a gentle reflection partner. Share your thoughts and receive thoughtful insights to support your journey.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MOOD TAB -->
+        <div class="tab-content" id="tab-mood">
+          <div class="mood-tracker-card" style="max-width: 700px; margin: 0 auto;">
+            <h2 class="section-title">💭 Mood & Energy Tracker</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">How are you feeling right now?</p>
+            <div class="mood-selector-grid" id="moodSelector"></div>
+            <div class="slider-group">
+              <label>Energy Level: <span id="energyValue">6</span>/10</label>
+              <input type="range" class="range-slider" min="1" max="10" value="6" id="energySlider">
+              <div class="slider-labels"><span>Low</span><span>High</span></div>
+            </div>
+            <div class="notes-group">
+              <label>Notes (optional)</label>
+              <textarea placeholder="Any context for how you're feeling?"></textarea>
+            </div>
+            <button class="btn-primary" onclick="saveMoodEntry()">Update Mood</button>
+
+            <div class="mood-history-section">
+              <h3>Recent Moods</h3>
+              <div class="mood-history-list">
+                <div class="empty-state" style="padding: 24px; text-align: center;">
+                  <span style="font-size: 32px;">📊</span>
+                  <p style="color: var(--text-muted); margin-top: 8px;">No mood entries yet. Start tracking above!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REFLECTIONS TAB -->
+        <div class="tab-content" id="tab-reflections">
+          <div class="reflections-header">
+            <h2 class="section-title">🪞 Reflections History</h2>
+            <div class="filter-tabs">
+              <button class="filter-tab active">All</button>
+              <button class="filter-tab">Journal</button>
+              <button class="filter-tab">Prompts</button>
+              <button class="filter-tab">AI</button>
+            </div>
+          </div>
+          <div class="reflections-list">
+            <div class="empty-state" style="padding: 60px 24px; text-align: center;">
+              <span style="font-size: 48px;">🪞</span>
+              <h3 style="margin-top: 16px;">No reflections yet</h3>
+              <p style="color: var(--text-muted); margin-top: 8px;">Your reflections and AI insights will appear here as you journal.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <script>
+    // Supabase initialization
+    const SUPABASE_URL = 'https://inpziyxjznikinqqputz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlucHppeXhqem5pa2lucXFwdXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MzQ0MTcsImV4cCI6MjA4NDAxMDQxN30.5QoXaD5vNcuteEmwmo82l_OIklVbGGCRpNtV0PMuSyY';
+
+    let db = null;
+    let currentUser = null;
+    let currentMood = 'peaceful';
+
+    try {
+      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch (err) {
+      console.error('Supabase init error:', err);
+    }
+
+    // Toast notification
+    function showToast(message) {
+      let toast = document.getElementById('toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);padding:14px 28px;background:var(--accent-green);color:var(--bg-deep);border-radius:9999px;font-size:14px;font-weight:500;opacity:0;transition:all 0.3s ease;z-index:1000;';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message;
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(100px)';
+        toast.style.opacity = '0';
+      }, 2500);
+    }
+
+    // Auth check
+    async function initAuth() {
+      if (!db) return;
+      try {
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) {
+          window.top.location.href = 'index.html';
+          return;
+        }
+        currentUser = session.user;
+        // Update username display
+        const username = currentUser.user_metadata?.username || 'friend';
+        document.querySelectorAll('.greeting-name span').forEach(el => el.textContent = username);
+        document.getElementById('sanctuaryGreeting').innerHTML = `${getGreeting()}, <span>${username}</span>`;
+
+        // Load user data
+        loadJournalEntries();
+        loadMoodHistory();
+        loadReflections();
+        updateStats();
+      } catch (err) {
+        console.error('Auth error:', err);
+      }
+    }
+
+    // Save journal entry
+    async function saveJournalEntry() {
+      const textarea = document.querySelector('.journal-composer textarea');
+      const content = textarea.value.trim();
+
+      if (!content) {
+        showToast('Please write something first');
+        return;
+      }
+
+      if (!currentUser) {
+        showToast('Please sign in to save');
+        return;
+      }
+
+      try {
+        const { error } = await db.from('journal_entries').insert({
+          user_id: currentUser.id,
+          content: content,
+          mood: currentMood
+        });
+
+        if (error) throw error;
+
+        showToast('Entry saved!');
+        textarea.value = '';
+        updateCharCount(textarea);
+        loadJournalEntries();
+        updateStats();
+      } catch (err) {
+        console.error('Save error:', err);
+        showToast('Failed to save entry');
+      }
+    }
+
+    // Save mood entry
+    async function saveMoodEntry() {
+      const energyLevel = document.getElementById('energySlider')?.value || 5;
+      const notesTextarea = document.querySelector('.notes-group textarea');
+      const notes = notesTextarea?.value || '';
+      const selectedMood = document.querySelector('.mood-select-btn.selected');
+
+      if (!selectedMood) {
+        showToast('Please select a mood first');
+        return;
+      }
+
+      if (!currentUser) {
+        showToast('Please sign in to save');
+        return;
+      }
+
+      const mood = selectedMood.querySelector('.label').textContent;
+
+      try {
+        const { error } = await db.from('mood_entries').insert({
+          user_id: currentUser.id,
+          mood: mood,
+          energy_level: parseInt(energyLevel),
+          notes: notes
+        });
+
+        if (error) throw error;
+
+        showToast('Mood updated!');
+        if (notesTextarea) notesTextarea.value = '';
+        loadMoodHistory();
+        updateStats();
+      } catch (err) {
+        console.error('Save error:', err);
+        showToast('Failed to save mood');
+      }
+    }
+
+    // Save reflection
+    async function saveReflection(textareaSelector, type = 'prompt') {
+      const textarea = document.querySelector(textareaSelector);
+      const content = textarea?.value?.trim();
+
+      if (!content) {
+        showToast('Please write something first');
+        return;
+      }
+
+      if (!currentUser) {
+        showToast('Please sign in to save');
+        return;
+      }
+
+      const promptEl = document.getElementById('dailyPrompt') || document.getElementById('sidePrompt');
+      const prompt = promptEl?.textContent?.replace(/"/g, '') || '';
+
+      try {
+        const { error } = await db.from('reflections').insert({
+          user_id: currentUser.id,
+          prompt: prompt,
+          response: content,
+          reflection_type: type
+        });
+
+        if (error) throw error;
+
+        showToast('Reflection saved!');
+        textarea.value = '';
+        loadReflections();
+        updateStats();
+      } catch (err) {
+        console.error('Save error:', err);
+        showToast('Failed to save reflection');
+      }
+    }
+
+    // Get AI Insight
+    // Daily limit for AI insights
+    const AI_DAILY_LIMIT = 10;
+
+    function getAIUsageToday() {
+      const today = new Date().toDateString();
+      const stored = localStorage.getItem('aiUsage');
+      if (stored) {
+        const data = JSON.parse(stored);
+        if (data.date === today) {
+          return data.count;
+        }
+      }
+      return 0;
+    }
+
+    function incrementAIUsage() {
+      const today = new Date().toDateString();
+      const currentCount = getAIUsageToday();
+      localStorage.setItem('aiUsage', JSON.stringify({
+        date: today,
+        count: currentCount + 1
+      }));
+    }
+
+    function getRemainingAIRequests() {
+      return AI_DAILY_LIMIT - getAIUsageToday();
+    }
+
+    function updateAILimitDisplay() {
+      const counter = document.getElementById('aiLimitCounter');
+      if (counter) {
+        const remaining = getRemainingAIRequests();
+        counter.textContent = `${remaining}/${AI_DAILY_LIMIT} today`;
+        counter.style.color = remaining <= 3 ? 'var(--accent-warm)' : 'var(--text-muted)';
+      }
+    }
+
+    async function getAIInsight() {
+      const textarea = document.getElementById('aiReflectionInput');
+      const btn = document.getElementById('aiInsightBtn');
+      const responseContainer = document.getElementById('aiResponseContainer');
+      const responseText = document.getElementById('aiResponseText');
+
+      const message = textarea?.value.trim();
+
+      if (!message) {
+        showToast('Please share your thoughts first');
+        return;
+      }
+
+      // Check daily limit
+      const remaining = getRemainingAIRequests();
+      if (remaining <= 0) {
+        showToast('Daily limit reached. Come back tomorrow for more insights!');
+        return;
+      }
+
+      // Show loading state
+      btn.disabled = true;
+      btn.textContent = 'Thinking...';
+      responseContainer.style.display = 'none';
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-reflection`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({
+            message: message,
+            mood: currentMood
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to get response');
+        }
+
+        // Increment usage counter
+        incrementAIUsage();
+
+        // Show the response
+        responseText.textContent = data.response;
+        responseContainer.style.display = 'block';
+
+        // Update the counter display
+        updateAILimitDisplay();
+
+        const newRemaining = getRemainingAIRequests();
+        if (newRemaining <= 3 && newRemaining > 0) {
+          showToast(`${newRemaining} insights remaining today`);
+        }
+
+      } catch (err) {
+        console.error('AI Error:', err);
+        showToast('Could not get insight. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Get Insight';
+      }
+    }
+
+    // Load journal entries
+    async function loadJournalEntries() {
+      if (!currentUser || !db) return;
+
+      try {
+        const { data, error } = await db
+          .from('journal_entries')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (error) throw error;
+
+        renderJournalEntries(data || []);
+      } catch (err) {
+        console.error('Load error:', err);
+      }
+    }
+
+    // Render journal entries
+    function renderJournalEntries(entries) {
+      const container = document.querySelector('.journal-entries-list');
+      if (!container) return;
+
+      if (entries.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-icon">📝</span>
+            <h3>No entries yet</h3>
+            <p>Start writing to capture your thoughts. Everything here is private and just for you.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <h3 style="margin-bottom: 16px; color: var(--text-secondary); font-size: 14px;">Your Entries</h3>
+        ${entries.map(entry => {
+          const date = new Date(entry.created_at).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+          });
+          const moodEmoji = moodData[entry.mood]?.emoji || '💭';
+          return `
+            <div class="activity-card" style="margin-bottom: 16px;">
+              <div class="activity-header">
+                <span class="activity-type">${moodEmoji} Journal Entry</span>
+                <span class="activity-time">${date}</span>
+              </div>
+              <div class="activity-content">${entry.content}</div>
+            </div>
+          `;
+        }).join('')}
+      `;
+    }
+
+    // Load mood history
+    async function loadMoodHistory() {
+      if (!currentUser || !db) return;
+
+      try {
+        const { data, error } = await db
+          .from('mood_entries')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(7);
+
+        if (error) throw error;
+
+        renderMoodHistory(data || []);
+        updateEnergyChart(data || []);
+      } catch (err) {
+        console.error('Load error:', err);
+      }
+    }
+
+    // Render mood history
+    function renderMoodHistory(entries) {
+      const container = document.querySelector('.mood-history-list');
+      if (!container) return;
+
+      if (entries.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state" style="padding: 24px; text-align: center;">
+            <span style="font-size: 32px;">📊</span>
+            <p style="color: var(--text-muted); margin-top: 8px;">No mood entries yet. Start tracking above!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = entries.map(entry => {
+        const date = new Date(entry.created_at).toLocaleDateString('en-US', {
+          weekday: 'short', month: 'short', day: 'numeric'
+        });
+        const moodInfo = Object.values(moodData).find(m => m.label === entry.mood) || { emoji: '😐' };
+        return `
+          <div class="mood-history-item">
+            <span class="emoji">${moodInfo.emoji}</span>
+            <div class="mood-history-details">
+              <div class="mood-history-date">${date}</div>
+              <div class="mood-history-energy">Energy: ${entry.energy_level}/10</div>
+              ${entry.notes ? `<div class="mood-history-note">${entry.notes}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update energy chart
+    function updateEnergyChart(moodEntries) {
+      const bars = document.querySelectorAll('.energy-bar-fill');
+      if (bars.length === 0) return;
+
+      // Reset all bars
+      bars.forEach(bar => bar.style.height = '0%');
+
+      // Group by day of week
+      const today = new Date();
+      const dayOfWeek = today.getDay(); // 0 = Sunday
+
+      moodEntries.forEach(entry => {
+        const entryDate = new Date(entry.created_at);
+        const entryDay = entryDate.getDay();
+        // Convert to Monday-first index (0 = Monday)
+        const index = entryDay === 0 ? 6 : entryDay - 1;
+        if (bars[index]) {
+          bars[index].style.height = `${entry.energy_level * 10}%`;
+        }
+      });
+
+      // Update average
+      if (moodEntries.length > 0) {
+        const avg = moodEntries.reduce((sum, e) => sum + e.energy_level, 0) / moodEntries.length;
+        const avgEl = document.querySelector('.energy-value');
+        if (avgEl) avgEl.textContent = avg.toFixed(1);
+
+        const trendEl = document.querySelector('.energy-trend');
+        if (trendEl) trendEl.innerHTML = `<span>📈</span> ${moodEntries.length} entries this week`;
+      }
+    }
+
+    // Load reflections
+    async function loadReflections() {
+      if (!currentUser || !db) return;
+
+      try {
+        const { data, error } = await db
+          .from('reflections')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (error) throw error;
+
+        renderReflections(data || []);
+      } catch (err) {
+        console.error('Load error:', err);
+      }
+    }
+
+    // Render reflections
+    function renderReflections(reflections) {
+      const container = document.querySelector('.reflections-list');
+      if (!container) return;
+
+      if (reflections.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state" style="padding: 60px 24px; text-align: center;">
+            <span style="font-size: 48px;">🪞</span>
+            <h3 style="margin-top: 16px;">No reflections yet</h3>
+            <p style="color: var(--text-muted); margin-top: 8px;">Your reflections will appear here as you journal.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = reflections.map(ref => {
+        const date = new Date(ref.created_at).toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric'
+        });
+        return `
+          <div class="reflection-card">
+            <div class="reflection-header">
+              <span class="reflection-type">${ref.reflection_type === 'prompt' ? '💡 Prompt Response' : '✍️ Reflection'}</span>
+              <span class="reflection-date">${date}</span>
+            </div>
+            ${ref.prompt ? `<p style="font-style: italic; color: var(--text-muted); margin-bottom: 12px;">"${ref.prompt}"</p>` : ''}
+            <div class="reflection-response">${ref.response}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update stats
+    async function updateStats() {
+      if (!currentUser || !db) return;
+
+      try {
+        // Get journal count
+        const { count: journalCount } = await db
+          .from('journal_entries')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', currentUser.id);
+
+        // Get reflections count
+        const { count: reflectionCount } = await db
+          .from('reflections')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', currentUser.id);
+
+        // Update UI
+        const statCards = document.querySelectorAll('.stat-card .stat-value');
+        if (statCards[1]) statCards[1].textContent = (journalCount || 0) + (reflectionCount || 0);
+      } catch (err) {
+        console.error('Stats error:', err);
+      }
+    }
+
+    // Character count for textarea
+    function updateCharCount(textarea) {
+      const countEl = document.querySelector('.char-count');
+      if (countEl && textarea) {
+        countEl.textContent = `${textarea.value.length} characters`;
+      }
+    }
+
+    const moodData = {
+      peaceful: { emoji: '😌', label: 'Peaceful', color: '#7ce8a8', message: '"Your peaceful energy is a gift tonight. This might be a good time for gentle creativity or quiet reflection."', actions: [
+        { icon: '✍️', title: 'Evening Journal', desc: 'Capture the calm — what made today feel good?', time: '5 min', class: 'journal' },
+        { icon: '🎨', title: 'Creative Flow', desc: 'Your peaceful state is perfect for creative expression', time: '10 min', class: 'creative' },
+        { icon: '📚', title: 'Night Reading', desc: 'Browse what others are sharing in the quiet room', time: '∞', class: 'reflection' }
+      ]},
+      anxious: { emoji: '😰', label: 'Anxious', color: '#e8a87c', message: '"I notice you\'re feeling anxious. Let\'s start with something grounding — your nervous system will thank you."', actions: [
+        { icon: '🌬️', title: 'Calming Breath', desc: 'A gentle 4-7-8 breathing exercise to settle your mind', time: '3 min', class: 'breathing' },
+        { icon: '🌿', title: '5-4-3-2-1 Grounding', desc: 'Come back to the present moment, one sense at a time', time: '5 min', class: 'journal' },
+        { icon: '💭', title: 'Brain Dump', desc: 'Get those swirling thoughts out of your head and onto paper', time: '5 min', class: 'reflection' }
+      ]},
+      low: { emoji: '😔', label: 'Low Energy', color: '#7cb8e8', message: '"Low energy days are part of the rhythm. Be gentle with yourself — small moments of care can help."', actions: [
+        { icon: '☕', title: 'Micro Self-Care', desc: 'One tiny thing just for you — tea, stretch, or a moment of quiet', time: '2 min', class: 'breathing' },
+        { icon: '💭', title: 'Gentle Check-in', desc: 'Just acknowledge how you\'re feeling. No pressure to fix anything.', time: '2 min', class: 'journal' },
+        { icon: '🌙', title: 'Rest Permission', desc: 'Sometimes the kindest thing is to simply rest. That\'s okay.', time: '∞', class: 'reflection' }
+      ]},
+      reflective: { emoji: '🤔', label: 'Reflective', color: '#c4a1ff', message: '"A reflective mood is a doorway to insight. Let\'s explore what\'s on your mind."', actions: [
+        { icon: '💭', title: 'Deep Reflection', desc: 'Explore today\'s prompt with the AI reflection partner', time: '5 min', class: 'reflection' },
+        { icon: '📊', title: 'Pattern Insights', desc: 'Look at your mood trends — what patterns do you notice?', time: '5 min', class: 'journal' },
+        { icon: '✍️', title: 'Free Write', desc: 'Let your thoughts flow without structure or judgment', time: '10 min', class: 'breathing' }
+      ]},
+      happy: { emoji: '😊', label: 'Happy', color: '#f0e87c', message: '"What a wonderful energy to bring! Consider capturing this moment or sharing your light with others."', actions: [
+        { icon: '✨', title: 'Capture This Moment', desc: 'Write down what\'s making you feel good right now', time: '3 min', class: 'journal' },
+        { icon: '🎨', title: 'Create Something', desc: 'Channel this energy into something beautiful', time: '15 min', class: 'creative' },
+        { icon: '💝', title: 'Share Your Light', desc: 'Send a kind word to someone in the community', time: '2 min', class: 'reflection' }
+      ]},
+      tired: { emoji: '😴', label: 'Tired', color: '#a1b8c4', message: '"Rest is productive too. Honor what your body is telling you."', actions: [
+        { icon: '🌙', title: 'Permission to Rest', desc: 'You don\'t have to do anything. Just be.', time: '∞', class: 'breathing' },
+        { icon: '🫖', title: 'Gentle Wind-Down', desc: 'A soft routine to ease into rest', time: '10 min', class: 'journal' },
+        { icon: '📝', title: 'Quick Note', desc: 'Jot one thought before you rest — just one', time: '1 min', class: 'reflection' }
+      ]},
+      calm: { emoji: '☺️', label: 'Calm', color: '#98d4bb', message: '"Calm is your superpower. This is the perfect state for deep work or meaningful connection."', actions: [
+        { icon: '✍️', title: 'Deep Journal', desc: 'Your calm mind is ready for deeper exploration', time: '15 min', class: 'journal' },
+        { icon: '🤝', title: 'Quiet Connection', desc: 'Reach out to someone you\'ve been meaning to connect with', time: '10 min', class: 'reflection' },
+        { icon: '🎯', title: 'Intentional Focus', desc: 'What one thing would you like to accomplish tonight?', time: '20 min', class: 'creative' }
+      ]},
+      neutral: { emoji: '😐', label: 'Neutral', color: '#9ca3af', message: '"Welcome to your quiet corner. Take whatever you need tonight."', actions: [
+        { icon: '🌬️', title: 'Gentle Breathing', desc: 'A calming exercise to settle into the evening', time: '3 min', class: 'breathing' },
+        { icon: '✍️', title: 'Evening Journal', desc: 'Capture a thought before it slips away', time: '5 min', class: 'journal' },
+        { icon: '💭', title: 'Quick Reflection', desc: 'Answer today\'s prompt and receive a gentle insight', time: '2 min', class: 'reflection' }
+      ]}
+    };
+
+    const dailyPrompts = [
+      "What do you need more of in your life right now?",
+      "What's one thing you did for yourself today that you're grateful for?",
+      "What's a small moment from today that deserves to be remembered?",
+      "Describe a place where you feel completely at peace...",
+      "What color represents your current mood, and why?",
+      "Write a letter to your future self, one year from now...",
+      "What boundary do you need to set or reinforce?",
+      "What would you do if you had no fear of judgment?"
+    ];
+
+    function getGreeting() {
+      const hour = new Date().getHours();
+      if (hour < 12) return 'Good morning';
+      if (hour < 17) return 'Good afternoon';
+      return 'Good evening';
+    }
+    function getTimeOfDay() {
+      const hour = new Date().getHours();
+      if (hour < 12) return 'morning';
+      if (hour < 17) return 'afternoon';
+      return 'evening';
+    }
+
+    function selectMood(mood, saveToSession = true) {
+      currentMood = mood;
+      const data = moodData[mood];
+      document.getElementById('currentMoodEmoji').textContent = data.emoji;
+      document.getElementById('currentMoodLabel').textContent = `Feeling ${data.label.toLowerCase()} this ${getTimeOfDay()}`;
+      document.getElementById('userMoodText').textContent = `${data.emoji} Feeling ${data.label.toLowerCase()}`;
+
+      const moodMessage = document.getElementById('moodMessage');
+      moodMessage.style.setProperty('--mood-accent', data.color);
+      moodMessage.querySelector('p').textContent = data.message;
+
+      const ambient = document.getElementById('sanctuaryAmbient');
+      ambient.className = `sanctuary-ambient mood-${mood}`;
+
+      const actionsContainer = document.getElementById('suggestedActions');
+      actionsContainer.innerHTML = data.actions.map(action => `
+        <button class="action-card ${action.class}">
+          <div class="action-icon">${action.icon}</div>
+          <h3>${action.title}</h3>
+          <p>${action.desc}</p>
+          <span class="action-time">⏱️ ${action.time}</span>
+        </button>
+      `).join('');
+
+      // Save mood to session so it persists across refreshes
+      if (saveToSession) {
+        sessionStorage.setItem('currentMood', mood);
+      }
+
+      document.getElementById('moodScreen').classList.add('hidden');
+      document.getElementById('appContainer').classList.add('visible');
+    }
+
+    function showMoodScreen() {
+      document.getElementById('appContainer').classList.remove('visible');
+      document.getElementById('moodScreen').classList.remove('hidden');
+    }
+
+    function switchTab(tabId, evt) {
+      document.querySelectorAll('.sanctuary-tab').forEach(tab => tab.classList.remove('active'));
+      if (evt) evt.currentTarget.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+    }
+
+    function refreshPrompt() {
+      const newPrompt = dailyPrompts[Math.floor(Math.random() * dailyPrompts.length)];
+      document.getElementById('dailyPrompt').textContent = `"${newPrompt}"`;
+      const side = document.getElementById('sidePrompt');
+      if (side) side.textContent = `"${newPrompt}"`;
+      document.querySelectorAll('.daily-prompt').forEach(el => { el.textContent = `"${newPrompt}"`; });
+    }
+
+    function initMoodSelector() {
+      const container = document.getElementById('moodSelector');
+      const moods = ['peaceful','anxious','low','reflective','happy','tired','calm','neutral'];
+      container.innerHTML = moods.map(moodId => {
+        const mood = moodData[moodId];
+        return `
+          <button class="mood-select-btn" style="--mood-color: ${mood.color}" onclick="updateSelectedMood('${moodId}', event)">
+            <span class="emoji">${mood.emoji}</span>
+            <span class="label">${mood.label}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function updateSelectedMood(moodId, evt) {
+      document.querySelectorAll('.mood-select-btn').forEach(btn => btn.classList.remove('selected'));
+      if (evt) evt.currentTarget.classList.add('selected');
+    }
+
+    // Apply saved appearance settings
+    function applyAppearanceSettings() {
+      const theme = localStorage.getItem('theme') || 'dark';
+      document.body.classList.add('theme-' + theme);
+
+      if (localStorage.getItem('reduceAnimations') === 'true') {
+        document.body.classList.add('reduce-motion');
+      }
+
+      const fontSize = localStorage.getItem('fontSize') || 'medium';
+      document.body.classList.add('font-' + fontSize);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      applyAppearanceSettings();
+
+      const slider = document.getElementById('energySlider');
+      const valueDisplay = document.getElementById('energyValue');
+      if (slider && valueDisplay) {
+        slider.addEventListener('input', (e) => valueDisplay.textContent = e.target.value);
+      }
+      document.getElementById('greetingTime').textContent = getGreeting();
+      document.getElementById('sanctuaryGreeting').innerHTML = `${getGreeting()}, <span>peaceful_soul</span>`;
+      initMoodSelector();
+      updateAILimitDisplay();
+
+      // Character count for journal textarea
+      const journalTextarea = document.querySelector('.journal-composer textarea');
+      if (journalTextarea) {
+        journalTextarea.addEventListener('input', () => updateCharCount(journalTextarea));
+        // Enable/disable save button
+        journalTextarea.addEventListener('input', () => {
+          const saveBtn = document.querySelector('.journal-composer .btn-primary');
+          if (saveBtn) saveBtn.disabled = !journalTextarea.value.trim();
+        });
+      }
+
+      // Check for mood parameter from app.html
+      const urlParams = new URLSearchParams(window.location.search);
+      const moodParam = urlParams.get('mood');
+
+      // Check if user already selected mood this session (persists across refreshes)
+      const savedMood = sessionStorage.getItem('currentMood');
+
+      if (moodParam && moodData[moodParam]) {
+        // Mood passed from app.html - this is a new sign-in
+        selectMood(moodParam);
+      } else if (savedMood && moodData[savedMood]) {
+        // User already selected mood this session - skip mood screen on refresh
+        selectMood(savedMood, false);
+      }
+      // Otherwise, mood screen stays visible for new sign-ins
+
+      // Initialize Supabase auth
+      initAuth();
+    });
+  </script>
+</body>
+</html>
+
+
