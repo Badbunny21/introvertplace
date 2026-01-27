@@ -304,8 +304,117 @@
       border: none;
     }
 
+    /* Loading state - hide everything until auth verified */
+    .app-loading {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+    .app-loading.hidden {
+      display: none;
+    }
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Hide mood overlay initially until auth verified */
+    .mood-overlay {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .mood-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Mobile hamburger menu */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #0d111a;
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+    }
+    .mobile-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hamburger {
+      width: 44px;
+      height: 44px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hamburger:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* Mobile nav overlay */
+    .mobile-nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 999;
+    }
+    .mobile-nav-overlay.visible {
+      display: block;
+    }
+
+    /* Responsive styles */
     @media (max-width: 900px) {
       .mood-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .mobile-header {
+        display: flex;
+      }
+      nav.app-nav {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        bottom: 0;
+        z-index: 1001;
+        transition: left 0.3s ease;
+      }
+      nav.app-nav.open {
+        left: 0;
+      }
+      main.app-content {
+        padding-top: 60px;
+      }
+      iframe.app-frame {
+        height: calc(100vh - 60px);
+      }
     }
     @media (max-width: 600px) {
       .greeting-name { font-size: 32px; }
@@ -318,6 +427,20 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+  <!-- Loading State (shown until auth verified) -->
+  <div class="app-loading" id="appLoading">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <div class="mobile-logo">🌙 Introvert Place</div>
+    <button class="hamburger" onclick="toggleMobileNav()">☰</button>
+  </div>
+
+  <!-- Mobile Nav Overlay -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="toggleMobileNav()"></div>
 
   <!-- Full-Screen Mood Selection Overlay -->
   <div class="mood-overlay" id="moodOverlay">
@@ -416,37 +539,70 @@
       document.getElementById('greetingTime').textContent = greeting;
     }
 
+    // Toggle mobile navigation
+    function toggleMobileNav() {
+      const nav = document.querySelector('nav.app-nav');
+      const overlay = document.getElementById('mobileNavOverlay');
+      nav.classList.toggle('open');
+      overlay.classList.toggle('visible');
+    }
+
+    // Close mobile nav when clicking a link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        const nav = document.querySelector('nav.app-nav');
+        const overlay = document.getElementById('mobileNavOverlay');
+        if (nav.classList.contains('open')) {
+          nav.classList.remove('open');
+          overlay.classList.remove('visible');
+        }
+      });
+    });
+
     // Check session and show mood screen or redirect
     async function init() {
       setGreeting();
 
-      const { data: { session } } = await db.auth.getSession();
-      if (!session) {
-        window.location.href = 'index.html';
-        return;
-      }
+      try {
+        const { data: { session } } = await db.auth.getSession();
 
-      currentUser = session.user;
-      const username = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
+        // Hide loading state
+        document.getElementById('appLoading').classList.add('hidden');
 
-      // Set username in mood screen and nav
-      document.getElementById('userName').textContent = username;
-      document.getElementById('navUserName').textContent = username;
-
-      // Load saved profile from localStorage
-      loadSavedProfile();
-
-      // Check if mood already selected today
-      const lastMood = localStorage.getItem('lastMoodDate');
-      const today = new Date().toDateString();
-
-      if (lastMood === today) {
-        // Already selected mood today, skip to app
-        const savedMood = JSON.parse(localStorage.getItem('currentMood') || '{}');
-        if (savedMood.emoji) {
-          document.getElementById('navUserMood').textContent = savedMood.emoji + ' Feeling ' + savedMood.label.toLowerCase();
+        if (!session) {
+          window.location.href = 'index.html';
+          return;
         }
-        document.getElementById('moodOverlay').classList.add('hidden');
+
+        currentUser = session.user;
+        const username = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
+
+        // Set username in mood screen and nav
+        document.getElementById('userName').textContent = username;
+        document.getElementById('navUserName').textContent = username;
+
+        // Load saved profile from localStorage
+        loadSavedProfile();
+
+        // Check if mood already selected today
+        const lastMood = localStorage.getItem('lastMoodDate');
+        const today = new Date().toDateString();
+
+        if (lastMood === today) {
+          // Already selected mood today, skip to app
+          const savedMood = JSON.parse(localStorage.getItem('currentMood') || '{}');
+          if (savedMood.emoji) {
+            document.getElementById('navUserMood').textContent = savedMood.emoji + ' Feeling ' + savedMood.label.toLowerCase();
+          }
+          // Don't show mood overlay
+        } else {
+          // Show mood overlay for new day
+          document.getElementById('moodOverlay').classList.add('visible');
+        }
+      } catch (err) {
+        console.error('Auth error:', err);
+        document.getElementById('appLoading').classList.add('hidden');
+        window.location.href = 'index.html';
       }
     }
 
@@ -460,7 +616,7 @@
       document.getElementById('navUserMood').textContent = emoji + ' Feeling ' + label.toLowerCase();
 
       // Hide mood overlay with animation
-      document.getElementById('moodOverlay').classList.add('hidden');
+      document.getElementById('moodOverlay').classList.remove('visible');
 
       // Load sanctuary with mood parameter
       const frame = document.getElementById('appFrame');
