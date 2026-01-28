@@ -997,6 +997,43 @@
       };
     });
 
+    // ========== AUTHOR PROFILES CACHE ==========
+    let authorProfiles = {}; // user_id -> { username, avatar_emoji, avatar_bg }
+
+    async function loadAuthorProfiles(posts) {
+      if (!db || !posts || posts.length === 0) return;
+      const userIds = [...new Set(posts.map(p => p.user_id).filter(Boolean))];
+      if (userIds.length === 0) return;
+
+      try {
+        const { data: profiles } = await db
+          .from('profiles')
+          .select('id, username, avatar_emoji, avatar_bg')
+          .in('id', userIds);
+
+        if (profiles) {
+          profiles.forEach(p => { authorProfiles[p.id] = p; });
+        }
+      } catch (err) {
+        console.error('Load author profiles error:', err);
+      }
+    }
+
+    function getAuthorAvatar(post) {
+      const profile = authorProfiles[post.user_id];
+      return profile?.avatar_emoji || post.author_avatar || '🌙';
+    }
+
+    function getAuthorBg(post) {
+      const profile = authorProfiles[post.user_id];
+      return profile?.avatar_bg || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    }
+
+    function getAuthorName(post) {
+      const profile = authorProfiles[post.user_id];
+      return profile?.username || post.author_name || 'Anonymous';
+    }
+
     // ========== CATEGORY FILTERING ==========
     let activeCategory = 'All';
     let allPosts = []; // Cached posts for filtering
@@ -1038,7 +1075,9 @@
         'quiet living': '🏡'
       };
       const icon = categoryIcons[(post.category || '').toLowerCase()] || '📝';
-      const isSaved = getSavedPosts().includes(post.id);
+      const avatar = getAuthorAvatar(post);
+      const avatarBg = getAuthorBg(post);
+      const authorName = getAuthorName(post);
 
       return `
         <article class="article-card" onclick="openArticleById('${post.id}')">
@@ -1052,8 +1091,8 @@
             <p>${escapeHtml(post.content.substring(0, 150))}...</p>
             <div class="article-footer">
               <div class="article-author">
-                <div class="article-author-avatar" style="display: flex; align-items: center; justify-content: center; font-size: 16px;">${post.author_avatar || '🌙'}</div>
-                <span>${escapeHtml(post.author_name || 'Anonymous')}</span>
+                <div class="article-author-avatar" style="background: ${avatarBg}; display: flex; align-items: center; justify-content: center; font-size: 16px;">${avatar}</div>
+                <span>${escapeHtml(authorName)}</span>
               </div>
               <span style="font-size: 12px; color: var(--text-muted);">${post.read_time || '3 min read'}</span>
             </div>
@@ -1356,6 +1395,9 @@
 
         if (emptyState) emptyState.style.display = 'none';
 
+        // Fetch author profiles so avatars match their actual profile
+        await loadAuthorProfiles(allPosts);
+
         // Render with current category filter
         filterAndRenderPosts();
         // Also render saved tab
@@ -1447,6 +1489,14 @@
           deleteBtn.style.display = isOwnPost ? 'flex' : 'none';
         }
 
+        // Fetch latest author profile
+        if (post.user_id && !authorProfiles[post.user_id]) {
+          await loadAuthorProfiles([post]);
+        }
+        const avatar = getAuthorAvatar(post);
+        const avatarBg = getAuthorBg(post);
+        const authorName = getAuthorName(post);
+
         if (articleContent) {
           articleContent.innerHTML = `
             <div class="article-hero">
@@ -1459,9 +1509,9 @@
               </div>
               <h1 class="article-title">${escapeHtml(post.title)}</h1>
               <div class="article-author">
-                <div class="author-avatar-large">${post.author_avatar || '🌙'}</div>
+                <div class="author-avatar-large" style="background: ${avatarBg}">${avatar}</div>
                 <div class="author-info">
-                  <span class="author-name">${escapeHtml(post.author_name || 'Anonymous')}</span>
+                  <span class="author-name">${escapeHtml(authorName)}</span>
                   <span class="author-tagline">Sharing their story</span>
                 </div>
               </div>
