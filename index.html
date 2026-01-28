@@ -1867,12 +1867,41 @@
       border: none;
       color: var(--text-secondary);
       cursor: pointer;
-      font-size: 16px;
       padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
     }
 
     .eye-btn:hover {
       color: var(--text-primary);
+    }
+
+    .eye-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .forgot-password {
+      text-align: right;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    .forgot-password a {
+      color: var(--text-secondary);
+      font-size: 13px;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .forgot-password a:hover {
+      color: var(--accent-soft);
     }
 
     .form-input:focus {
@@ -2968,7 +2997,6 @@
     <div class="modal">
       <button class="modal-close" onclick="closeModal('signin')">✕</button>
       <div class="modal-header">
-        <div class="modal-icon">🌙</div>
         <h2 data-i18n="signin.title">Welcome Back</h2>
         <p data-i18n="signin.subtitle">Return to your quiet space</p>
       </div>
@@ -2982,7 +3010,15 @@
         <label class="form-label" data-i18n="signin.password">Password</label>
         <div class="password-field">
           <input type="password" class="form-input password-input" placeholder="••••••••" required>
-          <button type="button" class="eye-btn" aria-label="Toggle password visibility" onclick="togglePassword(this)">👁</button>
+          <button type="button" class="eye-btn" aria-label="Toggle password visibility" onclick="togglePassword(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+        <div class="forgot-password">
+          <a href="#" onclick="showForgotPassword(event)">Forgot password?</a>
         </div>
       </div>
         <div class="form-checkbox">
@@ -3032,7 +3068,12 @@
           <label class="form-label" data-i18n="signup.password">Password</label>
           <div class="password-field">
             <input type="password" class="form-input password-input" placeholder="••••••••" required>
-            <button type="button" class="eye-btn" aria-label="Toggle password visibility" onclick="togglePassword(this)">👁</button>
+            <button type="button" class="eye-btn" aria-label="Toggle password visibility" onclick="togglePassword(this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
           </div>
         </div>
         <div class="form-checkbox">
@@ -3560,12 +3601,12 @@
       }
       const form = e.target;
       const email = form.querySelector('input[type="email"]')?.value;
-      const password = form.querySelector('input[type="password"]')?.value;
+      const password = form.querySelector('.password-input')?.value;
       if (!email || !password) {
         showToast('Enter email and password');
         return;
       }
-      showToast('🌙 Signing in...');
+      showToast('Signing in...');
       const { data, error } = await db.auth.signInWithPassword({ email, password });
       if (error) {
         if (error.message.includes('Email not confirmed')) {
@@ -3592,12 +3633,12 @@
       const form = e.target;
       const username = form.querySelector('input[type="text"]')?.value;
       const email = form.querySelector('input[type="email"]')?.value;
-      const password = form.querySelector('input[type="password"]')?.value;
+      const password = form.querySelector('.password-input')?.value;
       if (!email || !password) {
         showToast('Enter email and password');
         return;
       }
-      showToast('✨ Creating your space...');
+      showToast('Creating your space...');
 
       try {
         const { data, error } = await db.auth.signUp({
@@ -3890,16 +3931,49 @@
       document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
     }
 
+    // SVG icons for password toggle
+    const eyeOpenSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>`;
+
+    const eyeClosedSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+      <line x1="1" y1="1" x2="23" y2="23"></line>
+    </svg>`;
+
     function togglePassword(btn) {
       const input = btn.parentElement.querySelector('.password-input');
       if (!input) return;
       if (input.type === 'password') {
         input.type = 'text';
-        btn.textContent = '🙈';
+        btn.innerHTML = eyeClosedSVG;
       } else {
         input.type = 'password';
-        btn.textContent = '👁';
+        btn.innerHTML = eyeOpenSVG;
       }
+    }
+
+    function showForgotPassword(event) {
+      event.preventDefault();
+      const email = prompt('Enter your email address to receive a password reset link:');
+      if (!email) return;
+
+      if (!db) {
+        showToast('Connection error. Please try again.');
+        return;
+      }
+
+      db.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password.html'
+      }).then(({ error }) => {
+        if (error) {
+          showToast(error.message || 'Error sending reset email');
+        } else {
+          showToast('✉️ Password reset link sent! Check your email.');
+          closeModal('signin');
+        }
+      });
     }
 
     // Escape key closes modals

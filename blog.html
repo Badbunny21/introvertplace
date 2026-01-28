@@ -438,6 +438,74 @@
       font-family: 'Fraunces', serif; font-size: 22px; font-style: italic; color: var(--text-primary);
     }
 
+    /* Dynamic article content in reading modal */
+    .article-content .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-content .article-category {
+      padding: 6px 14px;
+      background: rgba(196,161,255,0.15);
+      color: var(--accent-soft);
+      border-radius: var(--radius-full);
+      font-size: 12px;
+    }
+    .article-content .article-date,
+    .article-content .article-read-time {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .article-content .article-title {
+      font-family: 'Fraunces', serif;
+      font-size: 42px;
+      line-height: 1.3;
+      margin-bottom: 24px;
+      color: var(--text-primary);
+    }
+    .article-content .article-author {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 40px;
+    }
+    .article-content .author-avatar-large {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .article-content .author-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .article-content .author-name {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .article-content .author-tagline {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .article-content .article-body {
+      font-size: 18px;
+      line-height: 1.9;
+      color: var(--text-secondary);
+    }
+    .article-content .article-body p {
+      margin-bottom: 24px;
+    }
+
     /* Reactions */
     .quiet-reactions {
       display: flex; align-items: center; justify-content: center;
@@ -739,29 +807,8 @@
       </div>
     </div>
     <div class="reading-content">
-      <span class="category-tag">Solitude</span>
-      <h1>The Art of Doing Nothing: A Guide to Productive Rest</h1>
-      <div class="reading-meta">
-        <div class="author">
-          <div class="author-avatar">🌿</div>
-          <div class="author-info">
-            <span class="author-name">The Introvert Place Team</span>
-            <span class="author-date">December 28, 2025</span>
-          </div>
-        </div>
-        <div class="reading-time"><span>📚</span><span>8 min read</span></div>
-      </div>
-      <div class="article-text">
-        <p>In a world that glorifies constant hustle, the idea of doing nothing feels almost rebellious. We're taught that every moment should be optimized, every minute productive. But what if the most productive thing you could do is... nothing at all?</p>
-        <p>As introverts, we understand something that the productivity culture often misses: rest isn't the absence of doing — it's an essential part of being. Our minds are always working, processing, creating. The external stillness allows for internal richness.</p>
-        <h2>The Science of Doing Nothing</h2>
-        <p>Neuroscience has shown that our brains are incredibly active during periods of rest. The "default mode network" — the brain's resting state — is where we process emotions, consolidate memories, and generate creative insights. When we're constantly stimulated, we never give this network the chance to work its magic.</p>
-        <blockquote>"Almost everything will work again if you unplug it for a few minutes, including you."</blockquote>
-        <p>For introverts, this understanding is intuitive. We've always known that solitude isn't empty — it's full. Full of thoughts, reflections, and the quiet work of understanding ourselves and the world around us.</p>
-        <h2>Reclaiming Rest</h2>
-        <p>The first step is letting go of guilt. Rest is not laziness. Solitude is not antisocial. Taking time to do nothing is not wasting time — it's investing in your mental and emotional wellbeing.</p>
-        <p>Start small. Five minutes of sitting with your thoughts. An afternoon without plans. A weekend where you say no to everything. Notice how it feels. Notice the initial discomfort, then the settling, then the peace.</p>
-        <p>You don't have to justify your need for rest. You don't have to be recovering from something or preparing for something. The rest itself is enough. You are enough, even when you're doing nothing.</p>
+      <div class="article-content">
+        <!-- Dynamic content will be inserted here -->
       </div>
       <div class="quiet-reactions">
         <p>How did this resonate?</p>
