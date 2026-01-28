@@ -1008,7 +1008,7 @@
       try {
         const { data: profiles } = await db
           .from('profiles')
-          .select('id, username, avatar_emoji, avatar_bg')
+          .select('id, username, avatar, avatar_emoji, avatar_bg')
           .in('id', userIds);
 
         if (profiles) {
@@ -1021,7 +1021,8 @@
 
     function getAuthorAvatar(post) {
       const profile = authorProfiles[post.user_id];
-      return profile?.avatar_emoji || post.author_avatar || '🌙';
+      // Profile page saves to 'avatar' column, check both
+      return profile?.avatar || profile?.avatar_emoji || post.author_avatar || '🌙';
     }
 
     function getAuthorBg(post) {
@@ -1309,7 +1310,7 @@
         let authorName = 'Anonymous';
         const { data: profile } = await db
           .from('profiles')
-          .select('username, avatar_emoji')
+          .select('username, avatar, avatar_emoji')
           .eq('id', currentUser.id)
           .single();
 
@@ -1325,7 +1326,7 @@
           content: content.trim(),
           category: category,
           author_name: authorName,
-          author_avatar: profile?.avatar_emoji || '🌙',
+          author_avatar: profile?.avatar || profile?.avatar_emoji || '🌙',
           read_time: Math.ceil(content.split(/\s+/).length / 200) + ' min read'
         };
         console.log('Post data:', postData);
