@@ -1127,11 +1127,11 @@
             <div class="privacy-note"><span>🔒</span> Your profile is only shown to compatible matches</div>
           </div>
 
-          <div class="souls-grid">
+          <div class="souls-grid" id="soulsGrid">
             <div style="grid-column: 1/-1; padding: 60px 24px; text-align: center;">
               <span style="font-size: 48px;">🔮</span>
-              <h3 style="margin-top: 16px;">No matches yet</h3>
-              <p style="color: var(--text-muted); margin-top: 8px;">Complete your profile to find compatible souls who share your interests.</p>
+              <h3 style="margin-top: 16px;">Loading souls...</h3>
+              <p style="color: var(--text-muted); margin-top: 8px;">Finding compatible souls who share your interests.</p>
             </div>
           </div>
         </div>
@@ -1688,12 +1688,69 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       }
     }
 
+    // Load souls (all users from profiles)
+    async function loadSouls() {
+      if (!db) return;
+
+      const grid = document.getElementById('soulsGrid');
+      if (!grid) return;
+
+      try {
+        const { data: profiles, error } = await db
+          .from('profiles')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (error) {
+          console.error('Load souls error:', error);
+          return;
+        }
+
+        if (!profiles || profiles.length === 0) {
+          grid.innerHTML = `
+            <div style="grid-column: 1/-1; padding: 60px 24px; text-align: center;">
+              <span style="font-size: 48px;">🔮</span>
+              <h3 style="margin-top: 16px;">No souls yet</h3>
+              <p style="color: var(--text-muted); margin-top: 8px;">Be one of the first to complete your profile and connect with others!</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = profiles.map(profile => {
+          const avatar = profile.avatar_emoji || profile.avatar || '🌙';
+          const avatarBg = profile.avatar_bg || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+          const interests = profile.interests ? profile.interests.split(',').map(i => i.trim()).filter(Boolean).slice(0, 3) : [];
+          const isMe = currentUser && profile.id === currentUser.id;
+
+          return `
+            <div class="soul-card" onclick="viewProfile('${profile.id}')">
+              <div class="soul-avatar" style="background: ${avatarBg}">${avatar}</div>
+              <div class="soul-name">${escapeHtml(profile.username || 'Anonymous')}${isMe ? ' (You)' : ''}</div>
+              <div class="soul-tagline">${escapeHtml(profile.tagline || profile.bio?.substring(0, 50) || 'A quiet soul')}</div>
+              ${interests.length > 0 ? `
+                <div class="interests">
+                  ${interests.map(i => `<span class="interest">${escapeHtml(i)}</span>`).join('')}
+                </div>
+              ` : ''}
+              ${!isMe ? `<button class="wave-btn" onclick="event.stopPropagation(); sendWave(this)">👋 Send a quiet wave</button>` : ''}
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error('Load souls exception:', err);
+      }
+    }
+
     // Load data on page load
     document.addEventListener('DOMContentLoaded', async () => {
       await initAuth();
       await ensureCommunitiesTable();
       loadCommunities();
       loadUnreadCount();
+      loadSouls();
 
       // Check URL params for auto-opening a community
       const urlParams = new URLSearchParams(window.location.search);
@@ -1830,18 +1887,12 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       }
 
       try {
-        // Search users/profiles (exclude current user)
-        let profileQuery = db
+        // Search users/profiles
+        const { data: profiles } = await db
           .from('profiles')
           .select('*')
           .or(`username.ilike.%${query}%,bio.ilike.%${query}%,interests.ilike.%${query}%`)
-          .limit(5);
-
-        if (currentUser) {
-          profileQuery = profileQuery.neq('id', currentUser.id);
-        }
-
-        const { data: profiles } = await profileQuery;
+          .limit(10);
 
         if (profiles) {
           results.users = profiles;
