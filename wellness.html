@@ -911,74 +911,103 @@
       const ctx = createAudioContext();
       soundscapeNodes = [];
 
-      // Layer 1: Gentle brown noise (ocean/wind texture)
-      const bufferSize = 2 * ctx.sampleRate;
-      const brownBuffer = ctx.createBuffer(2, bufferSize, ctx.sampleRate);
-      for (let channel = 0; channel < 2; channel++) {
-        const data = brownBuffer.getChannelData(channel);
-        let lastOut = 0;
-        for (let i = 0; i < bufferSize; i++) {
-          const white = Math.random() * 2 - 1;
-          data[i] = (lastOut + (0.02 * white)) / 1.02;
-          lastOut = data[i];
-          data[i] *= 3.5;
+      // --- Layer 1: Rain base (warm brown noise, low-pass filtered) ---
+      const rainLen = 4 * ctx.sampleRate;
+      const rainBuf = ctx.createBuffer(2, rainLen, ctx.sampleRate);
+      for (let ch = 0; ch < 2; ch++) {
+        const d = rainBuf.getChannelData(ch);
+        let last = 0;
+        for (let i = 0; i < rainLen; i++) {
+          const w = Math.random() * 2 - 1;
+          d[i] = (last + 0.02 * w) / 1.02;
+          last = d[i];
+          d[i] *= 3.5;
         }
       }
-      const brownSource = ctx.createBufferSource();
-      brownSource.buffer = brownBuffer;
-      brownSource.loop = true;
-      const brownGain = ctx.createGain();
-      brownGain.gain.value = 0.12;
-      const brownFilter = ctx.createBiquadFilter();
-      brownFilter.type = 'lowpass';
-      brownFilter.frequency.value = 400;
-      brownSource.connect(brownFilter);
-      brownFilter.connect(brownGain);
-      brownGain.connect(ctx.destination);
-      brownSource.start();
-      soundscapeNodes.push(brownSource, brownGain, brownFilter);
+      const rainSrc = ctx.createBufferSource();
+      rainSrc.buffer = rainBuf;
+      rainSrc.loop = true;
+      const rainLP = ctx.createBiquadFilter();
+      rainLP.type = 'lowpass';
+      rainLP.frequency.value = 800;
+      rainLP.Q.value = 0.5;
+      const rainGain = ctx.createGain();
+      rainGain.gain.value = 0.18;
+      rainSrc.connect(rainLP);
+      rainLP.connect(rainGain);
+      rainGain.connect(ctx.destination);
+      rainSrc.start();
+      soundscapeNodes.push(rainSrc, rainLP, rainGain);
 
-      // Layer 2: Soft pad tone (gentle drone)
-      const padFreqs = [132, 198, 264]; // C3, G3, C4 gentle chord
-      padFreqs.forEach(freq => {
-        const osc = ctx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        const gain = ctx.createGain();
-        gain.gain.value = 0.02;
-        // Gentle volume modulation for organic feel
-        const lfo = ctx.createOscillator();
-        lfo.type = 'sine';
-        lfo.frequency.value = 0.1 + Math.random() * 0.1;
-        const lfoGain = ctx.createGain();
-        lfoGain.gain.value = 0.008;
-        lfo.connect(lfoGain);
-        lfoGain.connect(gain.gain);
-        lfo.start();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        soundscapeNodes.push(osc, gain, lfo, lfoGain);
-      });
+      // --- Layer 2: Rain droplets (bandpass white noise, gentle patter) ---
+      const dropLen = 3 * ctx.sampleRate;
+      const dropBuf = ctx.createBuffer(2, dropLen, ctx.sampleRate);
+      for (let ch = 0; ch < 2; ch++) {
+        const d = dropBuf.getChannelData(ch);
+        for (let i = 0; i < dropLen; i++) {
+          d[i] = Math.random() * 2 - 1;
+        }
+      }
+      const dropSrc = ctx.createBufferSource();
+      dropSrc.buffer = dropBuf;
+      dropSrc.loop = true;
+      const dropBP = ctx.createBiquadFilter();
+      dropBP.type = 'bandpass';
+      dropBP.frequency.value = 4000;
+      dropBP.Q.value = 0.3;
+      const dropGain = ctx.createGain();
+      dropGain.gain.value = 0.04;
+      // Slow modulation for natural variation
+      const dropLfo = ctx.createOscillator();
+      dropLfo.type = 'sine';
+      dropLfo.frequency.value = 0.15;
+      const dropLfoGain = ctx.createGain();
+      dropLfoGain.gain.value = 0.02;
+      dropLfo.connect(dropLfoGain);
+      dropLfoGain.connect(dropGain.gain);
+      dropLfo.start();
+      dropSrc.connect(dropBP);
+      dropBP.connect(dropGain);
+      dropGain.connect(ctx.destination);
+      dropSrc.start();
+      soundscapeNodes.push(dropSrc, dropBP, dropGain, dropLfo, dropLfoGain);
 
-      // Layer 3: Occasional gentle high shimmer
-      const shimmerOsc = ctx.createOscillator();
-      shimmerOsc.type = 'sine';
-      shimmerOsc.frequency.value = 528;
-      const shimmerGain = ctx.createGain();
-      shimmerGain.gain.value = 0.008;
-      const shimmerLfo = ctx.createOscillator();
-      shimmerLfo.type = 'sine';
-      shimmerLfo.frequency.value = 0.05;
-      const shimmerLfoGain = ctx.createGain();
-      shimmerLfoGain.gain.value = 0.006;
-      shimmerLfo.connect(shimmerLfoGain);
-      shimmerLfoGain.connect(shimmerGain.gain);
-      shimmerLfo.start();
-      shimmerOsc.connect(shimmerGain);
-      shimmerGain.connect(ctx.destination);
-      shimmerOsc.start();
-      soundscapeNodes.push(shimmerOsc, shimmerGain, shimmerLfo, shimmerLfoGain);
+      // --- Layer 3: Ocean waves (deep brown noise with slow volume swell) ---
+      const wavLen = 6 * ctx.sampleRate;
+      const wavBuf = ctx.createBuffer(2, wavLen, ctx.sampleRate);
+      for (let ch = 0; ch < 2; ch++) {
+        const d = wavBuf.getChannelData(ch);
+        let last = 0;
+        for (let i = 0; i < wavLen; i++) {
+          const w = Math.random() * 2 - 1;
+          d[i] = (last + 0.01 * w) / 1.01;
+          last = d[i];
+          d[i] *= 5;
+        }
+      }
+      const wavSrc = ctx.createBufferSource();
+      wavSrc.buffer = wavBuf;
+      wavSrc.loop = true;
+      const wavLP = ctx.createBiquadFilter();
+      wavLP.type = 'lowpass';
+      wavLP.frequency.value = 300;
+      wavLP.Q.value = 0.7;
+      const wavGain = ctx.createGain();
+      wavGain.gain.value = 0.10;
+      // Slow swell mimicking ocean waves
+      const wavLfo = ctx.createOscillator();
+      wavLfo.type = 'sine';
+      wavLfo.frequency.value = 0.08;
+      const wavLfoGain = ctx.createGain();
+      wavLfoGain.gain.value = 0.06;
+      wavLfo.connect(wavLfoGain);
+      wavLfoGain.connect(wavGain.gain);
+      wavLfo.start();
+      wavSrc.connect(wavLP);
+      wavLP.connect(wavGain);
+      wavGain.connect(ctx.destination);
+      wavSrc.start();
+      soundscapeNodes.push(wavSrc, wavLP, wavGain, wavLfo, wavLfoGain);
 
       soundscapeActive = true;
     }

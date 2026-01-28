@@ -601,19 +601,18 @@
         // Load saved profile from localStorage
         loadSavedProfile();
 
-        // Check if mood already selected today
-        const lastMood = localStorage.getItem('lastMoodDate');
-        const today = new Date().toDateString();
+        // Check if mood already completed this session
+        // sessionStorage persists across refreshes but clears on tab/browser close
+        const moodDoneThisSession = sessionStorage.getItem('moodCompleted');
+        const savedMood = JSON.parse(localStorage.getItem('currentMood') || '{}');
 
-        if (lastMood === today) {
-          // Already selected mood today, skip to app
-          const savedMood = JSON.parse(localStorage.getItem('currentMood') || '{}');
+        if (moodDoneThisSession) {
+          // Already shown mood this session — restore saved mood to nav, skip overlay
           if (savedMood.emoji) {
             document.getElementById('navUserMood').textContent = savedMood.emoji + ' Feeling ' + savedMood.label.toLowerCase();
           }
-          // Don't show mood overlay
         } else {
-          // Show mood overlay for new day
+          // New session (fresh login or new tab) — show mood overlay
           document.getElementById('moodOverlay').classList.add('visible');
         }
       } catch (err) {
@@ -625,9 +624,9 @@
 
     // Handle mood selection
     function selectMood(moodId, label, emoji) {
-      // Save mood
+      // Save mood to localStorage (persists) and sessionStorage (prevents re-show on refresh)
       localStorage.setItem('currentMood', JSON.stringify({ id: moodId, label, emoji }));
-      localStorage.setItem('lastMoodDate', new Date().toDateString());
+      sessionStorage.setItem('moodCompleted', 'true');
 
       // Update nav
       document.getElementById('navUserMood').textContent = emoji + ' Feeling ' + label.toLowerCase();
@@ -703,7 +702,7 @@
     async function logout() {
       await db.auth.signOut();
       localStorage.removeItem('currentMood');
-      localStorage.removeItem('lastMoodDate');
+      sessionStorage.removeItem('moodCompleted');
       window.location.href = 'index.html';
     }
 

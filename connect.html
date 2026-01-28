@@ -660,6 +660,136 @@
       flex-shrink: 0;
     }
 
+    /* Conversation View */
+    .convo-view-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .convo-view-header .back-btn {
+      width: 36px; height: 36px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 50%;
+      color: var(--text-secondary);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .convo-view-header .back-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .convo-view-header .convo-user-info { flex: 1; }
+    .convo-view-header .convo-user-name { font-size: 16px; font-weight: 500; }
+    .convo-view-header .convo-user-status { font-size: 12px; color: var(--text-muted); }
+    .convo-view-avatar {
+      width: 42px; height: 42px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+
+    .messages-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+      min-height: 200px;
+    }
+
+    .message-bubble {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    .message-bubble.sent {
+      align-self: flex-end;
+      background: rgba(196,161,255,0.2);
+      border: 1px solid rgba(196,161,255,0.15);
+      color: var(--text-primary);
+      border-bottom-right-radius: 4px;
+    }
+    .message-bubble.received {
+      align-self: flex-start;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      border-bottom-left-radius: 4px;
+    }
+    .message-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .message-bubble.sent .message-time { text-align: right; }
+
+    .message-input-area {
+      display: flex;
+      gap: 10px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .message-input-area input {
+      flex: 1;
+      padding: 12px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .message-input-area input:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+    }
+    .message-input-area input::placeholder { color: var(--text-muted); }
+    .send-btn {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-calm) 100%);
+      border: none;
+      border-radius: 50%;
+      color: var(--bg-deep);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .send-btn:hover { transform: scale(1.05); }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .messages-empty {
+      padding: 60px 24px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .messages-empty .icon { font-size: 48px; margin-bottom: 16px; }
+
+    /* Profile View Modal */
+    .profile-view-card {
+      text-align: center;
+      padding: 12px 0;
+    }
+    .profile-view-avatar {
+      width: 80px; height: 80px;
+      border-radius: var(--radius-lg);
+      margin: 0 auto 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px;
+    }
+    .profile-view-name { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+    .profile-view-bio { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+    .profile-view-interests { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 24px; }
+    .profile-view-actions { display: flex; gap: 12px; }
+    .profile-view-actions button { flex: 1; }
+
     /* Modals */
     .modal {
       position: fixed;
@@ -1700,12 +1830,18 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       }
 
       try {
-        // Search users/profiles
-        const { data: profiles } = await db
+        // Search users/profiles (exclude current user)
+        let profileQuery = db
           .from('profiles')
           .select('*')
           .or(`username.ilike.%${query}%,bio.ilike.%${query}%,interests.ilike.%${query}%`)
           .limit(5);
+
+        if (currentUser) {
+          profileQuery = profileQuery.neq('id', currentUser.id);
+        }
+
+        const { data: profiles } = await profileQuery;
 
         if (profiles) {
           results.users = profiles;
@@ -1963,12 +2099,402 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       }
     }
 
-    // View profile (placeholder - can be expanded)
-    function viewProfile(id) {
+    // View profile - open profile modal with message option
+    async function viewProfile(id) {
       searchResults.classList.remove('active');
       searchInput.value = '';
-      showToast('✨ Opening profile...');
-      // TODO: Navigate to profile page or open modal
+
+      if (!db) return;
+
+      try {
+        const { data: profile, error } = await db
+          .from('profiles')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error || !profile) {
+          showToast('Profile not found');
+          return;
+        }
+
+        openProfileModal(profile);
+      } catch (err) {
+        console.error('View profile error:', err);
+        showToast('Error loading profile');
+      }
+    }
+
+    function openProfileModal(profile) {
+      let modal = document.getElementById('profileViewModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'profileViewModal';
+        modal.className = 'modal';
+        modal.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
+        document.body.appendChild(modal);
+      }
+
+      const avatar = profile.avatar_emoji || profile.avatar || '🌙';
+      const avatarBg = profile.avatar_bg || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      const interests = profile.interests ? profile.interests.split(',').map(i => i.trim()).filter(Boolean) : [];
+
+      modal.innerHTML = `
+        <div class="modal-box" style="max-width: 480px;">
+          <button class="close-btn" onclick="document.getElementById('profileViewModal').classList.remove('active')">✕</button>
+          <div class="modal-header">
+            <div class="profile-view-card">
+              <div class="profile-view-avatar" style="background: ${avatarBg}">${avatar}</div>
+              <div class="profile-view-name">${escapeHtml(profile.username || 'Anonymous')}</div>
+              ${profile.tagline ? `<p style="font-size: 14px; color: var(--text-muted); font-style: italic; margin-bottom: 8px;">${escapeHtml(profile.tagline)}</p>` : ''}
+            </div>
+          </div>
+          <div class="modal-body">
+            ${profile.bio ? `<p class="profile-view-bio">${escapeHtml(profile.bio)}</p>` : ''}
+            ${interests.length > 0 ? `
+              <div class="profile-view-interests">
+                ${interests.map(i => `<span class="interest">${escapeHtml(i)}</span>`).join('')}
+              </div>
+            ` : ''}
+            <div class="profile-view-actions">
+              <button class="submit-btn" onclick="document.getElementById('profileViewModal').classList.remove('active'); openConversation('${profile.id}', '${escapeHtml(profile.username || 'Anonymous')}', '${avatar}', '${avatarBg}')">
+                💬 Send Message
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      modal.classList.add('active');
+    }
+
+    // ========== MESSAGING SYSTEM ==========
+    let conversationsCache = [];
+    let currentConvoUserId = null;
+    let messagePollingInterval = null;
+
+    // Load conversations list
+    async function loadConversations() {
+      if (!db || !currentUser) return;
+
+      const container = document.querySelector('.conversations');
+      if (!container) return;
+
+      try {
+        // Get all messages involving current user, ordered by most recent
+        const { data: messages, error } = await db
+          .from('messages')
+          .select('*')
+          .or(`sender_id.eq.${currentUser.id},recipient_id.eq.${currentUser.id}`)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Load messages error:', error);
+          return;
+        }
+
+        if (!messages || messages.length === 0) {
+          container.innerHTML = `
+            <div class="messages-empty">
+              <div class="icon">💬</div>
+              <h3>No messages yet</h3>
+              <p style="color: var(--text-muted); margin-top: 8px;">Search for users and start a conversation!</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Group by conversation partner
+        const convos = {};
+        messages.forEach(msg => {
+          const partnerId = msg.sender_id === currentUser.id ? msg.recipient_id : msg.sender_id;
+          if (!convos[partnerId]) {
+            convos[partnerId] = {
+              partnerId,
+              lastMessage: msg,
+              unreadCount: 0
+            };
+          }
+          if (msg.recipient_id === currentUser.id && !msg.read) {
+            convos[partnerId].unreadCount++;
+          }
+        });
+
+        conversationsCache = Object.values(convos);
+
+        // Load partner profiles
+        const partnerIds = Object.keys(convos);
+        const { data: profiles } = await db
+          .from('profiles')
+          .select('id, username, avatar, avatar_emoji, avatar_bg')
+          .in('id', partnerIds);
+
+        const profileMap = {};
+        if (profiles) {
+          profiles.forEach(p => { profileMap[p.id] = p; });
+        }
+
+        // Render conversations
+        container.innerHTML = conversationsCache.map(convo => {
+          const profile = profileMap[convo.partnerId] || {};
+          const avatar = profile.avatar_emoji || profile.avatar || '🌙';
+          const avatarBg = profile.avatar_bg || 'var(--bg-elevated)';
+          const name = profile.username || 'Anonymous';
+          const preview = convo.lastMessage.content.length > 60
+            ? convo.lastMessage.content.substring(0, 60) + '...'
+            : convo.lastMessage.content;
+          const time = formatMessageTime(convo.lastMessage.created_at);
+          const isSent = convo.lastMessage.sender_id === currentUser.id;
+
+          return `
+            <div class="conversation ${convo.unreadCount > 0 ? 'unread' : ''}"
+                 onclick="openConversation('${convo.partnerId}', '${escapeHtml(name)}', '${avatar}', '${avatarBg}')">
+              <div class="convo-avatar" style="background: ${avatarBg}">${avatar}</div>
+              <div class="convo-content">
+                <div class="convo-header">
+                  <span class="convo-name">${escapeHtml(name)}</span>
+                  <span class="convo-time">${time}</span>
+                </div>
+                <div class="convo-preview">${isSent ? 'You: ' : ''}${escapeHtml(preview)}</div>
+              </div>
+              ${convo.unreadCount > 0 ? '<div class="unread-dot"></div>' : ''}
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error('Load conversations exception:', err);
+      }
+    }
+
+    // Open a conversation with a specific user
+    async function openConversation(userId, userName, userAvatar, userAvatarBg) {
+      if (!db || !currentUser) {
+        showToast('Please sign in to send messages');
+        return;
+      }
+
+      currentConvoUserId = userId;
+
+      // Switch to messages tab
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('.tab[data-tab="messages"]').classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('tab-messages').classList.add('active');
+
+      // Replace messages section with conversation view
+      const section = document.querySelector('.messages-section');
+      section.innerHTML = `
+        <div class="convo-view-header">
+          <button class="back-btn" onclick="closeConversation()">←</button>
+          <div class="convo-view-avatar" style="background: ${userAvatarBg || 'var(--bg-elevated)'}">${userAvatar || '🌙'}</div>
+          <div class="convo-user-info">
+            <div class="convo-user-name">${escapeHtml(userName)}</div>
+            <div class="convo-user-status">Take your time responding</div>
+          </div>
+        </div>
+        <div class="messages-list" id="messagesList">
+          <div style="text-align: center; color: var(--text-muted); padding: 20px;">Loading...</div>
+        </div>
+        <div class="message-input-area">
+          <input type="text" id="messageInput" placeholder="Write a message..." autocomplete="off"
+                 onkeydown="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }">
+          <button class="send-btn" onclick="sendMessage()" title="Send">→</button>
+        </div>
+      `;
+
+      // Load messages for this conversation
+      await loadMessages(userId);
+
+      // Mark messages as read
+      markAsRead(userId);
+
+      // Start polling for new messages
+      startMessagePolling(userId, userName, userAvatar, userAvatarBg);
+
+      // Focus the input
+      setTimeout(() => document.getElementById('messageInput')?.focus(), 100);
+    }
+
+    // Load messages for a conversation
+    async function loadMessages(partnerId) {
+      if (!db || !currentUser) return;
+
+      const container = document.getElementById('messagesList');
+      if (!container) return;
+
+      try {
+        const { data: messages, error } = await db
+          .from('messages')
+          .select('*')
+          .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${partnerId}),and(sender_id.eq.${partnerId},recipient_id.eq.${currentUser.id})`)
+          .order('created_at', { ascending: true })
+          .limit(100);
+
+        if (error) {
+          console.error('Load messages error:', error);
+          container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:40px;">Error loading messages</div>';
+          return;
+        }
+
+        if (!messages || messages.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; color: var(--text-muted); padding: 60px 20px;">
+              <div style="font-size: 40px; margin-bottom: 12px;">💬</div>
+              <p>Start the conversation! No pressure to be witty.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = messages.map(msg => {
+          const isSent = msg.sender_id === currentUser.id;
+          const time = formatMessageTime(msg.created_at);
+          return `
+            <div class="message-bubble ${isSent ? 'sent' : 'received'}">
+              <div>${escapeHtml(msg.content)}</div>
+              <div class="message-time">${time}</div>
+            </div>
+          `;
+        }).join('');
+
+        // Scroll to bottom
+        container.scrollTop = container.scrollHeight;
+
+      } catch (err) {
+        console.error('Load messages exception:', err);
+      }
+    }
+
+    // Send a message
+    async function sendMessage() {
+      if (!db || !currentUser || !currentConvoUserId) return;
+
+      const input = document.getElementById('messageInput');
+      if (!input) return;
+
+      const content = input.value.trim();
+      if (!content) return;
+
+      input.value = '';
+
+      try {
+        const { data, error } = await db
+          .from('messages')
+          .insert({
+            sender_id: currentUser.id,
+            recipient_id: currentConvoUserId,
+            content: content
+          })
+          .select();
+
+        if (error) {
+          console.error('Send message error:', error);
+          showToast('Error sending message');
+          input.value = content; // Restore on failure
+          return;
+        }
+
+        // Add message to the list immediately
+        const container = document.getElementById('messagesList');
+        if (container) {
+          // Remove empty state if present
+          const emptyState = container.querySelector('div[style*="text-align: center"]');
+          if (emptyState && container.children.length === 1) container.innerHTML = '';
+
+          const time = formatMessageTime(new Date().toISOString());
+          container.insertAdjacentHTML('beforeend', `
+            <div class="message-bubble sent">
+              <div>${escapeHtml(content)}</div>
+              <div class="message-time">${time}</div>
+            </div>
+          `);
+          container.scrollTop = container.scrollHeight;
+        }
+
+      } catch (err) {
+        console.error('Send message exception:', err);
+        showToast('Error sending message');
+      }
+    }
+
+    // Mark messages from a partner as read
+    async function markAsRead(partnerId) {
+      if (!db || !currentUser) return;
+
+      try {
+        await db
+          .from('messages')
+          .update({ read: true })
+          .eq('sender_id', partnerId)
+          .eq('recipient_id', currentUser.id)
+          .eq('read', false);
+
+        // Update unread badge
+        loadUnreadCount();
+      } catch (err) {
+        console.error('Mark as read error:', err);
+      }
+    }
+
+    // Poll for new messages in active conversation
+    function startMessagePolling(userId, userName, userAvatar, userAvatarBg) {
+      stopMessagePolling();
+      messagePollingInterval = setInterval(async () => {
+        if (currentConvoUserId !== userId) return;
+        await loadMessages(userId);
+        markAsRead(userId);
+      }, 8000); // Poll every 8 seconds
+    }
+
+    function stopMessagePolling() {
+      if (messagePollingInterval) {
+        clearInterval(messagePollingInterval);
+        messagePollingInterval = null;
+      }
+    }
+
+    // Close conversation and return to list
+    function closeConversation() {
+      stopMessagePolling();
+      currentConvoUserId = null;
+
+      // Restore messages section HTML
+      const section = document.querySelector('.messages-section');
+      section.innerHTML = `
+        <div class="async-banner">
+          <div class="icon">💬</div>
+          <div>
+            <h4>Async-First Messaging</h4>
+            <p>Take your time. No pressure to respond quickly — we all understand.</p>
+          </div>
+        </div>
+        <div class="async-badges">
+          <div class="async-badge"><span>👁️‍🗨️</span> No read receipts</div>
+          <div class="async-badge"><span>⌨️</span> No typing indicators</div>
+          <div class="async-badge"><span>🟢</span> No online status</div>
+        </div>
+        <div class="conversations">
+          <div style="padding: 40px; text-align: center; color: var(--text-muted);">Loading conversations...</div>
+        </div>
+      `;
+
+      loadConversations();
+    }
+
+    // Format message timestamp
+    function formatMessageTime(isoStr) {
+      const date = new Date(isoStr);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return diffMins + 'm ago';
+      if (diffHours < 24) return diffHours + 'h ago';
+      if (diffDays < 7) return diffDays + 'd ago';
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
     }
 
     // Keyboard navigation
@@ -1978,6 +2504,20 @@ CREATE POLICY "Authenticated users can create communities" ON communities
         this.blur();
       }
     });
+
+    // Update DOMContentLoaded to also load conversations
+    const origDOMContentLoaded = document.addEventListener;
+    (async function() {
+      // Wait for auth (already running from initAuth)
+      await new Promise(resolve => {
+        const check = setInterval(() => {
+          if (currentUser || !db) { clearInterval(check); resolve(); }
+        }, 100);
+        // Timeout after 3 seconds
+        setTimeout(() => { clearInterval(check); resolve(); }, 3000);
+      });
+      loadConversations();
+    })();
   </script>
 
 </body>
