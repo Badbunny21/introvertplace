@@ -412,7 +412,7 @@
     .reading-content {
       max-width: 720px;
       margin: 0 auto;
-      padding: 60px 40px 100px;
+      padding: 20px 40px 100px;
     }
     .reading-content .category-tag {
       display: inline-block; padding: 6px 14px;
@@ -438,93 +438,147 @@
       font-family: 'Fraunces', serif; font-size: 22px; font-style: italic; color: var(--text-primary);
     }
 
-    /* Dynamic article content in reading modal */
+    /* Dynamic article content in reading modal — immersive design */
+    .article-hero {
+      position: relative;
+      padding: 80px 0 60px;
+      margin-bottom: 48px;
+    }
+    .article-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100vw; right: -100vw;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(196,161,255,0.08) 0%, rgba(124,184,232,0.04) 50%, transparent 100%);
+      z-index: -1;
+    }
+    .article-hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
+    }
+
     .article-content .article-meta {
       display: flex;
       align-items: center;
       gap: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 28px;
       flex-wrap: wrap;
     }
     .article-content .article-category {
-      padding: 6px 14px;
-      background: rgba(196,161,255,0.15);
+      padding: 6px 16px;
+      background: linear-gradient(135deg, rgba(196,161,255,0.2), rgba(124,184,232,0.15));
       color: var(--accent-soft);
       border-radius: var(--radius-full);
       font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
     }
     .article-content .article-date,
     .article-content .article-read-time {
       font-size: 13px;
       color: var(--text-muted);
     }
+    .article-content .article-dot {
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
     .article-content .article-title {
       font-family: 'Fraunces', serif;
-      font-size: 42px;
-      line-height: 1.3;
-      margin-bottom: 24px;
+      font-size: 48px;
+      line-height: 1.2;
+      margin-bottom: 32px;
       color: var(--text-primary);
+      letter-spacing: -0.02em;
     }
     .article-content .article-author {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding-bottom: 32px;
-      border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 40px;
+      gap: 16px;
     }
     .article-content .author-avatar-large {
-      width: 50px;
-      height: 50px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 26px;
+      box-shadow: 0 4px 20px rgba(102,126,234,0.3);
     }
     .article-content .author-info {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
     }
     .article-content .author-name {
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 500;
       color: var(--text-primary);
     }
     .article-content .author-tagline {
       font-size: 13px;
       color: var(--text-muted);
+      font-style: italic;
     }
     .article-content .article-body {
-      font-size: 18px;
+      font-size: 19px;
       line-height: 1.9;
       color: var(--text-secondary);
     }
     .article-content .article-body p {
-      margin-bottom: 24px;
+      margin-bottom: 28px;
+    }
+    .article-content .article-body p:first-child::first-letter {
+      font-family: 'Fraunces', serif;
+      font-size: 3.5em;
+      float: left;
+      line-height: 0.8;
+      margin: 6px 14px 0 0;
+      color: var(--accent-soft);
+      font-weight: 400;
+    }
+    .article-content .article-body-end {
+      text-align: center;
+      margin: 60px 0 20px;
+      color: var(--text-muted);
+      font-size: 24px;
+      letter-spacing: 16px;
     }
 
     /* Reactions */
     .quiet-reactions {
-      display: flex; align-items: center; justify-content: center;
-      gap: 16px; padding: 40px; margin-top: 60px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 20px; padding: 48px 40px; margin-top: 60px;
+      background: linear-gradient(180deg, transparent 0%, rgba(196,161,255,0.04) 100%);
       border-top: 1px solid var(--border-subtle);
+      border-radius: 0 0 var(--radius-xl) var(--radius-xl);
     }
-    .quiet-reactions p { font-size: 14px; color: var(--text-muted); margin-right: 16px; }
+    .quiet-reactions p {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+    .reactions-row { display: flex; gap: 16px; }
     .reaction-btn {
-      width: 56px; height: 56px;
+      width: 60px; height: 60px;
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 50%;
-      font-size: 24px; cursor: pointer; transition: all 0.2s ease;
+      font-size: 26px; cursor: pointer; transition: all 0.3s ease;
     }
-    .reaction-btn:hover { transform: scale(1.1); border-color: var(--border-light); }
+    .reaction-btn:hover { transform: scale(1.15); border-color: var(--border-light); background: var(--bg-elevated); }
     .reaction-btn.selected {
       background: var(--bg-elevated);
       border-color: var(--accent-soft);
-      box-shadow: 0 0 20px rgba(196,161,255,0.2);
+      box-shadow: 0 0 24px rgba(196,161,255,0.25);
+      transform: scale(1.1);
     }
 
     /* Toast */
@@ -684,15 +738,17 @@
       .featured-content h2 { font-size: 26px; }
       .reading-content { padding: 40px 24px; }
       .reading-content h1 { font-size: 32px; }
-      .article-content .article-title { font-size: 32px; }
-      .article-content .article-body { font-size: 16px; }
+      .article-content .article-title { font-size: 34px; }
+      .article-content .article-body { font-size: 17px; }
+      .article-hero { padding: 50px 0 40px; }
     }
     @media (max-width: 600px) {
       .page-header h1 { font-size: 32px; }
       .tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; }
       .featured-image { height: 200px; }
       .guidelines { grid-template-columns: 1fr; }
-      .article-content .article-title { font-size: 26px; }
+      .article-content .article-title { font-size: 28px; }
+      .article-hero { padding: 30px 0 24px; }
       .article-content .article-meta { gap: 10px; }
       .reading-header { padding: 12px 16px; }
       .reading-actions { gap: 8px; }
@@ -789,13 +845,13 @@
         </div>
 
         <div class="tab-content" id="tab-saved">
-          <div class="articles-grid">
+          <div class="articles-grid" id="savedGrid">
             <!-- Saved articles will appear here -->
           </div>
-          <div style="text-align: center; padding: 60px 24px;">
+          <div id="savedEmpty" style="text-align: center; padding: 60px 24px;">
             <span style="font-size: 48px;">🔖</span>
             <h3 style="margin-top: 16px;">No saved articles</h3>
-            <p style="color: var(--text-muted); margin-top: 8px;">Save articles with the 🔖 bookmark icon to read later</p>
+            <p style="color: var(--text-muted); margin-top: 8px;">Save articles with the 🔖 bookmark icon when reading to find them here later</p>
           </div>
         </div>
 
@@ -818,10 +874,12 @@
       </div>
       <div class="quiet-reactions">
         <p>How did this resonate?</p>
-        <button class="reaction-btn" onclick="selectReaction(this)">🌿</button>
-        <button class="reaction-btn" onclick="selectReaction(this)">💜</button>
-        <button class="reaction-btn" onclick="selectReaction(this)">✨</button>
-        <button class="reaction-btn" onclick="selectReaction(this)">🙏</button>
+        <div class="reactions-row">
+          <button class="reaction-btn" onclick="selectReaction(this)">🌿</button>
+          <button class="reaction-btn" onclick="selectReaction(this)">💜</button>
+          <button class="reaction-btn" onclick="selectReaction(this)">✨</button>
+          <button class="reaction-btn" onclick="selectReaction(this)">🙏</button>
+        </div>
       </div>
     </div>
   </div>
@@ -939,19 +997,141 @@
       };
     });
 
+    // ========== CATEGORY FILTERING ==========
+    let activeCategory = 'All';
+    let allPosts = []; // Cached posts for filtering
+
     document.querySelectorAll('.category').forEach(cat => {
       cat.onclick = function() {
         document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
         this.classList.add('active');
+        activeCategory = this.textContent.trim();
+        filterAndRenderPosts();
       };
     });
 
+    function filterAndRenderPosts() {
+      const articlesGrid = document.querySelector('#tab-discover .articles-grid');
+      if (!articlesGrid) return;
+
+      const filtered = activeCategory === 'All'
+        ? allPosts
+        : allPosts.filter(p => p.category && p.category.toLowerCase() === activeCategory.toLowerCase());
+
+      if (filtered.length === 0) {
+        articlesGrid.innerHTML = `
+          <div style="grid-column: 1/-1; padding: 60px 24px; text-align: center;">
+            <span style="font-size: 48px;">📭</span>
+            <h3 style="margin-top: 16px;">No articles in "${escapeHtml(activeCategory)}"</h3>
+            <p style="color: var(--text-muted); margin-top: 8px;">Be the first to write about this topic!</p>
+          </div>
+        `;
+      } else {
+        articlesGrid.innerHTML = filtered.map(post => renderPostCard(post)).join('');
+      }
+    }
+
+    function renderPostCard(post) {
+      const categoryIcons = {
+        'deep thoughts': '💭', 'growth': '🌱', 'creativity': '🎨',
+        'relationships': '💜', 'solitude': '🌙', 'energy': '⚡',
+        'quiet living': '🏡'
+      };
+      const icon = categoryIcons[(post.category || '').toLowerCase()] || '📝';
+      const isSaved = getSavedPosts().includes(post.id);
+
+      return `
+        <article class="article-card" onclick="openArticleById('${post.id}')">
+          <div class="article-image" style="background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-calm) 100%);">
+            ${icon}
+            <span class="article-type community">Community</span>
+          </div>
+          <div class="article-body">
+            <span class="article-category">${escapeHtml(post.category || 'Story')}</span>
+            <h3>${escapeHtml(post.title)}</h3>
+            <p>${escapeHtml(post.content.substring(0, 150))}...</p>
+            <div class="article-footer">
+              <div class="article-author">
+                <div class="article-author-avatar" style="display: flex; align-items: center; justify-content: center; font-size: 16px;">${post.author_avatar || '🌙'}</div>
+                <span>${escapeHtml(post.author_name || 'Anonymous')}</span>
+              </div>
+              <span style="font-size: 12px; color: var(--text-muted);">${post.read_time || '3 min read'}</span>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    // ========== SAVE FOR LATER ==========
+    function getSavedPosts() {
+      try {
+        return JSON.parse(localStorage.getItem('savedBlogPosts') || '[]');
+      } catch { return []; }
+    }
+
+    function setSavedPosts(ids) {
+      localStorage.setItem('savedBlogPosts', JSON.stringify(ids));
+    }
+
     function toggleSave(btn) {
-      btn.classList.toggle('saved');
-      if (btn.classList.contains('saved')) {
+      if (!currentPostId) return;
+
+      const saved = getSavedPosts();
+      const idx = saved.indexOf(currentPostId);
+
+      if (idx === -1) {
+        saved.push(currentPostId);
+        btn.classList.add('active');
         showToast('🔖 Saved for later');
       } else {
+        saved.splice(idx, 1);
+        btn.classList.remove('active');
         showToast('Removed from saved');
+      }
+
+      setSavedPosts(saved);
+      renderSavedTab();
+    }
+
+    async function renderSavedTab() {
+      const savedIds = getSavedPosts();
+      const grid = document.getElementById('savedGrid');
+      const emptyEl = document.getElementById('savedEmpty');
+
+      if (savedIds.length === 0) {
+        if (grid) grid.innerHTML = '';
+        if (emptyEl) emptyEl.style.display = '';
+        return;
+      }
+
+      // Get saved posts from cache or database
+      const savedPosts = allPosts.filter(p => savedIds.includes(p.id));
+
+      if (savedPosts.length === 0 && db) {
+        // Fallback: load from database if not in cache
+        try {
+          const { data: posts } = await db
+            .from('blog_posts')
+            .select('*')
+            .in('id', savedIds)
+            .order('created_at', { ascending: false });
+
+          if (posts && posts.length > 0) {
+            grid.innerHTML = posts.map(post => renderPostCard(post)).join('');
+            if (emptyEl) emptyEl.style.display = 'none';
+            return;
+          }
+        } catch (err) {
+          console.error('Load saved posts error:', err);
+        }
+      }
+
+      if (savedPosts.length > 0) {
+        grid.innerHTML = savedPosts.map(post => renderPostCard(post)).join('');
+        if (emptyEl) emptyEl.style.display = 'none';
+      } else {
+        if (grid) grid.innerHTML = '';
+        if (emptyEl) emptyEl.style.display = '';
       }
     }
 
@@ -1157,57 +1337,29 @@
           .from('blog_posts')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(20);
+          .limit(50);
 
         if (error) {
           console.log('Could not load posts:', error.message);
           return;
         }
 
-        if (!posts || posts.length === 0) return;
+        // Cache all posts for filtering
+        allPosts = posts || [];
 
-        // Find the articles grid and add real posts
-        const articlesGrid = document.querySelector('#tab-discover .articles-grid');
-        if (!articlesGrid) {
-          console.log('Articles grid not found');
+        const emptyState = document.querySelector('#tab-discover .empty-featured');
+
+        if (allPosts.length === 0) {
+          if (emptyState) emptyState.style.display = '';
           return;
         }
 
-        // Hide empty state if we have posts
-        const emptyState = document.querySelector('#tab-discover .empty-featured');
-        if (emptyState) {
-          emptyState.style.display = 'none';
-        }
+        if (emptyState) emptyState.style.display = 'none';
 
-        // Create HTML for real posts and prepend to grid
-        const postsHtml = posts.map(post => `
-          <article class="article-card" onclick="openArticleById('${post.id}')">
-            <div class="article-image" style="background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-calm) 100%);">
-              ${post.category === '💭 Deep Thoughts' ? '💭' : post.category === '🌱 Growth' ? '🌱' : post.category === '🎨 Creative' ? '🎨' : post.category === '💜 Relationships' ? '💜' : '📝'}
-              <span class="article-type community">Community</span>
-            </div>
-            <div class="article-body">
-              <span class="article-category">${post.category || 'Story'}</span>
-              <h3>${escapeHtml(post.title)}</h3>
-              <p>${escapeHtml(post.content.substring(0, 150))}...</p>
-              <div class="article-footer">
-                <div class="article-author">
-                  <div class="article-author-avatar" style="display: flex; align-items: center; justify-content: center; font-size: 16px;">${post.author_avatar || '🌙'}</div>
-                  <span>${escapeHtml(post.author_name || 'Anonymous')}</span>
-                </div>
-                <span style="font-size: 12px; color: var(--text-muted);">${post.read_time || '3 min read'}</span>
-              </div>
-            </div>
-          </article>
-        `).join('');
-
-        // Insert real posts into the grid (replace any existing)
-        articlesGrid.innerHTML = postsHtml;
-
-        // Show empty state again if no posts
-        if (posts.length === 0 && emptyState) {
-          emptyState.style.display = 'block';
-        }
+        // Render with current category filter
+        filterAndRenderPosts();
+        // Also render saved tab
+        renderSavedTab();
 
       } catch (err) {
         console.error('Load posts error:', err);
@@ -1297,23 +1449,35 @@
 
         if (articleContent) {
           articleContent.innerHTML = `
-            <div class="article-meta">
-              <span class="article-category">${post.category || 'Story'}</span>
-              <span class="article-date">${new Date(post.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-              <span class="article-read-time">${post.read_time || '3 min read'}</span>
-            </div>
-            <h1 class="article-title">${escapeHtml(post.title)}</h1>
-            <div class="article-author">
-              <div class="author-avatar-large">${post.author_avatar || '🌙'}</div>
-              <div class="author-info">
-                <span class="author-name">${escapeHtml(post.author_name || 'Anonymous')}</span>
-                <span class="author-tagline">Sharing their story</span>
+            <div class="article-hero">
+              <div class="article-meta">
+                <span class="article-category">${escapeHtml(post.category || 'Story')}</span>
+                <span class="article-dot"></span>
+                <span class="article-date">${new Date(post.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                <span class="article-dot"></span>
+                <span class="article-read-time">${post.read_time || '3 min read'}</span>
+              </div>
+              <h1 class="article-title">${escapeHtml(post.title)}</h1>
+              <div class="article-author">
+                <div class="author-avatar-large">${post.author_avatar || '🌙'}</div>
+                <div class="author-info">
+                  <span class="author-name">${escapeHtml(post.author_name || 'Anonymous')}</span>
+                  <span class="author-tagline">Sharing their story</span>
+                </div>
               </div>
             </div>
             <div class="article-body">
               ${post.content.split('\n').map(p => p.trim() ? `<p>${escapeHtml(p)}</p>` : '').join('')}
             </div>
+            <div class="article-body-end">···</div>
           `;
+        }
+
+        // Update save button state
+        const saveBtn = modal.querySelector('.reading-action');
+        if (saveBtn) {
+          const isSaved = getSavedPosts().includes(post.id);
+          saveBtn.classList.toggle('active', isSaved);
         }
 
         openArticle();
