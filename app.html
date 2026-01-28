@@ -284,12 +284,29 @@
     .nav-name { font-size: 13px; color: var(--text); }
     .nav-mood { font-size: 11px; color: var(--muted); }
 
-    /* Full screen mode (for profile) */
+    /* Full screen mode (for profile and breathing exercises) */
     .app-wrapper.fullscreen nav.app-nav {
       display: none;
     }
     .app-wrapper.fullscreen main.app-content {
       width: 100%;
+    }
+
+    /* Breathing fullscreen mode - smooth transition */
+    .app-wrapper.breathing-fullscreen nav.app-nav {
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+      border: none;
+      opacity: 0;
+      transition: width 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
+    }
+    .app-wrapper.breathing-fullscreen main.app-content {
+      width: 100%;
+      transition: width 0.4s ease;
+    }
+    nav.app-nav {
+      transition: width 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
     }
 
     main.app-content {
@@ -435,7 +452,7 @@
 
   <!-- Mobile Header -->
   <div class="mobile-header">
-    <div class="mobile-logo">🌙 Introvert Place</div>
+    <div class="mobile-logo">Introvert Place</div>
     <button class="hamburger" onclick="toggleMobileNav()">☰</button>
   </div>
 
@@ -499,7 +516,7 @@
   <!-- Main App (hidden until mood selected) -->
   <div class="app-wrapper">
     <nav class="app-nav">
-      <div class="nav-logo">🌙 Introvert Place</div>
+      <div class="nav-logo">Introvert Place</div>
       <div class="nav-links">
         <a class="nav-link active" href="#" onclick="loadPage('sanctuary', event)">🧘 Sanctuary</a>
         <a class="nav-link" href="#" onclick="loadPage('wellness', event)">🌿 Wellness</a>
@@ -689,6 +706,21 @@
       localStorage.removeItem('lastMoodDate');
       window.location.href = 'index.html';
     }
+
+    // Listen for breathing fullscreen from wellness iframe (desktop only)
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.action === 'breathingFullscreen') {
+        const appWrapper = document.querySelector('.app-wrapper');
+        // Only apply on desktop (screen > 768px)
+        if (window.innerWidth > 768) {
+          if (event.data.enabled) {
+            appWrapper.classList.add('breathing-fullscreen');
+          } else {
+            appWrapper.classList.remove('breathing-fullscreen');
+          }
+        }
+      }
+    });
 
     // Listen for navigation messages from iframes
     window.addEventListener('message', (event) => {

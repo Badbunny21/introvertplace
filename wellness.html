@@ -360,6 +360,11 @@
       cursor: pointer; transition: all 0.2s ease;
     }
     .soundscape-toggle:hover { background: var(--bg-elevated); }
+    .soundscape-toggle.active {
+      background: rgba(124,232,168,0.15);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
     .cycle-counter { font-size: 15px; color: var(--text-muted); margin-top: 20px; }
     .completion-message {
       display: none; padding: 32px; background: rgba(124,232,168,0.1);
@@ -698,7 +703,7 @@
       </div>
       <div class="breathing-controls">
         <button class="btn-breathing" id="startBreathingBtn" onclick="startBreathing()">Begin Exercise</button>
-        <button class="soundscape-toggle"><span>🔊</span><span>Enable Soundscape</span></button>
+        <button class="soundscape-toggle" id="soundscapeBtn" onclick="toggleSoundscape()"><span>🔊</span><span>Enable Soundscape</span></button>
       </div>
       <div class="cycle-counter" id="cycleCounter"></div>
       <div class="completion-message" id="completionMessage">
@@ -708,7 +713,46 @@
     </div>
   </div>
 
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
   <script>
+    // ============ SUPABASE INIT ============
+    const SUPABASE_URL = 'https://inpziyxjznikinqqputz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlucHppeXhqem5pa2lucXFwdXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MzQ0MTcsImV4cCI6MjA4NDAxMDQxN30.5QoXaD5vNcuteEmwmo82l_OIklVbGGCRpNtV0PMuSyY';
+
+    let db = null;
+    let currentUser = null;
+
+    try {
+      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch (err) {
+      console.error('Supabase init error:', err);
+    }
+
+    async function initAuth() {
+      if (!db) return;
+      try {
+        const { data: { session } } = await db.auth.getSession();
+        if (session) {
+          currentUser = session.user;
+        }
+      } catch (err) {
+        console.error('Auth error:', err);
+      }
+    }
+
+    if (db) {
+      db.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          currentUser = session.user;
+        } else {
+          currentUser = null;
+        }
+      });
+    }
+
+    // ============ TAB NAVIGATION ============
     function switchToTab(tabId) {
       document.querySelectorAll('.wellness-tab').forEach(tab => tab.classList.remove('active'));
       const btn = document.querySelector(`.wellness-tab[onclick="switchToTab('${tabId}')"]`);
@@ -717,6 +761,7 @@
       document.getElementById(`tab-${tabId}`).classList.add('active');
     }
 
+    // ============ BREATHING EXERCISES ============
     const breathingExercises = {
       '478': { title: '4-7-8 Relaxing Breath', description: 'Inhale for 4, hold for 7, exhale for 8', inhale: 4, hold: 7, exhale: 8, cycles: 4 },
       'box': { title: 'Box Breathing', description: 'Equal counts: inhale, hold, exhale, hold', inhale: 4, hold: 4, exhale: 4, holdAfter: 4, cycles: 4 },
@@ -740,12 +785,17 @@
       document.getElementById('step-hold').style.display = currentExercise.hold ? 'flex' : 'none';
       resetBreathingState();
       document.getElementById('breathingModal').classList.add('active');
+      // Tell parent to go fullscreen (desktop only)
+      try { window.parent.postMessage({ action: 'breathingFullscreen', enabled: true }, '*'); } catch(e) {}
     }
 
     function closeBreathingModal() {
       document.getElementById('breathingModal').classList.remove('active');
       stopBreathing();
+      stopSoundscape();
       resetBreathingState();
+      // Tell parent to exit fullscreen
+      try { window.parent.postMessage({ action: 'breathingFullscreen', enabled: false }, '*'); } catch(e) {}
     }
 
     function resetBreathingState() {
@@ -838,8 +888,130 @@
       document.getElementById('completionMessage').classList.add('show');
       document.getElementById('startBreathingBtn').disabled = false;
       document.getElementById('startBreathingBtn').textContent = 'Do Again';
+      // Stop soundscape on completion
+      stopSoundscape();
     }
 
+    // ============ SOUNDSCAPE AUDIO (Web Audio API) ============
+    let audioCtx = null;
+    let soundscapeNodes = [];
+    let soundscapeActive = false;
+
+    function createAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function startSoundscape() {
+      const ctx = createAudioContext();
+      soundscapeNodes = [];
+
+      // Layer 1: Gentle brown noise (ocean/wind texture)
+      const bufferSize = 2 * ctx.sampleRate;
+      const brownBuffer = ctx.createBuffer(2, bufferSize, ctx.sampleRate);
+      for (let channel = 0; channel < 2; channel++) {
+        const data = brownBuffer.getChannelData(channel);
+        let lastOut = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          data[i] = (lastOut + (0.02 * white)) / 1.02;
+          lastOut = data[i];
+          data[i] *= 3.5;
+        }
+      }
+      const brownSource = ctx.createBufferSource();
+      brownSource.buffer = brownBuffer;
+      brownSource.loop = true;
+      const brownGain = ctx.createGain();
+      brownGain.gain.value = 0.12;
+      const brownFilter = ctx.createBiquadFilter();
+      brownFilter.type = 'lowpass';
+      brownFilter.frequency.value = 400;
+      brownSource.connect(brownFilter);
+      brownFilter.connect(brownGain);
+      brownGain.connect(ctx.destination);
+      brownSource.start();
+      soundscapeNodes.push(brownSource, brownGain, brownFilter);
+
+      // Layer 2: Soft pad tone (gentle drone)
+      const padFreqs = [132, 198, 264]; // C3, G3, C4 gentle chord
+      padFreqs.forEach(freq => {
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const gain = ctx.createGain();
+        gain.gain.value = 0.02;
+        // Gentle volume modulation for organic feel
+        const lfo = ctx.createOscillator();
+        lfo.type = 'sine';
+        lfo.frequency.value = 0.1 + Math.random() * 0.1;
+        const lfoGain = ctx.createGain();
+        lfoGain.gain.value = 0.008;
+        lfo.connect(lfoGain);
+        lfoGain.connect(gain.gain);
+        lfo.start();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        soundscapeNodes.push(osc, gain, lfo, lfoGain);
+      });
+
+      // Layer 3: Occasional gentle high shimmer
+      const shimmerOsc = ctx.createOscillator();
+      shimmerOsc.type = 'sine';
+      shimmerOsc.frequency.value = 528;
+      const shimmerGain = ctx.createGain();
+      shimmerGain.gain.value = 0.008;
+      const shimmerLfo = ctx.createOscillator();
+      shimmerLfo.type = 'sine';
+      shimmerLfo.frequency.value = 0.05;
+      const shimmerLfoGain = ctx.createGain();
+      shimmerLfoGain.gain.value = 0.006;
+      shimmerLfo.connect(shimmerLfoGain);
+      shimmerLfoGain.connect(shimmerGain.gain);
+      shimmerLfo.start();
+      shimmerOsc.connect(shimmerGain);
+      shimmerGain.connect(ctx.destination);
+      shimmerOsc.start();
+      soundscapeNodes.push(shimmerOsc, shimmerGain, shimmerLfo, shimmerLfoGain);
+
+      soundscapeActive = true;
+    }
+
+    function stopSoundscape() {
+      soundscapeNodes.forEach(node => {
+        try {
+          if (node.stop) node.stop();
+          if (node.disconnect) node.disconnect();
+        } catch(e) {}
+      });
+      soundscapeNodes = [];
+      soundscapeActive = false;
+      // Update button state
+      const btn = document.getElementById('soundscapeBtn');
+      if (btn) {
+        btn.classList.remove('active');
+        btn.innerHTML = '<span>🔊</span><span>Enable Soundscape</span>';
+      }
+    }
+
+    function toggleSoundscape() {
+      const btn = document.getElementById('soundscapeBtn');
+      if (soundscapeActive) {
+        stopSoundscape();
+      } else {
+        startSoundscape();
+        btn.classList.add('active');
+        btn.innerHTML = '<span>🔇</span><span>Disable Soundscape</span>';
+      }
+    }
+
+    // ============ RECOVERY MODE ============
     let recoveryModeActive = false;
     function toggleRecoveryMode() {
       recoveryModeActive = !recoveryModeActive;
@@ -853,31 +1025,78 @@
       }
     }
 
-    // Activity logging
+    // ============ SOCIAL BATTERY & ACTIVITY LOGGING ============
     let currentBattery = 100;
     let activities = [];
+    let allActivities = []; // All historical activities for predictions
     let selectedActivityData = null;
 
-    // Load saved data
-    function loadBatteryData() {
+    // Load battery from localStorage (for daily state) + Supabase (for history)
+    async function loadBatteryData() {
+      // Load today's battery level from localStorage
       const saved = localStorage.getItem('socialBattery');
       if (saved) {
         const data = JSON.parse(saved);
-        // Reset battery if it's a new day
         if (data.date !== new Date().toDateString()) {
           currentBattery = 100;
           activities = [];
-          saveBatteryData();
+          saveBatteryLocal();
         } else {
           currentBattery = data.battery;
           activities = data.activities || [];
         }
-        updateBatteryDisplay();
-        renderActivities();
       }
+
+      // Load persisted activities from Supabase
+      if (db && currentUser) {
+        try {
+          // Load today's activities
+          const todayStart = new Date();
+          todayStart.setHours(0, 0, 0, 0);
+
+          const { data: todayData, error: todayErr } = await db
+            .from('battery_activities')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .gte('logged_at', todayStart.toISOString())
+            .order('logged_at', { ascending: false });
+
+          if (!todayErr && todayData && todayData.length > 0) {
+            activities = todayData.map(a => ({
+              id: a.id,
+              name: a.name,
+              icon: a.icon,
+              drain: a.drain,
+              time: new Date(a.logged_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              logged_at: a.logged_at
+            }));
+            // Recalculate battery from today's activities
+            currentBattery = Math.max(0, 100 - activities.reduce((sum, a) => sum + a.drain, 0));
+            saveBatteryLocal();
+          }
+
+          // Load all historical activities for predictions
+          const { data: allData, error: allErr } = await db
+            .from('battery_activities')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .order('logged_at', { ascending: false })
+            .limit(100);
+
+          if (!allErr && allData) {
+            allActivities = allData;
+          }
+        } catch (err) {
+          console.error('Load activities error:', err);
+        }
+      }
+
+      updateBatteryDisplay();
+      renderActivities();
+      generatePredictions();
     }
 
-    function saveBatteryData() {
+    function saveBatteryLocal() {
       localStorage.setItem('socialBattery', JSON.stringify({
         date: new Date().toDateString(),
         battery: currentBattery,
@@ -912,7 +1131,7 @@
       document.getElementById('drainValue').textContent = '-' + this.value + '%';
     });
 
-    function logActivity() {
+    async function logActivity() {
       const customInput = document.getElementById('customActivityInput').value.trim();
       const drain = parseInt(document.getElementById('drainSlider').value);
 
@@ -929,21 +1148,58 @@
         return;
       }
 
-      // Add activity
-      activities.unshift({
+      const now = new Date();
+      const activity = {
         name: activityName,
         icon: activityIcon,
         drain: drain,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      });
+        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        logged_at: now.toISOString()
+      };
 
-      // Update battery
+      // Save to Supabase if authenticated
+      if (db && currentUser) {
+        try {
+          const { data, error } = await db
+            .from('battery_activities')
+            .insert({
+              user_id: currentUser.id,
+              name: activityName,
+              icon: activityIcon,
+              drain: drain,
+              logged_at: now.toISOString()
+            })
+            .select();
+
+          if (error) {
+            console.error('Save activity error:', error);
+            showToast('Activity logged locally (sync issue)');
+          } else if (data && data[0]) {
+            activity.id = data[0].id;
+          }
+
+          // Update allActivities for predictions
+          allActivities.unshift({
+            id: activity.id,
+            name: activityName,
+            icon: activityIcon,
+            drain: drain,
+            logged_at: now.toISOString(),
+            user_id: currentUser.id
+          });
+        } catch (err) {
+          console.error('Save activity exception:', err);
+        }
+      }
+
+      // Add to local list
+      activities.unshift(activity);
       currentBattery = Math.max(0, currentBattery - drain);
 
-      // Save and update display
-      saveBatteryData();
+      saveBatteryLocal();
       updateBatteryDisplay();
       renderActivities();
+      generatePredictions();
       closeActivityModal();
     }
 
@@ -958,6 +1214,19 @@
       else if (currentBattery < 80) status = 'Good energy — some capacity remaining';
 
       document.querySelector('.battery-status').textContent = status;
+
+      // Update overview card too
+      const overviewBattery = document.querySelector('#tab-overview .status-card:nth-child(2)');
+      if (overviewBattery) {
+        overviewBattery.querySelector('.status-value').textContent = currentBattery + '%';
+        overviewBattery.querySelector('.status-bar-fill').style.width = currentBattery + '%';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     function renderActivities() {
@@ -977,7 +1246,7 @@
         <div class="drain-item">
           <div class="drain-icon">${activity.icon}</div>
           <div class="drain-details">
-            <div class="drain-name">${activity.name}</div>
+            <div class="drain-name">${escapeHtml(activity.name)}</div>
             <div class="drain-time">${activity.time}</div>
           </div>
           <div class="drain-impact">-${activity.drain}%</div>
@@ -985,7 +1254,127 @@
       `).join('');
     }
 
-    // Toast notification
+    // ============ PREDICTIONS & SUGGESTIONS ENGINE ============
+    function generatePredictions() {
+      const container = document.querySelector('.predictions-card');
+      const data = allActivities.length > 0 ? allActivities : activities;
+
+      if (data.length < 3) {
+        container.innerHTML = `
+          <h3>🔮 Predictions & Suggestions</h3>
+          <div style="padding: 16px; text-align: center; color: var(--text-muted);">
+            <p>Log at least 3 activities to receive personalized insights and predictions.</p>
+            <p style="margin-top: 8px; font-size: 13px;">${data.length}/3 activities logged</p>
+          </div>
+        `;
+        return;
+      }
+
+      const insights = [];
+
+      // --- Analysis 1: Top draining activities ---
+      const activityCounts = {};
+      const activityTotalDrain = {};
+      data.forEach(a => {
+        const name = a.name;
+        activityCounts[name] = (activityCounts[name] || 0) + 1;
+        activityTotalDrain[name] = (activityTotalDrain[name] || 0) + a.drain;
+      });
+
+      const sortedByFrequency = Object.entries(activityCounts)
+        .sort((a, b) => b[1] - a[1]);
+
+      if (sortedByFrequency.length > 0) {
+        const topDrain = sortedByFrequency[0];
+        insights.push({
+          icon: '📊',
+          text: `<strong>${escapeHtml(topDrain[0])}</strong> is your most frequent drain, logged ${topDrain[1]} time${topDrain[1] > 1 ? 's' : ''}. Consider scheduling recovery time after.`
+        });
+      }
+
+      // --- Analysis 2: Average daily drain ---
+      const dayMap = {};
+      data.forEach(a => {
+        const day = new Date(a.logged_at).toDateString();
+        dayMap[day] = (dayMap[day] || 0) + a.drain;
+      });
+      const days = Object.values(dayMap);
+      if (days.length > 0) {
+        const avgDrain = Math.round(days.reduce((s, d) => s + d, 0) / days.length);
+        insights.push({
+          icon: '⚡',
+          text: `You typically lose about <strong>${avgDrain}%</strong> battery per day. ${avgDrain > 60 ? 'That\'s quite high — try to protect some alone time.' : avgDrain > 40 ? 'That\'s moderate — good awareness helps you pace yourself.' : 'That\'s well managed — you\'re pacing yourself nicely.'}`
+        });
+      }
+
+      // --- Analysis 3: Highest single drain ---
+      const sortedByAvgDrain = Object.entries(activityTotalDrain)
+        .map(([name, total]) => ({ name, avg: Math.round(total / activityCounts[name]) }))
+        .sort((a, b) => b.avg - a.avg);
+
+      if (sortedByAvgDrain.length > 1) {
+        const heaviest = sortedByAvgDrain[0];
+        insights.push({
+          icon: '🔋',
+          text: `<strong>${escapeHtml(heaviest.name)}</strong> drains the most energy (avg -${heaviest.avg}%). Try to limit this when your battery is already low.`
+        });
+      }
+
+      // --- Analysis 4: Time-of-day pattern (10+ activities) ---
+      if (data.length >= 10) {
+        const hourBuckets = { morning: 0, afternoon: 0, evening: 0 };
+        data.forEach(a => {
+          const hour = new Date(a.logged_at).getHours();
+          if (hour < 12) hourBuckets.morning++;
+          else if (hour < 17) hourBuckets.afternoon++;
+          else hourBuckets.evening++;
+        });
+        const peak = Object.entries(hourBuckets).sort((a, b) => b[1] - a[1])[0];
+        const peakLabel = peak[0].charAt(0).toUpperCase() + peak[0].slice(1);
+        insights.push({
+          icon: '🕐',
+          text: `Most of your draining activities happen in the <strong>${peakLabel.toLowerCase()}</strong>. Try to protect ${peak[0] === 'morning' ? 'your mornings' : peak[0] === 'afternoon' ? 'afternoon quiet time' : 'your evenings'} for recharging.`
+        });
+      }
+
+      // --- Analysis 5: Day-of-week pattern (10+ activities) ---
+      if (data.length >= 10) {
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayBuckets = {};
+        data.forEach(a => {
+          const day = dayNames[new Date(a.logged_at).getDay()];
+          dayBuckets[day] = (dayBuckets[day] || 0) + 1;
+        });
+        const busiestDay = Object.entries(dayBuckets).sort((a, b) => b[1] - a[1])[0];
+        if (busiestDay) {
+          insights.push({
+            icon: '📅',
+            text: `<strong>${busiestDay[0]}s</strong> tend to be your most draining days. Consider planning lighter schedules or buffer time.`
+          });
+        }
+      }
+
+      // --- Analysis 6: Recovery suggestion ---
+      if (currentBattery < 40) {
+        insights.push({
+          icon: '🌿',
+          text: `Your battery is at <strong>${currentBattery}%</strong>. A breathing exercise or some quiet solitude can help restore energy. Be gentle with yourself.`
+        });
+      }
+
+      // Render predictions
+      container.innerHTML = `
+        <h3>🔮 Predictions & Suggestions</h3>
+        ${insights.map(i => `
+          <div class="prediction-item">
+            <span class="prediction-icon">${i.icon}</span>
+            <span class="prediction-text">${i.text}</span>
+          </div>
+        `).join('')}
+      `;
+    }
+
+    // ============ TOAST NOTIFICATION ============
     function showToast(message) {
       let toast = document.getElementById('toast');
       if (!toast) {
@@ -1007,7 +1396,7 @@
       }, 2500);
     }
 
-    // Apply saved appearance settings
+    // ============ APPEARANCE SETTINGS ============
     function applyAppearanceSettings() {
       const theme = localStorage.getItem('theme') || 'dark';
       document.body.classList.add('theme-' + theme);
@@ -1020,9 +1409,14 @@
       document.body.classList.add('font-' + fontSize);
     }
 
-    // Initialize on load
-    applyAppearanceSettings();
-    loadBatteryData();
+    // ============ INITIALIZE ============
+    async function initWellness() {
+      applyAppearanceSettings();
+      await initAuth();
+      await loadBatteryData();
+    }
+
+    initWellness();
   </script>
 </body>
 </html>
