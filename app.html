@@ -210,10 +210,15 @@
 
     /* ============ MAIN APP ============ */
     .app-wrapper {
-      display: flex;
       min-height: 100vh;
     }
+
+    /* Sidebar: fixed drawer, hidden by default */
     nav.app-nav {
+      position: fixed;
+      left: -260px;
+      top: 0;
+      bottom: 0;
       width: 240px;
       background: #0d111a;
       border-right: 1px solid var(--border);
@@ -221,7 +226,13 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+      z-index: 1001;
+      transition: left 0.3s ease;
     }
+    nav.app-nav.open {
+      left: 0;
+    }
+
     .nav-links {
       display: flex;
       flex-direction: column;
@@ -284,33 +295,55 @@
     .nav-name { font-size: 13px; color: var(--text); }
     .nav-mood { font-size: 11px; color: var(--muted); }
 
-    /* Full screen mode (for profile and breathing exercises) */
-    .app-wrapper.fullscreen nav.app-nav {
-      display: none;
+    /* Sidebar overlay backdrop */
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
     }
-    .app-wrapper.fullscreen main.app-content {
-      width: 100%;
+    .sidebar-overlay.visible {
+      opacity: 1;
+      visibility: visible;
     }
 
-    /* Breathing fullscreen mode - smooth transition */
-    .app-wrapper.breathing-fullscreen nav.app-nav {
-      width: 0;
-      padding: 0;
-      overflow: hidden;
-      border: none;
+    /* Floating navigation toggle button */
+    .nav-toggle {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 100;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(13, 17, 26, 0.85);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: background 0.2s ease, transform 0.2s ease, opacity 0.3s ease;
+    }
+    .nav-toggle:hover {
+      background: rgba(26, 30, 40, 0.95);
+      transform: scale(1.05);
+    }
+
+    /* Breathing fullscreen mode - hide toggle button too */
+    body.breathing-active .nav-toggle {
       opacity: 0;
-      transition: width 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
-    }
-    .app-wrapper.breathing-fullscreen main.app-content {
-      width: 100%;
-      transition: width 0.4s ease;
-    }
-    nav.app-nav {
-      transition: width 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
+      pointer-events: none;
     }
 
     main.app-content {
-      flex: 1;
+      width: 100%;
       overflow: auto;
       min-height: 100vh;
       background: linear-gradient(135deg, #0b0f16 0%, #0c0f1a 60%, #0c0d14 100%);
@@ -356,82 +389,9 @@
       visibility: visible;
     }
 
-    /* Mobile hamburger menu */
-    .mobile-header {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      background: #0d111a;
-      border-bottom: 1px solid var(--border);
-      padding: 0 16px;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 1000;
-    }
-    .mobile-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .hamburger {
-      width: 44px;
-      height: 44px;
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-size: 24px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .hamburger:hover {
-      background: rgba(255,255,255,0.05);
-    }
-
-    /* Mobile nav overlay */
-    .mobile-nav-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.8);
-      z-index: 999;
-    }
-    .mobile-nav-overlay.visible {
-      display: block;
-    }
-
     /* Responsive styles */
     @media (max-width: 900px) {
       .mood-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 768px) {
-      .mobile-header {
-        display: flex;
-      }
-      nav.app-nav {
-        position: fixed;
-        left: -260px;
-        top: 0;
-        bottom: 0;
-        z-index: 1001;
-        transition: left 0.3s ease;
-      }
-      nav.app-nav.open {
-        left: 0;
-      }
-      main.app-content {
-        padding-top: 60px;
-      }
-      iframe.app-frame {
-        height: calc(100vh - 60px);
-      }
     }
     @media (max-width: 600px) {
       .greeting-name { font-size: 32px; }
@@ -450,14 +410,11 @@
     <div class="loading-spinner"></div>
   </div>
 
-  <!-- Mobile Header -->
-  <div class="mobile-header">
-    <div class="mobile-logo">Introvert Place</div>
-    <button class="hamburger" onclick="toggleMobileNav()">☰</button>
-  </div>
+  <!-- Floating navigation toggle button -->
+  <button class="nav-toggle" id="navToggle" onclick="toggleSidebar()" title="Toggle navigation (Esc)">☰</button>
 
-  <!-- Mobile Nav Overlay -->
-  <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="toggleMobileNav()"></div>
+  <!-- Sidebar overlay backdrop -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
   <!-- Full-Screen Mood Selection Overlay -->
   <div class="mood-overlay" id="moodOverlay">
@@ -556,24 +513,35 @@
       document.getElementById('greetingTime').textContent = greeting;
     }
 
-    // Toggle mobile navigation
-    function toggleMobileNav() {
+    // Toggle sidebar drawer
+    function toggleSidebar() {
       const nav = document.querySelector('nav.app-nav');
-      const overlay = document.getElementById('mobileNavOverlay');
-      nav.classList.toggle('open');
-      overlay.classList.toggle('visible');
+      const overlay = document.getElementById('sidebarOverlay');
+      const isOpen = nav.classList.contains('open');
+      if (isOpen) {
+        nav.classList.remove('open');
+        overlay.classList.remove('visible');
+      } else {
+        nav.classList.add('open');
+        overlay.classList.add('visible');
+      }
     }
 
-    // Close mobile nav when clicking a link
+    // Close sidebar when clicking a nav link
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', () => {
         const nav = document.querySelector('nav.app-nav');
-        const overlay = document.getElementById('mobileNavOverlay');
-        if (nav.classList.contains('open')) {
-          nav.classList.remove('open');
-          overlay.classList.remove('visible');
-        }
+        const overlay = document.getElementById('sidebarOverlay');
+        nav.classList.remove('open');
+        overlay.classList.remove('visible');
       });
+    });
+
+    // Keyboard shortcut: Escape to toggle sidebar
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        toggleSidebar();
+      }
     });
 
     // Check session and show mood screen or redirect
@@ -647,7 +615,6 @@
 
     function loadPage(page, evt, params) {
       const frame = document.getElementById('appFrame');
-      const appWrapper = document.querySelector('.app-wrapper');
       const map = {
         sanctuary: 'sanctuary.html',
         wellness: 'wellness.html',
@@ -676,22 +643,19 @@
       url += '?' + queryParams.toString();
       frame.src = url;
 
-      // Toggle fullscreen mode for profile page
-      if (page === 'profile') {
-        appWrapper.classList.add('fullscreen');
-      } else {
-        appWrapper.classList.remove('fullscreen');
-      }
+      // Close sidebar after navigation (content is always full-screen)
+      const nav = document.querySelector('nav.app-nav');
+      const overlay = document.getElementById('sidebarOverlay');
+      nav.classList.remove('open');
+      overlay.classList.remove('visible');
 
       if (evt && evt.target) {
         setActive(evt.target.closest('.nav-link'));
       }
     }
 
-    // Exit fullscreen mode (called from profile back button)
+    // Exit fullscreen mode (called from profile back button via postMessage)
     function exitFullscreen() {
-      const appWrapper = document.querySelector('.app-wrapper');
-      appWrapper.classList.remove('fullscreen');
       loadPage('sanctuary');
       // Set sanctuary as active
       document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
@@ -706,17 +670,13 @@
       window.location.href = 'index.html';
     }
 
-    // Listen for breathing fullscreen from wellness iframe (desktop only)
+    // Listen for breathing fullscreen from wellness iframe (hides toggle button)
     window.addEventListener('message', (event) => {
       if (event.data && event.data.action === 'breathingFullscreen') {
-        const appWrapper = document.querySelector('.app-wrapper');
-        // Only apply on desktop (screen > 768px)
-        if (window.innerWidth > 768) {
-          if (event.data.enabled) {
-            appWrapper.classList.add('breathing-fullscreen');
-          } else {
-            appWrapper.classList.remove('breathing-fullscreen');
-          }
+        if (event.data.enabled) {
+          document.body.classList.add('breathing-active');
+        } else {
+          document.body.classList.remove('breathing-active');
         }
       }
     });
@@ -733,13 +693,9 @@
           }
         });
       }
-      // Handle back from profile (exit fullscreen)
+      // Handle back from profile
       if (event.data && event.data.action === 'exitProfile') {
         exitFullscreen();
-        // Default to sanctuary active
-        if (event.data.page === 'sanctuary') {
-          document.querySelector('.nav-link').classList.add('active');
-        }
       }
     });
 
