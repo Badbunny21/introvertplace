@@ -1303,6 +1303,17 @@
       }
     }
 
+    // Listen for auth state changes (token refresh, sign-in/out)
+    if (db) {
+      db.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          currentUser = session.user;
+        } else {
+          currentUser = null;
+        }
+      });
+    }
+
   </script>
 
   <script>
@@ -1751,6 +1762,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       loadCommunities();
       loadUnreadCount();
       loadSouls();
+      loadConversations();
 
       // Check URL params for auto-opening a community
       const urlParams = new URLSearchParams(window.location.search);
@@ -2176,6 +2188,16 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       }
     }
 
+    // Store pending profile data for message button (avoids XSS in onclick strings)
+    let pendingMessageProfile = null;
+
+    function messageFromProfile() {
+      if (!pendingMessageProfile) return;
+      const p = pendingMessageProfile;
+      document.getElementById('profileViewModal').classList.remove('active');
+      openConversation(p.id, p.username || 'Anonymous', p.avatar, p.avatarBg);
+    }
+
     function openProfileModal(profile) {
       let modal = document.getElementById('profileViewModal');
       if (!modal) {
@@ -2186,16 +2208,24 @@ CREATE POLICY "Authenticated users can create communities" ON communities
         document.body.appendChild(modal);
       }
 
-      const avatar = profile.avatar_emoji || profile.avatar || '🌙';
+      const avatar = profile.avatar || profile.avatar_emoji || '🌙';
       const avatarBg = profile.avatar_bg || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
       const interests = profile.interests ? profile.interests.split(',').map(i => i.trim()).filter(Boolean) : [];
+
+      // Store profile data safely instead of embedding in onclick
+      pendingMessageProfile = {
+        id: profile.id,
+        username: profile.username || 'Anonymous',
+        avatar: avatar,
+        avatarBg: avatarBg
+      };
 
       modal.innerHTML = `
         <div class="modal-box" style="max-width: 480px;">
           <button class="close-btn" onclick="document.getElementById('profileViewModal').classList.remove('active')">✕</button>
           <div class="modal-header">
             <div class="profile-view-card">
-              <div class="profile-view-avatar" style="background: ${avatarBg}">${avatar}</div>
+              <div class="profile-view-avatar" style="background: ${escapeHtml(avatarBg)}">${escapeHtml(avatar)}</div>
               <div class="profile-view-name">${escapeHtml(profile.username || 'Anonymous')}</div>
               ${profile.tagline ? `<p style="font-size: 14px; color: var(--text-muted); font-style: italic; margin-bottom: 8px;">${escapeHtml(profile.tagline)}</p>` : ''}
             </div>
@@ -2208,7 +2238,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
               </div>
             ` : ''}
             <div class="profile-view-actions">
-              <button class="submit-btn" onclick="document.getElementById('profileViewModal').classList.remove('active'); openConversation('${profile.id}', '${escapeHtml(profile.username || 'Anonymous')}', '${avatar}', '${avatarBg}')">
+              <button class="submit-btn" onclick="messageFromProfile()">
                 💬 Send Message
               </button>
             </div>
@@ -2222,6 +2252,9 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     let conversationsCache = [];
     let currentConvoUserId = null;
     let messagePollingInterval = null;
+    let lastRenderedMsgCount = 0;
+    let lastRenderedMsgId = null;
+    let conversationProfiles = {};
 
     // Load conversations list
     async function loadConversations() {
@@ -2290,15 +2323,18 @@ CREATE POLICY "Authenticated users can create communities" ON communities
           const avatar = profile.avatar_emoji || profile.avatar || '🌙';
           const avatarBg = profile.avatar_bg || 'var(--bg-elevated)';
           const name = profile.username || 'Anonymous';
-          const preview = convo.lastMessage.content.length > 60
-            ? convo.lastMessage.content.substring(0, 60) + '...'
-            : convo.lastMessage.content;
+          const msgContent = convo.lastMessage.content || '';
+          const preview = msgContent.length > 60
+            ? msgContent.substring(0, 60) + '...'
+            : msgContent;
           const time = formatMessageTime(convo.lastMessage.created_at);
           const isSent = convo.lastMessage.sender_id === currentUser.id;
 
+          conversationProfiles[convo.partnerId] = { name, avatar, avatarBg };
+
           return `
             <div class="conversation ${convo.unreadCount > 0 ? 'unread' : ''}"
-                 onclick="openConversation('${convo.partnerId}', '${escapeHtml(name)}', '${avatar}', '${avatarBg}')">
+                 onclick="openConversationById('${convo.partnerId}')">
               <div class="convo-avatar" style="background: ${avatarBg}">${avatar}</div>
               <div class="convo-content">
                 <div class="convo-header">
@@ -2353,6 +2389,10 @@ CREATE POLICY "Authenticated users can create communities" ON communities
         </div>
       `;
 
+      // Reset message tracking for new conversation
+      lastRenderedMsgCount = 0;
+      lastRenderedMsgId = null;
+
       // Load messages for this conversation
       await loadMessages(userId);
 
@@ -2394,8 +2434,18 @@ CREATE POLICY "Authenticated users can create communities" ON communities
               <p>Start the conversation! No pressure to be witty.</p>
             </div>
           `;
+          lastRenderedMsgCount = 0;
+          lastRenderedMsgId = null;
           return;
         }
+
+        // Skip re-render if nothing changed (prevents flicker during polling)
+        const newestId = messages[messages.length - 1].id;
+        if (messages.length === lastRenderedMsgCount && newestId === lastRenderedMsgId) {
+          return;
+        }
+        lastRenderedMsgCount = messages.length;
+        lastRenderedMsgId = newestId;
 
         container.innerHTML = messages.map(msg => {
           const isSent = msg.sender_id === currentUser.id;
@@ -2504,6 +2554,13 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       }
     }
 
+    // Open conversation by partner ID (safe from XSS)
+    function openConversationById(partnerId) {
+      const profile = conversationProfiles[partnerId];
+      if (!profile) return;
+      openConversation(partnerId, profile.name, profile.avatar, profile.avatarBg);
+    }
+
     // Close conversation and return to list
     function closeConversation() {
       stopMessagePolling();
@@ -2556,19 +2613,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       }
     });
 
-    // Update DOMContentLoaded to also load conversations
-    const origDOMContentLoaded = document.addEventListener;
-    (async function() {
-      // Wait for auth (already running from initAuth)
-      await new Promise(resolve => {
-        const check = setInterval(() => {
-          if (currentUser || !db) { clearInterval(check); resolve(); }
-        }, 100);
-        // Timeout after 3 seconds
-        setTimeout(() => { clearInterval(check); resolve(); }, 3000);
-      });
-      loadConversations();
-    })();
+    // Conversations now load from DOMContentLoaded after initAuth completes
   </script>
 
 </body>

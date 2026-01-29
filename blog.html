@@ -1089,7 +1089,7 @@
           <div class="article-body">
             <span class="article-category">${escapeHtml(post.category || 'Story')}</span>
             <h3>${escapeHtml(post.title)}</h3>
-            <p>${escapeHtml(post.content.substring(0, 150))}...</p>
+            <p>${escapeHtml((post.content || '').substring(0, 150))}...</p>
             <div class="article-footer">
               <div class="article-author">
                 <div class="article-author-avatar" style="background: ${avatarBg}; display: flex; align-items: center; justify-content: center; font-size: 16px;">${avatar}</div>
@@ -1543,7 +1543,9 @@
     function loadDraft() {
       const draft = localStorage.getItem('blogDraft');
       if (draft) {
-        const { title, content, category } = JSON.parse(draft);
+        let parsed;
+        try { parsed = JSON.parse(draft); } catch { return; }
+        const { title, content, category } = parsed;
         document.getElementById('postTitle').value = title || '';
         document.getElementById('postContent').value = content || '';
         if (category) {
