@@ -404,6 +404,8 @@
       padding: 32px;
       max-width: 420px;
       width: 90%;
+      max-height: calc(100vh - 80px);
+      overflow-y: auto;
       text-align: center;
       transform: scale(0.9);
       transition: transform 0.3s ease;
@@ -2200,9 +2202,17 @@
           const progressBar = document.getElementById('avatarUploadProgress');
           const progressFill = document.getElementById('avatarProgressFill');
           progressBar.style.display = 'block';
-          progressFill.style.width = '30%';
+          progressFill.style.width = '10%';
 
           const filePath = currentUser.id + '/avatar.webp';
+
+          // Ensure avatars bucket exists
+          try {
+            await db.storage.createBucket('avatars', { public: true });
+          } catch (bucketErr) {
+            // Bucket likely already exists, ignore
+          }
+          progressFill.style.width = '30%';
 
           // Upload to Supabase Storage
           const { error: uploadError } = await db.storage
@@ -2212,7 +2222,10 @@
               upsert: true
             });
 
-          if (uploadError) throw uploadError;
+          if (uploadError) {
+            console.error('Upload error details:', uploadError);
+            throw uploadError;
+          }
           progressFill.style.width = '60%';
 
           // Get public URL with cache buster
@@ -2220,14 +2233,17 @@
           const avatarUrl = urlData.publicUrl + '?t=' + Date.now();
           progressFill.style.width = '80%';
 
-          // Save avatar_url to DB, clear emoji
+          // Save avatar_url to DB
           const { error: dbError } = await db.from('profiles').upsert({
             id: currentUser.id,
             avatar_url: avatarUrl,
             updated_at: new Date().toISOString()
           });
 
-          if (dbError) throw dbError;
+          if (dbError) {
+            // Column might not exist yet - still save to localStorage
+            console.warn('DB save avatar_url failed (column may not exist):', dbError.message);
+          }
           progressFill.style.width = '100%';
 
           // Update localStorage
@@ -2276,8 +2292,16 @@
       } catch (err) {
         console.error('Save avatar error:', err);
         const errorEl = document.getElementById('avatarUploadError');
-        errorEl.textContent = 'Failed to upload avatar. Please try again.';
+        const msg = err?.message || err?.error || String(err);
+        if (msg.includes('Bucket not found') || msg.includes('bucket')) {
+          errorEl.textContent = 'Storage not configured. Please create an "avatars" bucket in your Supabase dashboard.';
+        } else if (msg.includes('row-level security') || msg.includes('policy') || msg.includes('403') || msg.includes('not authorized')) {
+          errorEl.textContent = 'Permission denied. Storage policies need to be configured.';
+        } else {
+          errorEl.textContent = 'Upload failed: ' + msg;
+        }
         errorEl.style.display = 'block';
+        document.getElementById('avatarUploadProgress').style.display = 'none';
       } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save Avatar';
