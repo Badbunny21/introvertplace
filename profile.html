@@ -1050,10 +1050,10 @@
         </div>
         <div class="section-body">
           <div class="spaces-grid">
-            <a class="space-link" href="#creative"><div class="space-icon">✨</div><div class="space-info"><h4>Creative Space</h4><p>0 creations</p></div><span class="space-arrow">→</span></a>
-            <a class="space-link" href="#garden"><div class="space-icon">🌿</div><div class="space-info"><h4>My Garden Room</h4><p>Personal gallery</p></div><span class="space-arrow">→</span></a>
-            <a class="space-link" href="#blog"><div class="space-icon">📖</div><div class="space-info"><h4>Blog Posts</h4><p>0 published</p></div><span class="space-arrow">→</span></a>
-            <a class="space-link" href="#saved"><div class="space-icon">🔖</div><div class="space-info"><h4>Saved Items</h4><p>Nothing saved yet</p></div><span class="space-arrow">→</span></a>
+            <a class="space-link" href="javascript:void(0)" onclick="navigateToPage('creative')"><div class="space-icon">✨</div><div class="space-info"><h4>Creative Space</h4><p id="spaceCreativeCount">0 creations</p></div><span class="space-arrow">→</span></a>
+            <a class="space-link" href="javascript:void(0)" onclick="navigateToPage('sanctuary')"><div class="space-icon">🌿</div><div class="space-info"><h4>My Garden Room</h4><p>Personal gallery</p></div><span class="space-arrow">→</span></a>
+            <a class="space-link" href="javascript:void(0)" onclick="navigateToPage('blog')"><div class="space-icon">📖</div><div class="space-info"><h4>Blog Posts</h4><p id="spaceBlogCount">0 published</p></div><span class="space-arrow">→</span></a>
+            <a class="space-link" href="javascript:void(0)" onclick="navigateToPage('blog')"><div class="space-icon">🔖</div><div class="space-info"><h4>Saved Items</h4><p id="spaceSavedCount">Nothing saved yet</p></div><span class="space-arrow">→</span></a>
           </div>
         </div>
       </div>
@@ -2366,6 +2366,7 @@
       initSettings();
       loadJoinedCommunities();
       loadPinnedCreation();
+      loadSpaceCounts();
     };
 
     // Attach pinned creation click handler after a short delay to ensure DOM is ready
@@ -2652,6 +2653,65 @@
       }
 
       showToast('Opening community...');
+    }
+
+    // Navigate to a page within the app
+    function navigateToPage(page) {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ action: 'navigate', page: page }, '*');
+      } else {
+        window.location.href = page + '.html';
+      }
+    }
+
+    // Load real counts for My Spaces blocks
+    async function loadSpaceCounts() {
+      // Blog posts count (from Supabase)
+      if (currentUser && db) {
+        try {
+          const { count, error } = await db
+            .from('blog_posts')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', currentUser.id);
+
+          if (!error && count !== null) {
+            const el = document.getElementById('spaceBlogCount');
+            if (el) el.textContent = count === 1 ? '1 published' : count + ' published';
+          }
+        } catch (err) {
+          console.log('Could not load blog count:', err);
+        }
+      }
+
+      // Saved items count (from localStorage)
+      try {
+        const savedIds = JSON.parse(localStorage.getItem('savedBlogPosts') || '[]');
+        const el = document.getElementById('spaceSavedCount');
+        if (el) {
+          if (savedIds.length > 0) {
+            el.textContent = savedIds.length === 1 ? '1 saved item' : savedIds.length + ' saved items';
+          } else {
+            el.textContent = 'Nothing saved yet';
+          }
+        }
+      } catch (err) {
+        console.log('Could not load saved count:', err);
+      }
+
+      // Creative works count (from localStorage)
+      try {
+        const creations = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+        const el = document.getElementById('spaceCreativeCount');
+        if (el) {
+          if (creations.length > 0) {
+            el.textContent = creations.length === 1 ? '1 creation' : creations.length + ' creations';
+          } else {
+            el.textContent = '0 creations';
+          }
+        }
+      } catch (err) {
+        console.log('Could not load creative count:', err);
+      }
     }
 
     // ============ JOINED COMMUNITIES ============

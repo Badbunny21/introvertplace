@@ -374,6 +374,83 @@
     .completion-message h4 { font-size: 22px; color: var(--accent-green); margin-bottom: 8px; }
     .completion-message p { font-size: 15px; color: var(--text-secondary); }
 
+    /* Grounding Exercise Modal */
+    .grounding-exercise-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 20px 0;
+    }
+    .grounding-sense-icon {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 56px;
+      transition: all 0.5s ease;
+      box-shadow: 0 0 60px rgba(124,232,168,0.2);
+    }
+    .grounding-sense-count {
+      font-family: 'Fraunces', serif;
+      font-size: 64px;
+      font-weight: 300;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+    .grounding-sense-label {
+      font-size: 22px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+    .grounding-prompt {
+      font-size: 17px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .grounding-progress {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .grounding-progress-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.3s ease;
+    }
+    .grounding-progress-dot.done {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+    }
+    .grounding-progress-dot.active {
+      background: var(--accent-soft);
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 12px rgba(196,161,255,0.4);
+      transform: scale(1.2);
+    }
+    .btn-grounding-next {
+      padding: 16px 48px;
+      background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-calm) 100%);
+      color: var(--bg-deep);
+      border: none; border-radius: var(--radius-md);
+      font-size: 16px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .btn-grounding-next:hover { transform: scale(1.05); box-shadow: 0 8px 32px rgba(196,161,255,0.3); }
+    .grounding-completion {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .grounding-completion.show { display: block; animation: fadeIn 0.5s ease; }
+    .grounding-completion h3 { font-size: 28px; color: var(--accent-green); margin-bottom: 12px; }
+    .grounding-completion p { font-size: 16px; color: var(--text-secondary); line-height: 1.6; max-width: 400px; margin: 0 auto; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
     /* Responsive */
     @media (max-width: 1100px) {
       .status-grid { grid-template-columns: 1fr; }
@@ -537,7 +614,7 @@
                 <div class="grounding-step"><span class="step-number">2</span><span class="step-text">things you can <span class="sense">SMELL</span> 👃</span></div>
                 <div class="grounding-step"><span class="step-number">1</span><span class="step-text">thing you can <span class="sense">TASTE</span> 👅</span></div>
               </div>
-              <button class="btn-primary">Start Guided Exercise</button>
+              <button class="btn-primary" onclick="startGroundingExercise()">Start Guided Exercise</button>
             </div>
             <div class="other-techniques">
               <div class="technique-card"><h4>🦶 Feet on Floor</h4><p>Press your feet firmly into the ground. Feel the solid earth beneath you supporting your weight.</p></div>
@@ -709,6 +786,36 @@
       <div class="completion-message" id="completionMessage">
         <h4>🌟 Beautiful work</h4>
         <p>You completed the exercise. Notice how your body feels now compared to before.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grounding Exercise Modal -->
+  <div class="breathing-modal" id="groundingModal">
+    <div class="modal-overlay" onclick="closeGroundingModal()"></div>
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeGroundingModal()">✕</button>
+      <div id="groundingExercise">
+        <div class="grounding-exercise-display" id="groundingDisplay">
+          <div class="grounding-sense-icon" id="groundingSenseIcon" style="background: rgba(124,184,232,0.2);">👁️</div>
+          <div class="grounding-sense-count" id="groundingSenseCount">5</div>
+          <div class="grounding-sense-label" id="groundingSenseLabel">things you can SEE</div>
+          <p class="grounding-prompt" id="groundingPrompt">Look around slowly. Name 5 things you can see right now.</p>
+          <div class="grounding-progress" id="groundingProgress">
+            <div class="grounding-progress-dot active"></div>
+            <div class="grounding-progress-dot"></div>
+            <div class="grounding-progress-dot"></div>
+            <div class="grounding-progress-dot"></div>
+            <div class="grounding-progress-dot"></div>
+          </div>
+          <button class="btn-grounding-next" id="groundingNextBtn" onclick="nextGroundingStep()">I'm ready — next sense</button>
+        </div>
+        <div class="grounding-completion" id="groundingCompletion">
+          <div style="font-size: 64px; margin-bottom: 20px;">🌿</div>
+          <h3>You're grounded</h3>
+          <p>You've reconnected with the present moment through all five senses. Notice how your body feels now compared to before.</p>
+          <button class="btn-grounding-next" onclick="closeGroundingModal()" style="margin-top: 28px;">Done</button>
+        </div>
       </div>
     </div>
   </div>
@@ -890,6 +997,64 @@
       document.getElementById('startBreathingBtn').textContent = 'Do Again';
       // Stop soundscape on completion
       stopSoundscape();
+    }
+
+    // ============ 5-4-3-2-1 GROUNDING EXERCISE ============
+    const groundingSteps = [
+      { count: 5, sense: 'SEE',   icon: '👁️', prompt: 'Look around slowly. Name 5 things you can see right now.', color: 'rgba(124,184,232,0.2)' },
+      { count: 4, sense: 'TOUCH', icon: '✋', prompt: 'Notice 4 things you can physically feel — the chair, your clothes, the air on your skin.', color: 'rgba(196,161,255,0.2)' },
+      { count: 3, sense: 'HEAR',  icon: '👂', prompt: 'Listen carefully. What 3 sounds can you hear? Near or far, loud or soft.', color: 'rgba(124,232,168,0.2)' },
+      { count: 2, sense: 'SMELL', icon: '👃', prompt: 'Breathe in gently. Can you notice 2 distinct smells around you?', color: 'rgba(232,168,124,0.2)' },
+      { count: 1, sense: 'TASTE', icon: '👅', prompt: 'Focus on your mouth. What 1 taste can you notice right now?', color: 'rgba(240,232,124,0.2)' }
+    ];
+
+    let groundingStep = 0;
+
+    function startGroundingExercise() {
+      groundingStep = 0;
+      document.getElementById('groundingCompletion').classList.remove('show');
+      document.getElementById('groundingDisplay').style.display = '';
+      renderGroundingStep();
+      document.getElementById('groundingModal').classList.add('active');
+      try { window.parent.postMessage({ action: 'breathingFullscreen', enabled: true }, '*'); } catch(e) {}
+    }
+
+    function renderGroundingStep() {
+      const step = groundingSteps[groundingStep];
+      document.getElementById('groundingSenseIcon').textContent = step.icon;
+      document.getElementById('groundingSenseIcon').style.background = step.color;
+      document.getElementById('groundingSenseCount').textContent = step.count;
+      document.getElementById('groundingSenseLabel').textContent = 'things you can ' + step.sense;
+      document.getElementById('groundingPrompt').textContent = step.prompt;
+      document.getElementById('groundingNextBtn').textContent =
+        groundingStep < groundingSteps.length - 1 ? "I'm ready — next sense" : "I'm done";
+
+      // Update progress dots
+      const dots = document.querySelectorAll('#groundingProgress .grounding-progress-dot');
+      dots.forEach((dot, i) => {
+        dot.className = 'grounding-progress-dot';
+        if (i < groundingStep) dot.classList.add('done');
+        else if (i === groundingStep) dot.classList.add('active');
+      });
+    }
+
+    function nextGroundingStep() {
+      groundingStep++;
+      if (groundingStep >= groundingSteps.length) {
+        completeGroundingExercise();
+        return;
+      }
+      renderGroundingStep();
+    }
+
+    function completeGroundingExercise() {
+      document.getElementById('groundingDisplay').style.display = 'none';
+      document.getElementById('groundingCompletion').classList.add('show');
+    }
+
+    function closeGroundingModal() {
+      document.getElementById('groundingModal').classList.remove('active');
+      try { window.parent.postMessage({ action: 'breathingFullscreen', enabled: false }, '*'); } catch(e) {}
     }
 
     // ============ SOUNDSCAPE AUDIO (Web Audio API) ============
