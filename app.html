@@ -458,7 +458,7 @@
         <span class="nav-item-icon">📖</span>
         <span class="nav-item-label">Blog</span>
       </button>
-      <button class="nav-item" data-page="connect" onclick="loadPage('connect', event)">
+      <button class="nav-item" data-page="connect" onclick="loadPage('connect', event, {view: 'communities'})">
         <span class="nav-item-icon">🤝</span>
         <span class="nav-item-label">Connect</span>
       </button>
@@ -576,6 +576,11 @@
         Object.entries(params).forEach(([key, value]) => {
           queryParams.set(key, value);
         });
+      }
+
+      // Default connect page to communities view
+      if (page === 'connect' && !queryParams.has('view')) {
+        queryParams.set('view', 'communities');
       }
 
       url += '?' + queryParams.toString();

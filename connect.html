@@ -98,16 +98,6 @@
       margin: 0 auto;
     }
 
-    /* Header */
-    .page-header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-
-    .page-header h1 { font-size: 42px; font-weight: 300; margin-bottom: 12px; }
-    .page-header .tagline { font-size: 20px; color: var(--text-secondary); margin-bottom: 8px; }
-    .page-header .subtitle { font-family: 'Fraunces', serif; font-size: 16px; font-style: italic; color: var(--text-muted); }
-
     /* Search */
     .search-section {
       max-width: 600px;
@@ -236,54 +226,76 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Tabs */
-    .tabs {
+    /* View Navigation */
+    .view-nav {
       display: flex;
       justify-content: center;
-      gap: 10px;
+      gap: 6px;
       margin-bottom: 32px;
-      flex-wrap: wrap;
-    }
-
-    .tab {
-      padding: 12px 24px;
+      padding: 6px;
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-full);
-      color: var(--text-secondary);
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s ease;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .view-nav-item {
       display: flex;
       align-items: center;
       gap: 8px;
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-full);
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
     }
 
-    .tab:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .view-nav-item:hover { background: var(--bg-elevated); color: var(--text-primary); }
 
-    .tab.active {
+    .view-nav-item.active {
       background: var(--accent-soft);
       color: var(--bg-deep);
-      border-color: var(--accent-soft);
     }
 
-    .tab-badge {
-      background: rgba(255,255,255,0.2);
-      padding: 2px 8px;
+    .view-nav-item .nav-icon { font-size: 16px; }
+    .view-nav-item .nav-label { white-space: nowrap; }
+
+    .view-nav-badge {
+      background: var(--accent-rose);
+      color: #fff;
+      padding: 1px 7px;
       border-radius: var(--radius-full);
-      font-size: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      min-width: 18px;
+      text-align: center;
     }
 
-    .tab.active .tab-badge { background: rgba(0,0,0,0.2); }
+    .view-nav-item.active .view-nav-badge { background: rgba(0,0,0,0.25); }
 
-    /* Tab Content */
-    .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+    /* Page Views */
+    .page-view { display: none; }
+    .page-view.active { display: block; animation: viewFadeIn 0.35s ease; }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+    @keyframes viewFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* Per-view headers */
+    .view-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .view-header h1 { font-size: 36px; font-weight: 300; margin-bottom: 8px; }
+    .view-header .tagline { font-size: 16px; color: var(--text-secondary); }
 
     /* Communities */
     .section-header {
@@ -1041,16 +1053,18 @@
     /* Responsive */
     @media (max-width: 900px) {
       .content-wrapper { padding: 24px; }
-      .page-header h1 { font-size: 36px; }
+      .view-header h1 { font-size: 32px; }
     }
     @media (max-width: 600px) {
       .content-wrapper { padding: 20px 16px; }
-      .page-header h1 { font-size: 32px; }
-      .tabs { justify-content: flex-start; overflow-x: auto; }
+      .view-header h1 { font-size: 28px; }
+      .view-nav-item .nav-label { display: none; }
+      .view-nav-item { padding: 10px 16px; }
+      .view-nav { max-width: 280px; }
       .tone-grid { flex-direction: column; }
     }
     @media (max-width: 380px) {
-      .page-header h1 { font-size: 26px; }
+      .view-header h1 { font-size: 24px; }
     }
   </style>
 </head>
@@ -1068,37 +1082,44 @@
 
       <div class="content-wrapper">
         
-        <!-- Header -->
-        <header class="page-header">
-          <h1>🤝 Connect</h1>
-          <p class="tagline">Find your people. No small talk required.</p>
-          <p class="subtitle">Communities for quiet connection. Join when ready, participate when comfortable.</p>
-        </header>
+        <!-- Secondary Navigation -->
+        <nav class="view-nav">
+          <button class="view-nav-item active" data-view="communities" onclick="switchView('communities')">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Communities</span>
+          </button>
+          <button class="view-nav-item" data-view="souls" onclick="switchView('souls')">
+            <span class="nav-icon">✨</span>
+            <span class="nav-label">Find Souls</span>
+          </button>
+          <button class="view-nav-item" data-view="messages" onclick="switchView('messages')">
+            <span class="nav-icon">💬</span>
+            <span class="nav-label">Messages</span>
+            <span class="view-nav-badge" id="messagesBadge" style="display: none;">0</span>
+          </button>
+        </nav>
 
-        <!-- Search -->
-        <div class="search-section">
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="search-input" id="searchInput" placeholder="Search communities, interests, or similar souls..." autocomplete="off">
-            <div class="search-results" id="searchResults"></div>
+        <!-- COMMUNITIES VIEW -->
+        <div class="page-view active" id="view-communities">
+
+          <div class="view-header">
+            <h1>Communities</h1>
+            <p class="tagline">Find your people. No small talk required.</p>
           </div>
-          <p class="search-hints">
-            <span>🏠 communities</span>
-            <span>💭 interests</span>
-            <span>✨ similar souls</span>
-          </p>
-        </div>
 
-        <!-- Tabs -->
-        <div class="tabs">
-          <button class="tab active" data-tab="communities"><span>🏠</span> Communities</button>
-          <button class="tab" data-tab="souls"><span>✨</span> Find Souls</button>
-          <button class="tab" data-tab="messages"><span>💬</span> Messages <span class="tab-badge" id="messagesBadge" style="display: none;">0</span></button>
-        </div>
+          <!-- Search (communities only) -->
+          <div class="search-section">
+            <div class="search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="search-input" id="communitiesSearchInput" placeholder="Search communities or interests..." autocomplete="off">
+              <div class="search-results" id="communitiesSearchResults"></div>
+            </div>
+            <p class="search-hints">
+              <span>🏠 communities</span>
+              <span>💭 interests</span>
+            </p>
+          </div>
 
-        <!-- COMMUNITIES TAB -->
-        <div class="tab-content active" id="tab-communities">
-          
           <div class="section-header">
             <h2>Discover Communities</h2>
             <button class="create-btn" onclick="openModal('createModal')">
@@ -1124,9 +1145,14 @@
           </div>
         </div>
 
-        <!-- FIND SOULS TAB -->
-        <div class="tab-content" id="tab-souls">
-          
+        <!-- FIND SOULS VIEW -->
+        <div class="page-view" id="view-souls">
+
+          <div class="view-header">
+            <h1>Find Souls</h1>
+            <p class="tagline">Connect with people who share your energy.</p>
+          </div>
+
           <div class="souls-intro">
             <div class="intro-icon">✨</div>
             <h3>Find Similar Souls</h3>
@@ -1143,10 +1169,15 @@
           </div>
         </div>
 
-        <!-- MESSAGES TAB -->
-        <div class="tab-content" id="tab-messages">
+        <!-- MESSAGES VIEW -->
+        <div class="page-view" id="view-messages">
+
+          <div class="view-header">
+            <h1>Messages</h1>
+          </div>
+
           <div class="messages-section">
-            
+
             <div class="async-banner">
               <div class="icon">💬</div>
               <div>
@@ -1324,16 +1355,37 @@
   </script>
 
   <script>
-    // Tab switching
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', function() {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.getElementById('tab-' + this.dataset.tab).classList.add('active');
-      });
-    });
+    // View switching (URL-param driven)
+    let soulsLoaded = false;
+    let conversationsLoaded = false;
+
+    function switchView(viewName) {
+      // Update secondary nav
+      document.querySelectorAll('.view-nav-item').forEach(item => item.classList.remove('active'));
+      document.querySelector(`.view-nav-item[data-view="${viewName}"]`)?.classList.add('active');
+
+      // Switch views
+      document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + viewName)?.classList.add('active');
+
+      // Update URL without reload
+      const url = new URL(window.location);
+      url.searchParams.set('view', viewName);
+      history.replaceState(null, '', url);
+
+      // Lazy-load data on first visit
+      if (viewName === 'souls' && !soulsLoaded) {
+        soulsLoaded = true;
+        loadSouls();
+      }
+      if (viewName === 'messages' && !conversationsLoaded) {
+        conversationsLoaded = true;
+        loadConversations();
+      }
+
+      // Stop message polling when leaving messages
+      if (viewName !== 'messages') stopMessagePolling();
+    }
 
     // Filters
     document.querySelectorAll('.filter').forEach(f => {
@@ -1766,17 +1818,47 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     document.addEventListener('DOMContentLoaded', async () => {
       await initAuth();
       await ensureCommunitiesTable();
+
+      // Always load communities eagerly + unread count for badge
       loadCommunities();
       loadUnreadCount();
-      loadSouls();
-      loadConversations();
 
-      // Check URL params for auto-opening a community
+      // Read URL params to determine initial view
       const urlParams = new URLSearchParams(window.location.search);
+      const initialView = urlParams.get('view') || 'communities';
+      const conversationParam = urlParams.get('conversation');
       const communityId = urlParams.get('community');
+
+      // Switch to the requested view
+      switchView(initialView);
+
+      // Deep-link: open a specific community
       if (communityId) {
-        // Wait a moment for communities to load then open the specific one
+        switchView('communities');
         setTimeout(() => viewCommunity(communityId), 500);
+      }
+
+      // Deep-link: open a specific conversation
+      if (conversationParam) {
+        switchView('messages');
+        // Wait for conversations to load, then try to open
+        setTimeout(() => {
+          const profile = conversationProfiles[conversationParam];
+          if (profile) {
+            openConversation(conversationParam, profile.name, profile.avatar, profile.avatarBg);
+          }
+        }, 1000);
+      }
+
+      // Restore conversation from sessionStorage if returning to messages
+      if (initialView === 'messages') {
+        const savedConvo = sessionStorage.getItem('activeConversation');
+        if (savedConvo) {
+          try {
+            const convo = JSON.parse(savedConvo);
+            setTimeout(() => openConversation(convo.userId, convo.userName, convo.userAvatar, convo.userAvatarBg), 1000);
+          } catch (e) { /* ignore invalid data */ }
+        }
       }
     });
 
@@ -1832,13 +1914,13 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
-    // ========== SEARCH FUNCTIONALITY ==========
-    const searchInput = document.getElementById('searchInput');
-    const searchResults = document.getElementById('searchResults');
+    // ========== SEARCH FUNCTIONALITY (Communities only) ==========
+    const communitiesSearchInput = document.getElementById('communitiesSearchInput');
+    const communitiesSearchResults = document.getElementById('communitiesSearchResults');
     let searchTimeout = null;
 
     // Debounced search
-    searchInput.addEventListener('input', function() {
+    communitiesSearchInput.addEventListener('input', function() {
       const query = this.value.trim();
 
       // Clear previous timeout
@@ -1846,17 +1928,17 @@ CREATE POLICY "Authenticated users can create communities" ON communities
 
       // Hide results if query is empty
       if (!query) {
-        searchResults.classList.remove('active');
+        communitiesSearchResults.classList.remove('active');
         return;
       }
 
       // Show loading state
-      searchResults.innerHTML = `
+      communitiesSearchResults.innerHTML = `
         <div class="search-loading">
           <span class="spinner"></span>Searching...
         </div>
       `;
-      searchResults.classList.add('active');
+      communitiesSearchResults.classList.add('active');
 
       // Debounce search (300ms delay)
       searchTimeout = setTimeout(() => performSearch(query), 300);
@@ -1865,117 +1947,71 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     // Close search results when clicking outside
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.search-box')) {
-        searchResults.classList.remove('active');
+        communitiesSearchResults.classList.remove('active');
       }
     });
 
     // Focus search on input click
-    searchInput.addEventListener('focus', function() {
+    communitiesSearchInput.addEventListener('focus', function() {
       if (this.value.trim()) {
-        searchResults.classList.add('active');
+        communitiesSearchResults.classList.add('active');
       }
     });
 
-    // Perform search across all data
+    // Perform search (communities only)
     async function performSearch(query) {
       if (!db) {
         showNoResults(query);
         return;
       }
 
-      const lowerQuery = query.toLowerCase();
-      let results = {
-        communities: [],
-        users: [],
-        interests: []
-      };
+      let communities = [];
 
       try {
-        // Search communities
-        const { data: communities } = await db
+        const { data } = await db
           .from('communities')
           .select('*')
           .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-          .limit(5);
+          .limit(8);
 
-        if (communities) {
-          results.communities = communities;
+        if (data) {
+          communities = data;
         }
       } catch (err) {
         console.log('Communities table may not exist yet');
       }
 
-      try {
-        // Search users/profiles
-        const { data: profiles } = await db
-          .from('profiles')
-          .select('*')
-          .or(`username.ilike.%${query}%,bio.ilike.%${query}%,interests.ilike.%${query}%`)
-          .limit(10);
-
-        if (profiles) {
-          results.users = profiles;
-        }
-      } catch (err) {
-        console.log('Profiles table may not exist yet');
-      }
-
       // Render results
-      renderSearchResults(results, query);
+      renderSearchResults(communities, query);
     }
 
     // Render search results
-    function renderSearchResults(results, query) {
-      const { communities, users, interests } = results;
-      const totalResults = communities.length + users.length;
-
-      if (totalResults === 0) {
+    function renderSearchResults(communities, query) {
+      if (communities.length === 0) {
         showNoResults(query);
         return;
       }
 
-      let html = '';
-
-      // Communities section
-      if (communities.length > 0) {
-        html += `<div class="search-category">🏠 Communities</div>`;
-        communities.forEach(community => {
-          html += `
-            <div class="search-result-item" onclick="viewCommunity('${community.id}')">
-              <div class="search-result-icon">${community.icon || '🏠'}</div>
-              <div class="search-result-info">
-                <div class="search-result-name">${escapeHtml(community.name)}</div>
-                <div class="search-result-meta">${escapeHtml(community.description?.substring(0, 60) || '')}...</div>
-              </div>
-              <div class="search-result-badge">${community.member_count || 0} members</div>
+      let html = `<div class="search-category">🏠 Communities</div>`;
+      communities.forEach(community => {
+        html += `
+          <div class="search-result-item" onclick="viewCommunity('${community.id}')">
+            <div class="search-result-icon">${community.icon || '🏠'}</div>
+            <div class="search-result-info">
+              <div class="search-result-name">${escapeHtml(community.name)}</div>
+              <div class="search-result-meta">${escapeHtml(community.description?.substring(0, 60) || '')}...</div>
             </div>
-          `;
-        });
-      }
+            <div class="search-result-badge">${community.member_count || 0} members</div>
+          </div>
+        `;
+      });
 
-      // Users section
-      if (users.length > 0) {
-        html += `<div class="search-category">✨ People</div>`;
-        users.forEach(user => {
-          const avatar = user.avatar_emoji || '🌙';
-          html += `
-            <div class="search-result-item" onclick="viewProfile('${user.id}')">
-              <div class="search-result-icon" style="background: ${user.avatar_bg || 'var(--bg-elevated)'}">${avatar}</div>
-              <div class="search-result-info">
-                <div class="search-result-name">${escapeHtml(user.username || 'Anonymous')}</div>
-                <div class="search-result-meta">${escapeHtml(user.bio?.substring(0, 50) || user.interests?.substring(0, 50) || 'Introvert')}</div>
-              </div>
-            </div>
-          `;
-        });
-      }
-
-      searchResults.innerHTML = html;
+      communitiesSearchResults.innerHTML = html;
     }
 
     // Show no results message
     function showNoResults(query) {
-      searchResults.innerHTML = `
+      communitiesSearchResults.innerHTML = `
         <div class="search-results-empty">
           <div class="icon">🔍</div>
           <p>No results found for "${escapeHtml(query)}"</p>
@@ -1994,8 +2030,8 @@ CREATE POLICY "Authenticated users can create communities" ON communities
 
     // View community - open community detail modal
     async function viewCommunity(id) {
-      searchResults.classList.remove('active');
-      searchInput.value = '';
+      communitiesSearchResults.classList.remove('active');
+      communitiesSearchInput.value = '';
 
       if (!db) {
         showToast('Database not connected');
@@ -2171,8 +2207,8 @@ CREATE POLICY "Authenticated users can create communities" ON communities
 
     // View profile - open profile modal with message option
     async function viewProfile(id) {
-      searchResults.classList.remove('active');
-      searchInput.value = '';
+      communitiesSearchResults.classList.remove('active');
+      communitiesSearchInput.value = '';
 
       if (!db) return;
 
@@ -2369,11 +2405,13 @@ CREATE POLICY "Authenticated users can create communities" ON communities
 
       currentConvoUserId = userId;
 
-      // Switch to messages tab
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelector('.tab[data-tab="messages"]').classList.add('active');
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      document.getElementById('tab-messages').classList.add('active');
+      // Switch to messages view
+      switchView('messages');
+
+      // Save active conversation to sessionStorage for persistence
+      sessionStorage.setItem('activeConversation', JSON.stringify({
+        userId, userName, userAvatar, userAvatarBg
+      }));
 
       // Replace messages section with conversation view
       const section = document.querySelector('.messages-section');
@@ -2572,6 +2610,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     function closeConversation() {
       stopMessagePolling();
       currentConvoUserId = null;
+      sessionStorage.removeItem('activeConversation');
 
       // Restore messages section HTML
       const section = document.querySelector('.messages-section');
@@ -2613,9 +2652,9 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     }
 
     // Keyboard navigation
-    searchInput.addEventListener('keydown', function(e) {
+    communitiesSearchInput.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
-        searchResults.classList.remove('active');
+        communitiesSearchResults.classList.remove('active');
         this.blur();
       }
     });
