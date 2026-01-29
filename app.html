@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Introvert Place — App</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -219,7 +219,6 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 64px;
       background: rgba(13, 17, 26, 0.92);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -227,20 +226,21 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      padding: 0 12px;
+      gap: 2px;
+      padding: 6px 8px;
+      padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
       z-index: 100;
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
     .nav-item {
       flex: 1;
-      max-width: 100px;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
-      padding: 8px 4px;
-      border-radius: 12px;
+      gap: 2px;
+      padding: 6px 2px;
+      border-radius: 10px;
       text-decoration: none;
       cursor: pointer;
       transition: background 0.2s ease;
@@ -263,6 +263,9 @@
       color: var(--muted);
       transition: color 0.2s ease;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
     .nav-item.active .nav-item-icon {
       opacity: 1;
@@ -306,7 +309,7 @@
     }
     iframe.app-frame {
       width: 100%;
-      height: calc(100vh - 64px);
+      height: calc(100vh - 56px - env(safe-area-inset-bottom, 0px));
       border: none;
     }
 
@@ -355,6 +358,16 @@
       .mood-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
       .mood-option { padding: 20px 16px; }
       .mood-emoji { font-size: 36px; }
+      .mood-content { padding: 32px 16px; }
+    }
+    @media (max-width: 380px) {
+      .greeting-name { font-size: 26px; }
+      .mood-question { font-size: 16px; }
+      .mood-grid { gap: 8px; }
+      .mood-option { padding: 16px 12px; }
+      .mood-emoji { font-size: 30px; }
+      .nav-item-label { font-size: 9px; }
+      .nav-item-icon { font-size: 20px; }
     }
   </style>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>

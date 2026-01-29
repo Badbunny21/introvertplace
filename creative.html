@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Creative - Introvert Place</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -510,6 +510,13 @@
       .options-list { flex-direction: column; }
       .mode-tabs { display: none; }
       .rooms-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .wizard-page { padding: 24px 16px; }
+    }
+    @media (max-width: 380px) {
+      .wizard-header h1 { font-size: 26px; }
+      .wizard-page { padding: 20px 12px; }
     }
 
     /* ==================== */

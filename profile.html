@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Profile - Introvert Place</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -889,6 +889,11 @@
       .profile-tabs { gap: 6px; }
       .profile-tab { padding: 10px 20px; font-size: 13px; }
       .currently-grid, .spaces-grid, .checkbox-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 380px) {
+      .container { padding: 16px 12px 60px; }
+      .username { font-size: 26px; }
+      .profile-tab { padding: 8px 14px; font-size: 12px; }
     }
   </style>
   <!-- Supabase -->

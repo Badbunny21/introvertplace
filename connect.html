@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Connect - Introvert Place</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -1039,11 +1039,18 @@
     .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
     /* Responsive */
+    @media (max-width: 900px) {
+      .content-wrapper { padding: 24px; }
+      .page-header h1 { font-size: 36px; }
+    }
     @media (max-width: 600px) {
       .content-wrapper { padding: 20px 16px; }
       .page-header h1 { font-size: 32px; }
       .tabs { justify-content: flex-start; overflow-x: auto; }
       .tone-grid { flex-direction: column; }
+    }
+    @media (max-width: 380px) {
+      .page-header h1 { font-size: 26px; }
     }
   </style>
 </head>

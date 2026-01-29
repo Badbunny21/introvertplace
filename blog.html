@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Blog - Introvert Place</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -743,6 +743,7 @@
       .article-hero { padding: 50px 0 40px; }
     }
     @media (max-width: 600px) {
+      .content { padding: 20px 16px; }
       .page-header h1 { font-size: 32px; }
       .tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; }
       .featured-image { height: 200px; }
@@ -752,6 +753,12 @@
       .article-content .article-meta { gap: 10px; }
       .reading-header { padding: 12px 16px; }
       .reading-actions { gap: 8px; }
+      .reading-content { padding: 16px 16px 80px; }
+      .reading-content h1 { font-size: 28px; }
+    }
+    @media (max-width: 380px) {
+      .page-header h1 { font-size: 26px; }
+      .reading-content h1 { font-size: 24px; }
     }
   </style>
 </head>
