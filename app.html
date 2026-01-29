@@ -570,11 +570,6 @@
       setActiveNav(page);
     }
 
-    // Exit fullscreen mode (called from profile back button via postMessage)
-    function exitFullscreen() {
-      loadPage('sanctuary');
-    }
-
     // Logout
     async function logout() {
       await db.auth.signOut();
@@ -598,10 +593,6 @@
     window.addEventListener('message', (event) => {
       if (event.data && event.data.action === 'navigate') {
         loadPage(event.data.page, null, event.data.params);
-      }
-      // Handle back from profile
-      if (event.data && event.data.action === 'exitProfile') {
-        exitFullscreen();
       }
     });
 
