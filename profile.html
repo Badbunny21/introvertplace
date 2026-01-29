@@ -2205,26 +2205,21 @@
           progressFill.style.width = '10%';
 
           const filePath = currentUser.id + '/avatar.webp';
-
-          // Ensure avatars bucket exists
-          try {
-            await db.storage.createBucket('avatars', { public: true });
-          } catch (bucketErr) {
-            // Bucket likely already exists, ignore
-          }
           progressFill.style.width = '30%';
 
           // Upload to Supabase Storage
-          const { error: uploadError } = await db.storage
+          const { data: uploadData, error: uploadError } = await db.storage
             .from('avatars')
             .upload(filePath, pendingAvatarFile, {
               contentType: 'image/webp',
               upsert: true
             });
 
+          console.log('Upload result:', { uploadData, uploadError });
+
           if (uploadError) {
-            console.error('Upload error details:', uploadError);
-            throw uploadError;
+            console.error('Upload error details:', JSON.stringify(uploadError));
+            throw new Error(uploadError.message || uploadError.error || JSON.stringify(uploadError));
           }
           progressFill.style.width = '60%';
 
@@ -2293,13 +2288,7 @@
         console.error('Save avatar error:', err);
         const errorEl = document.getElementById('avatarUploadError');
         const msg = err?.message || err?.error || String(err);
-        if (msg.includes('Bucket not found') || msg.includes('bucket')) {
-          errorEl.textContent = 'Storage not configured. Please create an "avatars" bucket in your Supabase dashboard.';
-        } else if (msg.includes('row-level security') || msg.includes('policy') || msg.includes('403') || msg.includes('not authorized')) {
-          errorEl.textContent = 'Permission denied. Storage policies need to be configured.';
-        } else {
-          errorEl.textContent = 'Upload failed: ' + msg;
-        }
+        errorEl.textContent = 'Upload failed: ' + msg;
         errorEl.style.display = 'block';
         document.getElementById('avatarUploadProgress').style.display = 'none';
       } finally {
