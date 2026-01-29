@@ -213,131 +213,87 @@
       min-height: 100vh;
     }
 
-    /* Sidebar: fixed drawer, hidden by default */
-    nav.app-nav {
+    /* Bottom navigation bar */
+    .bottom-nav {
       position: fixed;
-      left: -260px;
-      top: 0;
       bottom: 0;
-      width: 240px;
-      background: #0d111a;
-      border-right: 1px solid var(--border);
-      padding: 24px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      z-index: 1001;
-      transition: left 0.3s ease;
-    }
-    nav.app-nav.open {
       left: 0;
-    }
-
-    .nav-links {
+      right: 0;
+      height: 64px;
+      background: rgba(13, 17, 26, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-      height: 100%;
-    }
-    .nav-spacer { flex: 1; }
-    .nav-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 22px;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .nav-link {
-      padding: 12px 14px;
-      border-radius: 10px;
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transition: background 0.2s, color 0.2s;
-    }
-    .nav-link:hover {
-      color: var(--text);
-      background: rgba(255,255,255,0.04);
-    }
-    .nav-link.active {
-      background: rgba(255,255,255,0.08);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .profile-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-    }
-    .nav-avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
-    }
-    .nav-user {
-      display: inline-flex;
-      flex-direction: column;
-      line-height: 1.2;
-    }
-    .nav-name { font-size: 13px; color: var(--text); }
-    .nav-mood { font-size: 11px; color: var(--muted); }
-
-    /* Sidebar overlay backdrop */
-    .sidebar-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-    .sidebar-overlay.visible {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    /* Floating navigation toggle button */
-    .nav-toggle {
-      position: fixed;
-      top: 16px;
-      left: 16px;
+      gap: 4px;
+      padding: 0 12px;
       z-index: 100;
-      width: 44px;
-      height: 44px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .nav-item {
+      flex: 1;
+      max-width: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 8px 4px;
       border-radius: 12px;
-      background: rgba(13, 17, 26, 0.85);
-      border: 1px solid var(--border);
-      color: var(--text);
+      text-decoration: none;
       cursor: pointer;
+      transition: background 0.2s ease;
+      border: none;
+      background: none;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    .nav-item-icon {
+      font-size: 22px;
+      line-height: 1;
+      opacity: 0.5;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .nav-item-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color 0.2s ease;
+      white-space: nowrap;
+    }
+    .nav-item.active .nav-item-icon {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    .nav-item.active .nav-item-label {
+      color: var(--accent-soft);
+    }
+
+    /* Profile nav item avatar */
+    .nav-item-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: background 0.2s ease, transform 0.2s ease, opacity 0.3s ease;
+      font-size: 13px;
+      line-height: 1;
+      opacity: 0.5;
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
-    .nav-toggle:hover {
-      background: rgba(26, 30, 40, 0.95);
-      transform: scale(1.05);
+    .nav-item.active .nav-item-avatar {
+      opacity: 1;
+      transform: scale(1.1);
     }
 
-    /* Breathing fullscreen mode - hide toggle button too */
-    body.breathing-active .nav-toggle {
+    /* Breathing fullscreen mode - hide bottom nav */
+    body.breathing-active .bottom-nav {
+      transform: translateY(100%);
       opacity: 0;
       pointer-events: none;
     }
@@ -350,7 +306,7 @@
     }
     iframe.app-frame {
       width: 100%;
-      height: 100vh;
+      height: calc(100vh - 64px);
       border: none;
     }
 
@@ -410,11 +366,6 @@
     <div class="loading-spinner"></div>
   </div>
 
-  <!-- Floating navigation toggle button -->
-  <button class="nav-toggle" id="navToggle" onclick="toggleSidebar()" title="Toggle navigation (Esc)">☰</button>
-
-  <!-- Sidebar overlay backdrop -->
-  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
   <!-- Full-Screen Mood Selection Overlay -->
   <div class="mood-overlay" id="moodOverlay">
@@ -472,27 +423,37 @@
 
   <!-- Main App (hidden until mood selected) -->
   <div class="app-wrapper">
-    <nav class="app-nav">
-      <div class="nav-logo">Introvert Place</div>
-      <div class="nav-links">
-        <a class="nav-link active" href="#" onclick="loadPage('sanctuary', event)">🧘 Sanctuary</a>
-        <a class="nav-link" href="#" onclick="loadPage('wellness', event)">🌿 Wellness</a>
-        <a class="nav-link" href="#" onclick="loadPage('creative', event)">✨ Creative</a>
-        <a class="nav-link" href="#" onclick="loadPage('blog', event)">📖 Blog</a>
-        <a class="nav-link" href="#" onclick="loadPage('connect', event)">🤝 Connect</a>
-        <div class="nav-spacer"></div>
-        <a class="nav-link profile-link" href="#" onclick="loadPage('profile', event)">
-          <span class="nav-avatar" id="navUserAvatar">🌸</span>
-          <span class="nav-user">
-            <span class="nav-name" id="navUserName">peaceful_soul</span>
-            <span class="nav-mood" id="navUserMood">😌 Feeling calm</span>
-          </span>
-        </a>
-      </div>
-    </nav>
     <main class="app-content">
       <iframe id="appFrame" class="app-frame" src="sanctuary.html"></iframe>
     </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav" id="bottomNav">
+      <button class="nav-item active" data-page="sanctuary" onclick="loadPage('sanctuary', event)">
+        <span class="nav-item-icon">🧘</span>
+        <span class="nav-item-label">Sanctuary</span>
+      </button>
+      <button class="nav-item" data-page="wellness" onclick="loadPage('wellness', event)">
+        <span class="nav-item-icon">🌿</span>
+        <span class="nav-item-label">Wellness</span>
+      </button>
+      <button class="nav-item" data-page="creative" onclick="loadPage('creative', event)">
+        <span class="nav-item-icon">✨</span>
+        <span class="nav-item-label">Creative</span>
+      </button>
+      <button class="nav-item" data-page="blog" onclick="loadPage('blog', event)">
+        <span class="nav-item-icon">📖</span>
+        <span class="nav-item-label">Blog</span>
+      </button>
+      <button class="nav-item" data-page="connect" onclick="loadPage('connect', event)">
+        <span class="nav-item-icon">🤝</span>
+        <span class="nav-item-label">Connect</span>
+      </button>
+      <button class="nav-item" data-page="profile" onclick="loadPage('profile', event)">
+        <span class="nav-item-avatar" id="navUserAvatar">🌸</span>
+        <span class="nav-item-label">Profile</span>
+      </button>
+    </nav>
   </div>
 
   <script>
@@ -513,36 +474,12 @@
       document.getElementById('greetingTime').textContent = greeting;
     }
 
-    // Toggle sidebar drawer
-    function toggleSidebar() {
-      const nav = document.querySelector('nav.app-nav');
-      const overlay = document.getElementById('sidebarOverlay');
-      const isOpen = nav.classList.contains('open');
-      if (isOpen) {
-        nav.classList.remove('open');
-        overlay.classList.remove('visible');
-      } else {
-        nav.classList.add('open');
-        overlay.classList.add('visible');
-      }
+    // Set active nav item
+    function setActiveNav(page) {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      const target = document.querySelector('.nav-item[data-page="' + page + '"]');
+      if (target) target.classList.add('active');
     }
-
-    // Close sidebar when clicking a nav link
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        const nav = document.querySelector('nav.app-nav');
-        const overlay = document.getElementById('sidebarOverlay');
-        nav.classList.remove('open');
-        overlay.classList.remove('visible');
-      });
-    });
-
-    // Keyboard shortcut: Escape to toggle sidebar
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        toggleSidebar();
-      }
-    });
 
     // Check session and show mood screen or redirect
     async function init() {
@@ -562,9 +499,8 @@
         currentUser = session.user;
         const username = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
 
-        // Set username in mood screen and nav
+        // Set username in mood screen
         document.getElementById('userName').textContent = username;
-        document.getElementById('navUserName').textContent = username;
 
         // Load saved profile from localStorage
         loadSavedProfile();
@@ -575,10 +511,7 @@
         const savedMood = JSON.parse(localStorage.getItem('currentMood') || '{}');
 
         if (moodDoneThisSession) {
-          // Already shown mood this session — restore saved mood to nav, skip overlay
-          if (savedMood.emoji) {
-            document.getElementById('navUserMood').textContent = savedMood.emoji + ' Feeling ' + savedMood.label.toLowerCase();
-          }
+          // Already shown mood this session — skip overlay
         } else {
           // New session (fresh login or new tab) — show mood overlay
           document.getElementById('moodOverlay').classList.add('visible');
@@ -596,9 +529,6 @@
       localStorage.setItem('currentMood', JSON.stringify({ id: moodId, label, emoji }));
       sessionStorage.setItem('moodCompleted', 'true');
 
-      // Update nav
-      document.getElementById('navUserMood').textContent = emoji + ' Feeling ' + label.toLowerCase();
-
       // Hide mood overlay with animation
       document.getElementById('moodOverlay').classList.remove('visible');
 
@@ -608,11 +538,6 @@
     }
 
     // Navigation
-    function setActive(link) {
-      document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
-      link.classList.add('active');
-    }
-
     function loadPage(page, evt, params) {
       const frame = document.getElementById('appFrame');
       const map = {
@@ -642,24 +567,12 @@
 
       url += '?' + queryParams.toString();
       frame.src = url;
-
-      // Close sidebar after navigation (content is always full-screen)
-      const nav = document.querySelector('nav.app-nav');
-      const overlay = document.getElementById('sidebarOverlay');
-      nav.classList.remove('open');
-      overlay.classList.remove('visible');
-
-      if (evt && evt.target) {
-        setActive(evt.target.closest('.nav-link'));
-      }
+      setActiveNav(page);
     }
 
     // Exit fullscreen mode (called from profile back button via postMessage)
     function exitFullscreen() {
       loadPage('sanctuary');
-      // Set sanctuary as active
-      document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
-      document.querySelector('.nav-link').classList.add('active');
     }
 
     // Logout
@@ -685,13 +598,6 @@
     window.addEventListener('message', (event) => {
       if (event.data && event.data.action === 'navigate') {
         loadPage(event.data.page, null, event.data.params);
-        // Update active nav link
-        document.querySelectorAll('.nav-link').forEach(link => {
-          link.classList.remove('active');
-          if (link.textContent.toLowerCase().includes(event.data.page)) {
-            link.classList.add('active');
-          }
-        });
       }
       // Handle back from profile
       if (event.data && event.data.action === 'exitProfile') {
@@ -705,15 +611,14 @@
       if (savedProfile) {
         const profile = JSON.parse(savedProfile);
 
-        // Update avatar
+        // Update avatar in bottom nav
         if (profile.avatar) {
           document.getElementById('navUserAvatar').textContent = profile.avatar;
         }
 
-        // Update username
+        // Update username in mood screen
         if (profile.username) {
           document.getElementById('userName').textContent = profile.username;
-          document.getElementById('navUserName').textContent = profile.username;
         }
       }
     }
@@ -723,9 +628,6 @@
       if (event.data && event.data.type === 'profileUpdate') {
         if (event.data.avatar) {
           document.getElementById('navUserAvatar').textContent = event.data.avatar;
-        }
-        if (event.data.username) {
-          document.getElementById('navUserName').textContent = event.data.username;
         }
       }
     });
