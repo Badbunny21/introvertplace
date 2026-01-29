@@ -2202,12 +2202,12 @@
           const progressBar = document.getElementById('avatarUploadProgress');
           const progressFill = document.getElementById('avatarProgressFill');
           progressBar.style.display = 'block';
-          progressFill.style.width = '10%';
+          progressFill.style.width = '20%';
 
+          let avatarUrl = null;
+
+          // Try storage upload first, fall back to data URL
           const filePath = currentUser.id + '/avatar.webp';
-          progressFill.style.width = '30%';
-
-          // Upload to Supabase Storage
           const { data: uploadData, error: uploadError } = await db.storage
             .from('avatars')
             .upload(filePath, pendingAvatarFile, {
@@ -2215,18 +2215,17 @@
               upsert: true
             });
 
-          console.log('Upload result:', { uploadData, uploadError });
-
-          if (uploadError) {
-            console.error('Upload error details:', JSON.stringify(uploadError));
-            throw new Error(uploadError.message || uploadError.error || JSON.stringify(uploadError));
+          if (!uploadError) {
+            // Storage upload succeeded - use public URL
+            const { data: urlData } = db.storage.from('avatars').getPublicUrl(filePath);
+            avatarUrl = urlData.publicUrl + '?t=' + Date.now();
+          } else {
+            // Storage failed - use data URL directly (image is already 256x256 WebP, ~20-40KB)
+            console.warn('Storage upload failed, using data URL fallback:', uploadError.message);
+            avatarUrl = pendingAvatarDataUrl;
           }
-          progressFill.style.width = '60%';
 
-          // Get public URL with cache buster
-          const { data: urlData } = db.storage.from('avatars').getPublicUrl(filePath);
-          const avatarUrl = urlData.publicUrl + '?t=' + Date.now();
-          progressFill.style.width = '80%';
+          progressFill.style.width = '60%';
 
           // Save avatar_url to DB
           const { error: dbError } = await db.from('profiles').upsert({
@@ -2236,8 +2235,7 @@
           });
 
           if (dbError) {
-            // Column might not exist yet - still save to localStorage
-            console.warn('DB save avatar_url failed (column may not exist):', dbError.message);
+            console.warn('DB save avatar_url warning:', dbError.message);
           }
           progressFill.style.width = '100%';
 
