@@ -592,6 +592,14 @@
     let currentUser = null;
     let currentMood = 'peaceful';
 
+    // Escape HTML to prevent XSS when rendering user-generated content
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
     try {
       db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     } catch (err) {
@@ -914,7 +922,7 @@
                   <span class="activity-type">${moodEmoji} Journal</span>
                   <span class="activity-time">${date}</span>
                 </div>
-                <div class="activity-content">${item.content}</div>
+                <div class="activity-content">${escapeHtml(item.content)}</div>
               </div>`;
           } else {
             return `
@@ -923,8 +931,8 @@
                   <span class="activity-type">💡 Reflection</span>
                   <span class="activity-time">${date}</span>
                 </div>
-                <div class="activity-content">${item.response}</div>
-                ${item.prompt ? `<div style="font-size:12px;color:var(--text-muted);margin-top:8px;font-style:italic;">Prompt: "${item.prompt}"</div>` : ''}
+                <div class="activity-content">${escapeHtml(item.response)}</div>
+                ${item.prompt ? `<div style="font-size:12px;color:var(--text-muted);margin-top:8px;font-style:italic;">Prompt: "${escapeHtml(item.prompt)}"</div>` : ''}
               </div>`;
           }
         }).join('');
@@ -981,7 +989,7 @@
                 <span class="activity-type">${moodEmoji} Journal Entry</span>
                 <span class="activity-time">${date}</span>
               </div>
-              <div class="activity-content">${entry.content}</div>
+              <div class="activity-content">${escapeHtml(entry.content)}</div>
             </div>
           `;
         }).join('')}
@@ -1035,7 +1043,7 @@
             <div class="mood-history-details">
               <div class="mood-history-date">${date}</div>
               <div class="mood-history-energy">Energy: ${entry.energy_level}/10</div>
-              ${entry.notes ? `<div class="mood-history-note">${entry.notes}</div>` : ''}
+              ${entry.notes ? `<div class="mood-history-note">${escapeHtml(entry.notes)}</div>` : ''}
             </div>
           </div>
         `;
@@ -1121,8 +1129,8 @@
               <span class="reflection-type">${ref.reflection_type === 'prompt' ? '💡 Prompt Response' : '✍️ Reflection'}</span>
               <span class="reflection-date">${date}</span>
             </div>
-            ${ref.prompt ? `<p style="font-style: italic; color: var(--text-muted); margin-bottom: 12px;">"${ref.prompt}"</p>` : ''}
-            <div class="reflection-response">${ref.response}</div>
+            ${ref.prompt ? `<p style="font-style: italic; color: var(--text-muted); margin-bottom: 12px;">"${escapeHtml(ref.prompt)}"</p>` : ''}
+            <div class="reflection-response">${escapeHtml(ref.response)}</div>
           </div>
         `;
       }).join('');
