@@ -531,6 +531,7 @@
       justify-content: center;
       font-size: 40px;
     }
+    .soul-avatar img { width: 100%; height: 100%; border-radius: var(--radius-lg); object-fit: cover; }
 
     .soul-name { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
     .soul-tagline { font-size: 14px; color: var(--text-muted); font-style: italic; margin-bottom: 16px; }
@@ -657,6 +658,7 @@
       font-size: 26px;
       flex-shrink: 0;
     }
+    .convo-avatar img { width: 100%; height: 100%; border-radius: var(--radius-md); object-fit: cover; }
 
     .convo-content { flex: 1; min-width: 0; }
     .convo-header { display: flex; justify-stretch: space-between; margin-bottom: 4px; }
@@ -700,6 +702,7 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 22px; flex-shrink: 0;
     }
+    .convo-view-avatar img { width: 100%; height: 100%; border-radius: var(--radius-md); object-fit: cover; }
 
     .messages-list {
       flex: 1;
@@ -796,6 +799,7 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 40px;
     }
+    .profile-view-avatar img { width: 100%; height: 100%; border-radius: var(--radius-lg); object-fit: cover; }
     .profile-view-name { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
     .profile-view-bio { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
     .profile-view-interests { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 24px; }
@@ -1796,7 +1800,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
 
           return `
             <div class="soul-card" onclick="viewProfile('${profile.id}')">
-              <div class="soul-avatar" style="background: ${avatarBg}">${avatar}</div>
+              ${renderAvatarHtml(profile.avatar_url, avatar, avatarBg, 'soul-avatar')}
               <div class="soul-name">${escapeHtml(profile.username || 'Anonymous')}${isMe ? ' (You)' : ''}</div>
               <div class="soul-tagline">${escapeHtml(profile.tagline || profile.bio?.substring(0, 50) || 'A quiet soul')}</div>
               ${interests.length > 0 ? `
@@ -1845,7 +1849,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
         setTimeout(() => {
           const profile = conversationProfiles[conversationParam];
           if (profile) {
-            openConversation(conversationParam, profile.name, profile.avatar, profile.avatarBg);
+            openConversation(conversationParam, profile.name, profile.avatar, profile.avatarBg, profile.avatarUrl);
           }
         }, 1000);
       }
@@ -1856,7 +1860,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
         if (savedConvo) {
           try {
             const convo = JSON.parse(savedConvo);
-            setTimeout(() => openConversation(convo.userId, convo.userName, convo.userAvatar, convo.userAvatarBg), 1000);
+            setTimeout(() => openConversation(convo.userId, convo.userName, convo.userAvatar, convo.userAvatarBg, convo.userAvatarUrl), 1000);
           } catch (e) { /* ignore invalid data */ }
         }
       }
@@ -2238,7 +2242,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       if (!pendingMessageProfile) return;
       const p = pendingMessageProfile;
       document.getElementById('profileViewModal').classList.remove('active');
-      openConversation(p.id, p.username || 'Anonymous', p.avatar, p.avatarBg);
+      openConversation(p.id, p.username || 'Anonymous', p.avatar, p.avatarBg, p.avatarUrl);
     }
 
     function openProfileModal(profile) {
@@ -2253,6 +2257,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
 
       const avatar = profile.avatar || profile.avatar_emoji || '🌙';
       const avatarBg = profile.avatar_bg || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      const avatarUrl = profile.avatar_url || null;
       const interests = profile.interests ? profile.interests.split(',').map(i => i.trim()).filter(Boolean) : [];
 
       // Store profile data safely instead of embedding in onclick
@@ -2260,7 +2265,8 @@ CREATE POLICY "Authenticated users can create communities" ON communities
         id: profile.id,
         username: profile.username || 'Anonymous',
         avatar: avatar,
-        avatarBg: avatarBg
+        avatarBg: avatarBg,
+        avatarUrl: avatarUrl
       };
 
       modal.innerHTML = `
@@ -2268,7 +2274,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
           <button class="close-btn" onclick="document.getElementById('profileViewModal').classList.remove('active')">✕</button>
           <div class="modal-header">
             <div class="profile-view-card">
-              <div class="profile-view-avatar" style="background: ${escapeHtml(avatarBg)}">${escapeHtml(avatar)}</div>
+              ${renderAvatarHtml(avatarUrl, avatar, avatarBg, 'profile-view-avatar')}
               <div class="profile-view-name">${escapeHtml(profile.username || 'Anonymous')}</div>
               ${profile.tagline ? `<p style="font-size: 14px; color: var(--text-muted); font-style: italic; margin-bottom: 8px;">${escapeHtml(profile.tagline)}</p>` : ''}
             </div>
@@ -2289,6 +2295,16 @@ CREATE POLICY "Authenticated users can create communities" ON communities
         </div>
       `;
       modal.classList.add('active');
+    }
+
+    // ========== AVATAR HELPER ==========
+    function renderAvatarHtml(avatarUrl, avatarEmoji, avatarBg, cssClass) {
+      const bg = avatarBg || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      const emoji = avatarEmoji || '🌙';
+      if (avatarUrl) {
+        return '<div class="' + cssClass + '" style="background:' + bg + '"><img src="' + avatarUrl + '" alt="" onerror="this.remove();this.parentElement.textContent=\'' + emoji.replace(/'/g, "\\'") + '\'"></div>';
+      }
+      return '<div class="' + cssClass + '" style="background: ' + bg + '">' + emoji + '</div>';
     }
 
     // ========== MESSAGING SYSTEM ==========
@@ -2352,7 +2368,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
         const partnerIds = Object.keys(convos);
         const { data: profiles } = await db
           .from('profiles')
-          .select('id, username, avatar, avatar_emoji, avatar_bg')
+          .select('id, username, avatar, avatar_emoji, avatar_bg, avatar_url')
           .in('id', partnerIds);
 
         const profileMap = {};
@@ -2365,6 +2381,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
           const profile = profileMap[convo.partnerId] || {};
           const avatar = profile.avatar_emoji || profile.avatar || '🌙';
           const avatarBg = profile.avatar_bg || 'var(--bg-elevated)';
+          const avatarUrl = profile.avatar_url || null;
           const name = profile.username || 'Anonymous';
           const msgContent = convo.lastMessage.content || '';
           const preview = msgContent.length > 60
@@ -2373,12 +2390,12 @@ CREATE POLICY "Authenticated users can create communities" ON communities
           const time = formatMessageTime(convo.lastMessage.created_at);
           const isSent = convo.lastMessage.sender_id === currentUser.id;
 
-          conversationProfiles[convo.partnerId] = { name, avatar, avatarBg };
+          conversationProfiles[convo.partnerId] = { name, avatar, avatarBg, avatarUrl };
 
           return `
             <div class="conversation ${convo.unreadCount > 0 ? 'unread' : ''}"
                  onclick="openConversationById('${convo.partnerId}')">
-              <div class="convo-avatar" style="background: ${avatarBg}">${avatar}</div>
+              ${renderAvatarHtml(avatarUrl, avatar, avatarBg, 'convo-avatar')}
               <div class="convo-content">
                 <div class="convo-header">
                   <span class="convo-name">${escapeHtml(name)}</span>
@@ -2397,7 +2414,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     }
 
     // Open a conversation with a specific user
-    async function openConversation(userId, userName, userAvatar, userAvatarBg) {
+    async function openConversation(userId, userName, userAvatar, userAvatarBg, userAvatarUrl) {
       if (!db || !currentUser) {
         showToast('Please sign in to send messages');
         return;
@@ -2410,7 +2427,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
 
       // Save active conversation to sessionStorage for persistence
       sessionStorage.setItem('activeConversation', JSON.stringify({
-        userId, userName, userAvatar, userAvatarBg
+        userId, userName, userAvatar, userAvatarBg, userAvatarUrl
       }));
 
       // Replace messages section with conversation view
@@ -2418,7 +2435,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       section.innerHTML = `
         <div class="convo-view-header">
           <button class="back-btn" onclick="closeConversation()">←</button>
-          <div class="convo-view-avatar" style="background: ${userAvatarBg || 'var(--bg-elevated)'}">${userAvatar || '🌙'}</div>
+          ${renderAvatarHtml(userAvatarUrl, userAvatar || '🌙', userAvatarBg || 'var(--bg-elevated)', 'convo-view-avatar')}
           <div class="convo-user-info">
             <div class="convo-user-name">${escapeHtml(userName)}</div>
             <div class="convo-user-status">Take your time responding</div>
@@ -2603,7 +2620,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     function openConversationById(partnerId) {
       const profile = conversationProfiles[partnerId];
       if (!profile) return;
-      openConversation(partnerId, profile.name, profile.avatar, profile.avatarBg);
+      openConversation(partnerId, profile.name, profile.avatar, profile.avatarBg, profile.avatarUrl);
     }
 
     // Close conversation and return to list

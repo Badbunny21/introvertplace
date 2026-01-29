@@ -509,6 +509,93 @@
       background: rgba(196,161,255,0.2);
     }
 
+    /* Avatar image support */
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 24px;
+      object-fit: cover;
+    }
+
+    /* Avatar upload section in modal */
+    .avatar-upload-section {
+      border-top: 1px solid var(--border-white-10);
+      margin-top: 16px;
+      padding-top: 16px;
+      text-align: left;
+    }
+    .avatar-upload-section h4 {
+      font-size: 14px;
+      color: var(--text-gray-400);
+      margin-bottom: 12px;
+      font-family: inherit;
+      font-weight: 400;
+    }
+    .avatar-upload-btn {
+      width: 100%;
+      padding: 16px;
+      background: transparent;
+      border: 2px dashed var(--border-white-20);
+      border-radius: 12px;
+      color: var(--text-gray-400);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .avatar-upload-btn:hover {
+      border-color: var(--accent-soft);
+      color: var(--text-white);
+      background: rgba(196,161,255,0.05);
+    }
+    .avatar-upload-preview {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 2px solid var(--accent-soft);
+      border-radius: 12px;
+    }
+    .avatar-upload-preview img {
+      width: 96px;
+      height: 96px;
+      border-radius: 12px;
+      object-fit: cover;
+    }
+    .avatar-upload-preview .remove-photo {
+      color: #ff6b6b;
+      font-size: 13px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+    }
+    .avatar-upload-preview .remove-photo:hover {
+      text-decoration: underline;
+    }
+    .avatar-upload-error {
+      color: #ff6b6b;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    .avatar-upload-progress {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-top: 12px;
+      overflow: hidden;
+      display: none;
+    }
+    .avatar-upload-progress .progress-fill {
+      height: 100%;
+      background: var(--accent-soft);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
     /* Username Edit */
     .username-input {
       width: 100%;
@@ -1394,6 +1481,25 @@
         <div class="avatar-option" data-emoji="🌻">🌻</div>
         <div class="avatar-option" data-emoji="🍄">🍄</div>
       </div>
+      <div class="avatar-upload-section">
+        <h4>Or upload a custom photo</h4>
+        <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none">
+        <div id="avatarUploadBtn" class="avatar-upload-btn" onclick="document.getElementById('avatarFileInput').click()">
+          📷 Choose an image...
+        </div>
+        <div id="avatarUploadPreview" class="avatar-upload-preview" style="display:none">
+          <img id="avatarPreviewImg" src="" alt="Preview">
+          <div>
+            <div style="font-size:14px; color:var(--text-white); margin-bottom:4px;">Custom photo</div>
+            <button class="remove-photo" onclick="removeUploadedAvatar()">Remove photo</button>
+          </div>
+        </div>
+        <div id="avatarUploadError" class="avatar-upload-error" style="display:none"></div>
+        <div id="avatarUploadProgress" class="avatar-upload-progress">
+          <div class="progress-fill" id="avatarProgressFill"></div>
+        </div>
+      </div>
+
       <div class="modal-buttons">
         <button class="modal-btn cancel" onclick="hideAvatarModal()">Cancel</button>
         <button class="modal-btn save" id="saveAvatarBtn" onclick="saveAvatar()">Save Avatar</button>
@@ -1509,10 +1615,8 @@
       if (savedProfile) {
         const data = JSON.parse(savedProfile);
 
-        // Avatar
-        if (data.avatar) {
-          document.querySelector('.avatar').textContent = data.avatar;
-        }
+        // Avatar (supports image or emoji)
+        renderAvatarDisplay(data.avatar_url, data.avatar);
 
         // Username
         if (data.username) {
@@ -1596,6 +1700,14 @@
         if (error && error.code !== 'PGRST116') throw error; // PGRST116 = not found
 
         if (data) {
+          // Populate avatar (supports image or emoji)
+          renderAvatarDisplay(data.avatar_url, data.avatar || data.avatar_emoji);
+          // Sync avatar_url to localStorage
+          const savedProfile = JSON.parse(localStorage.getItem('introvert_profile') || '{}');
+          savedProfile.avatar_url = data.avatar_url || null;
+          if (data.avatar) savedProfile.avatar = data.avatar;
+          localStorage.setItem('introvert_profile', JSON.stringify(savedProfile));
+
           // Populate bio
           const bioInput = document.querySelector('.bio-input');
           if (bioInput && data.bio) {
@@ -1696,11 +1808,15 @@
       const currentlyPlaying = document.querySelector('.currently-input[placeholder="Game or hobby?"]')?.value || null;
 
       // Get current avatar and username
-      const currentAvatar = document.querySelector('.avatar')?.textContent || '🌙';
+      const avatarEl = document.querySelector('.avatar');
+      const hasImgAvatar = avatarEl?.querySelector('img');
+      const currentAvatar = hasImgAvatar ? (JSON.parse(localStorage.getItem('introvert_profile') || '{}').avatar || '🌙') : (avatarEl?.textContent || '🌙');
+      const currentAvatarUrl = JSON.parse(localStorage.getItem('introvert_profile') || '{}').avatar_url || null;
       const currentUsername = document.querySelector('.username-edit')?.childNodes[0]?.textContent?.trim() || 'your_username';
 
       const profileData = {
         avatar: currentAvatar,
+        avatar_url: currentAvatarUrl,
         username: currentUsername,
         bio: bioInput?.value || null,
         quote: quoteInput?.value || null,
@@ -1924,17 +2040,62 @@
 
     // Avatar Modal Functions
     let selectedAvatar = '🌸';
+    let pendingAvatarFile = null;
+    let pendingAvatarDataUrl = null;
+
+    function renderAvatarDisplay(avatarUrl, avatarEmoji) {
+      const avatarEl = document.querySelector('.avatar');
+      if (!avatarEl) return;
+      if (avatarUrl) {
+        avatarEl.innerHTML = '<img src="' + avatarUrl + '" alt="Avatar" onerror="this.parentElement.textContent=\'' + (avatarEmoji || '🌙').replace(/'/g, "\\'") + '\'">';
+      } else {
+        avatarEl.innerHTML = '';
+        avatarEl.textContent = avatarEmoji || '🌙';
+      }
+    }
+
+    function removeUploadedAvatar() {
+      pendingAvatarFile = null;
+      pendingAvatarDataUrl = null;
+      document.getElementById('avatarUploadPreview').style.display = 'none';
+      document.getElementById('avatarUploadBtn').style.display = '';
+      document.getElementById('avatarUploadError').style.display = 'none';
+      // Re-enable emoji selection visual
+      const currentEmoji = document.querySelector('.avatar').textContent || document.querySelector('.avatar img') ? null : document.querySelector('.avatar').textContent;
+      document.querySelectorAll('.avatar-option').forEach(o => o.style.opacity = '');
+    }
 
     function showAvatarModal() {
       document.getElementById('avatarModal').classList.add('show');
-      // Mark current avatar as selected
-      const currentEmoji = document.querySelector('.avatar').textContent;
-      document.querySelectorAll('.avatar-option').forEach(opt => {
-        opt.classList.toggle('selected', opt.dataset.emoji === currentEmoji);
-        if (opt.dataset.emoji === currentEmoji) {
-          selectedAvatar = currentEmoji;
-        }
-      });
+      // Reset upload state
+      pendingAvatarFile = null;
+      pendingAvatarDataUrl = null;
+      document.getElementById('avatarUploadPreview').style.display = 'none';
+      document.getElementById('avatarUploadBtn').style.display = '';
+      document.getElementById('avatarUploadError').style.display = 'none';
+      document.getElementById('avatarUploadProgress').style.display = 'none';
+
+      // Check if current avatar is an image
+      const avatarEl = document.querySelector('.avatar');
+      const hasImage = avatarEl.querySelector('img');
+
+      if (hasImage) {
+        // Current avatar is an image - show preview of it
+        document.querySelectorAll('.avatar-option').forEach(opt => {
+          opt.classList.remove('selected');
+          opt.style.opacity = '0.4';
+        });
+      } else {
+        // Current avatar is emoji
+        const currentEmoji = avatarEl.textContent;
+        document.querySelectorAll('.avatar-option').forEach(opt => {
+          opt.style.opacity = '';
+          opt.classList.toggle('selected', opt.dataset.emoji === currentEmoji);
+          if (opt.dataset.emoji === currentEmoji) {
+            selectedAvatar = currentEmoji;
+          }
+        });
+      }
     }
 
     function hideAvatarModal() {
@@ -1947,37 +2108,181 @@
         document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
         this.classList.add('selected');
         selectedAvatar = this.dataset.emoji;
+        // Clear pending upload when emoji selected
+        pendingAvatarFile = null;
+        pendingAvatarDataUrl = null;
+        document.getElementById('avatarUploadPreview').style.display = 'none';
+        document.getElementById('avatarUploadBtn').style.display = '';
+        document.querySelectorAll('.avatar-option').forEach(o => o.style.opacity = '');
       });
     });
 
-    async function saveAvatar() {
-      document.querySelector('.avatar').textContent = selectedAvatar;
+    // File input change handler for avatar upload
+    document.getElementById('avatarFileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
 
-      // Always save to localStorage
-      const savedProfile = JSON.parse(localStorage.getItem('introvert_profile') || '{}');
-      savedProfile.avatar = selectedAvatar;
-      savedProfile.updated_at = new Date().toISOString();
-      localStorage.setItem('introvert_profile', JSON.stringify(savedProfile));
+      const errorEl = document.getElementById('avatarUploadError');
+      errorEl.style.display = 'none';
 
-      // Also save to database if available
-      if (currentUser && db) {
-        try {
-          await db.from('profiles').upsert({
-            id: currentUser.id,
-            avatar: selectedAvatar,
-            updated_at: new Date().toISOString()
-          });
-        } catch (err) {
-          console.error('Save avatar error:', err);
-        }
+      // Validate type
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        errorEl.textContent = 'Please select a JPG, PNG, WebP, or GIF image.';
+        errorEl.style.display = 'block';
+        this.value = '';
+        return;
       }
 
-      hideAvatarModal();
-      showToast('✓ Avatar updated!');
+      // Validate size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        errorEl.textContent = 'Image must be under 5MB.';
+        errorEl.style.display = 'block';
+        this.value = '';
+        return;
+      }
 
-      // Notify parent window (app.html) to update avatar
-      if (window.parent !== window) {
-        window.parent.postMessage({ type: 'profileUpdate', avatar: selectedAvatar }, '*');
+      // Process with Canvas: center-crop to 256x256, convert to WebP
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = 256;
+          canvas.height = 256;
+          const ctx = canvas.getContext('2d');
+
+          // Center crop
+          const size = Math.min(img.width, img.height);
+          const sx = (img.width - size) / 2;
+          const sy = (img.height - size) / 2;
+          ctx.drawImage(img, sx, sy, size, size, 0, 0, 256, 256);
+
+          canvas.toBlob(function(blob) {
+            if (!blob) {
+              errorEl.textContent = 'Failed to process image. Please try another.';
+              errorEl.style.display = 'block';
+              return;
+            }
+            pendingAvatarFile = blob;
+            pendingAvatarDataUrl = canvas.toDataURL('image/webp', 0.85);
+
+            // Show preview
+            document.getElementById('avatarPreviewImg').src = pendingAvatarDataUrl;
+            document.getElementById('avatarUploadPreview').style.display = 'flex';
+            document.getElementById('avatarUploadBtn').style.display = 'none';
+
+            // Deselect emoji options visually
+            document.querySelectorAll('.avatar-option').forEach(o => {
+              o.classList.remove('selected');
+              o.style.opacity = '0.4';
+            });
+          }, 'image/webp', 0.85);
+        };
+        img.onerror = function() {
+          errorEl.textContent = 'Failed to load image. Please try another.';
+          errorEl.style.display = 'block';
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+      this.value = '';
+    });
+
+    async function saveAvatar() {
+      const saveBtn = document.getElementById('saveAvatarBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      try {
+        if (pendingAvatarFile && currentUser && db) {
+          // === IMAGE PATH ===
+          const progressBar = document.getElementById('avatarUploadProgress');
+          const progressFill = document.getElementById('avatarProgressFill');
+          progressBar.style.display = 'block';
+          progressFill.style.width = '30%';
+
+          const filePath = currentUser.id + '/avatar.webp';
+
+          // Upload to Supabase Storage
+          const { error: uploadError } = await db.storage
+            .from('avatars')
+            .upload(filePath, pendingAvatarFile, {
+              contentType: 'image/webp',
+              upsert: true
+            });
+
+          if (uploadError) throw uploadError;
+          progressFill.style.width = '60%';
+
+          // Get public URL with cache buster
+          const { data: urlData } = db.storage.from('avatars').getPublicUrl(filePath);
+          const avatarUrl = urlData.publicUrl + '?t=' + Date.now();
+          progressFill.style.width = '80%';
+
+          // Save avatar_url to DB, clear emoji
+          const { error: dbError } = await db.from('profiles').upsert({
+            id: currentUser.id,
+            avatar_url: avatarUrl,
+            updated_at: new Date().toISOString()
+          });
+
+          if (dbError) throw dbError;
+          progressFill.style.width = '100%';
+
+          // Update localStorage
+          const savedProfile = JSON.parse(localStorage.getItem('introvert_profile') || '{}');
+          savedProfile.avatar_url = avatarUrl;
+          savedProfile.updated_at = new Date().toISOString();
+          localStorage.setItem('introvert_profile', JSON.stringify(savedProfile));
+
+          // Update display
+          renderAvatarDisplay(avatarUrl, savedProfile.avatar || '🌙');
+
+          // Notify parent window
+          if (window.parent !== window) {
+            window.parent.postMessage({ type: 'profileUpdate', avatar_url: avatarUrl, avatar: savedProfile.avatar }, '*');
+          }
+
+          hideAvatarModal();
+          showToast('✓ Avatar updated!');
+        } else {
+          // === EMOJI PATH ===
+          document.querySelector('.avatar').innerHTML = '';
+          document.querySelector('.avatar').textContent = selectedAvatar;
+
+          const savedProfile = JSON.parse(localStorage.getItem('introvert_profile') || '{}');
+          savedProfile.avatar = selectedAvatar;
+          savedProfile.avatar_url = null;
+          savedProfile.updated_at = new Date().toISOString();
+          localStorage.setItem('introvert_profile', JSON.stringify(savedProfile));
+
+          if (currentUser && db) {
+            await db.from('profiles').upsert({
+              id: currentUser.id,
+              avatar: selectedAvatar,
+              avatar_url: null,
+              updated_at: new Date().toISOString()
+            });
+          }
+
+          hideAvatarModal();
+          showToast('✓ Avatar updated!');
+
+          if (window.parent !== window) {
+            window.parent.postMessage({ type: 'profileUpdate', avatar: selectedAvatar, avatar_url: null }, '*');
+          }
+        }
+      } catch (err) {
+        console.error('Save avatar error:', err);
+        const errorEl = document.getElementById('avatarUploadError');
+        errorEl.textContent = 'Failed to upload avatar. Please try again.';
+        errorEl.style.display = 'block';
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Avatar';
+        pendingAvatarFile = null;
+        pendingAvatarDataUrl = null;
       }
     }
 

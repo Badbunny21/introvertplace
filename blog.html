@@ -186,6 +186,7 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex; align-items: center; justify-content: center; font-size: 18px;
     }
+    .author-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
     .author-info { display: flex; flex-direction: column; }
     .author-name { font-size: 14px; font-weight: 500; }
     .author-date { font-size: 12px; color: var(--text-muted); }
@@ -257,6 +258,7 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 14px;
     }
+    .article-author-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
     .article-meta { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-muted); }
     .save-btn {
       background: none; border: none; color: var(--text-muted);
@@ -511,6 +513,7 @@
       font-size: 26px;
       box-shadow: 0 4px 20px rgba(102,126,234,0.3);
     }
+    .article-content .author-avatar-large img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
     .article-content .author-info {
       display: flex;
       flex-direction: column;
@@ -1005,7 +1008,7 @@
     });
 
     // ========== AUTHOR PROFILES CACHE ==========
-    let authorProfiles = {}; // user_id -> { username, avatar_emoji, avatar_bg }
+    let authorProfiles = {}; // user_id -> { username, avatar_emoji, avatar_bg, avatar_url }
 
     async function loadAuthorProfiles(posts) {
       if (!db || !posts || posts.length === 0) return;
@@ -1015,7 +1018,7 @@
       try {
         const { data: profiles } = await db
           .from('profiles')
-          .select('id, username, avatar, avatar_emoji, avatar_bg')
+          .select('id, username, avatar, avatar_emoji, avatar_bg, avatar_url')
           .in('id', userIds);
 
         if (profiles) {
@@ -1028,8 +1031,12 @@
 
     function getAuthorAvatar(post) {
       const profile = authorProfiles[post.user_id];
-      // Profile page saves to 'avatar' column, check both
       return profile?.avatar || profile?.avatar_emoji || post.author_avatar || '🌙';
+    }
+
+    function getAuthorAvatarUrl(post) {
+      const profile = authorProfiles[post.user_id];
+      return profile?.avatar_url || null;
     }
 
     function getAuthorBg(post) {
@@ -1040,6 +1047,16 @@
     function getAuthorName(post) {
       const profile = authorProfiles[post.user_id];
       return profile?.username || post.author_name || 'Anonymous';
+    }
+
+    function renderAuthorAvatarHtml(post, cssClass) {
+      const avatarUrl = getAuthorAvatarUrl(post);
+      const emoji = getAuthorAvatar(post);
+      const bg = getAuthorBg(post);
+      if (avatarUrl) {
+        return '<div class="' + cssClass + '" style="background:' + bg + '"><img src="' + avatarUrl + '" alt="" onerror="this.remove();this.parentElement.textContent=\'' + emoji.replace(/'/g, "\\'") + '\'"></div>';
+      }
+      return '<div class="' + cssClass + '" style="background: ' + bg + '; display: flex; align-items: center; justify-content: center; font-size: ' + (cssClass === 'author-avatar-large' ? '26' : '16') + 'px;">' + emoji + '</div>';
     }
 
     // ========== CATEGORY FILTERING ==========
@@ -1099,7 +1116,7 @@
             <p>${escapeHtml((post.content || '').substring(0, 150))}...</p>
             <div class="article-footer">
               <div class="article-author">
-                <div class="article-author-avatar" style="background: ${avatarBg}; display: flex; align-items: center; justify-content: center; font-size: 16px;">${avatar}</div>
+                ${renderAuthorAvatarHtml(post, 'article-author-avatar')}
                 <span>${escapeHtml(authorName)}</span>
               </div>
               <span style="font-size: 12px; color: var(--text-muted);">${post.read_time || '3 min read'}</span>
@@ -1517,7 +1534,7 @@
               </div>
               <h1 class="article-title">${escapeHtml(post.title)}</h1>
               <div class="article-author">
-                <div class="author-avatar-large" style="background: ${avatarBg}">${avatar}</div>
+                ${renderAuthorAvatarHtml(post, 'author-avatar-large')}
                 <div class="author-info">
                   <span class="author-name">${escapeHtml(authorName)}</span>
                   <span class="author-tagline">Sharing their story</span>

@@ -293,6 +293,12 @@
       opacity: 1;
       transform: scale(1.1);
     }
+    .nav-item-avatar img {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
 
     /* Breathing fullscreen mode - hide bottom nav */
     body.breathing-active .bottom-nav {
@@ -620,9 +626,12 @@
       if (savedProfile) {
         const profile = JSON.parse(savedProfile);
 
-        // Update avatar in bottom nav
-        if (profile.avatar) {
-          document.getElementById('navUserAvatar').textContent = profile.avatar;
+        // Update avatar in bottom nav (supports image or emoji)
+        const navAvatar = document.getElementById('navUserAvatar');
+        if (profile.avatar_url) {
+          navAvatar.innerHTML = '<img src="' + profile.avatar_url + '" alt="" onerror="this.parentElement.textContent=\'' + (profile.avatar || '🌙').replace(/'/g, "\\'") + '\'">';
+        } else if (profile.avatar) {
+          navAvatar.textContent = profile.avatar;
         }
 
         // Update username in mood screen
@@ -635,8 +644,16 @@
     // Listen for profile updates from iframe (profile page)
     window.addEventListener('message', function(event) {
       if (event.data && event.data.type === 'profileUpdate') {
-        if (event.data.avatar) {
-          document.getElementById('navUserAvatar').textContent = event.data.avatar;
+        const navAvatar = document.getElementById('navUserAvatar');
+        if (event.data.avatar_url) {
+          navAvatar.innerHTML = '<img src="' + event.data.avatar_url + '" alt="" onerror="this.parentElement.textContent=\'' + (event.data.avatar || '🌙').replace(/'/g, "\\'") + '\'">';
+        } else if (event.data.avatar_url === null) {
+          // Switched back to emoji
+          navAvatar.innerHTML = '';
+          navAvatar.textContent = event.data.avatar || '🌙';
+        } else if (event.data.avatar) {
+          navAvatar.innerHTML = '';
+          navAvatar.textContent = event.data.avatar;
         }
       }
     });
