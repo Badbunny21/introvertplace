@@ -361,23 +361,6 @@
     .checkbox-label { font-size: 13px; color: var(--text-gray-400); }
     .checkbox-option.checked .checkbox-label { color: var(--text-white); }
 
-    .footer-actions {
-      display: flex; gap: 16px; justify-content: center;
-      margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border-white-10);
-    }
-    .footer-btn {
-      padding: 16px 32px; border-radius: 12px;
-      font-size: 15px; cursor: pointer; transition: all 0.3s ease; font-family: inherit;
-    }
-    .footer-btn.secondary {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border-white-20);
-      color: var(--text-gray-400);
-    }
-    .footer-btn.secondary:hover { background: rgba(255,255,255,0.1); color: var(--text-white); }
-    .footer-btn.primary { background: var(--text-white); border: none; color: var(--bg-black); }
-    .footer-btn.primary:hover { box-shadow: 0 0 30px rgba(255,255,255,0.3); transform: translateY(-2px); }
-
     .toast {
       position: fixed; bottom: 24px; left: 50%;
       transform: translateX(-50%) translateY(100px);
@@ -914,8 +897,6 @@
       .profile-tabs { gap: 6px; }
       .profile-tab { padding: 10px 20px; font-size: 13px; }
       .currently-grid, .spaces-grid, .checkbox-grid { grid-template-columns: 1fr; }
-      .footer-actions { flex-direction: column; }
-      .footer-btn { width: 100%; text-align: center; }
     }
   </style>
   <!-- Supabase -->
@@ -1375,10 +1356,6 @@
       </div>
     </div>
 
-    <div class="footer-actions">
-      <button class="footer-btn secondary" onclick="showToast('👁️ Preview mode')">Preview as Visitor</button>
-      <button class="footer-btn primary" onclick="goToCreative()">Visit My Creative Space →</button>
-    </div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -1834,9 +1811,6 @@
       showToast('✓ Saved');
     }
 
-    function goToCreative() {
-      showToast('✨ Opening Creative Space...');
-    }
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
