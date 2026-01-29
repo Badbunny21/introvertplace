@@ -632,6 +632,7 @@
         document.getElementById('sanctuaryGreeting').innerHTML = `${getGreeting()}, <span>${username}</span>`;
 
         // Load user data
+        loadRecentMoments();
         loadJournalEntries();
         loadMoodHistory();
         loadReflections();
@@ -669,6 +670,7 @@
         textarea.value = '';
         updateCharCount(textarea);
         loadJournalEntries();
+        loadRecentMoments();
         updateStats();
       } catch (err) {
         console.error('Save error:', err);
@@ -746,6 +748,7 @@
         showToast('Reflection saved!');
         textarea.value = '';
         loadReflections();
+        loadRecentMoments();
         updateStats();
       } catch (err) {
         console.error('Save error:', err);
@@ -860,6 +863,76 @@
     }
 
     // Load journal entries
+    // Load recent moments for the "For You" tab (combined journal + reflections)
+    async function loadRecentMoments() {
+      if (!currentUser || !db) return;
+
+      const grid = document.querySelector('.activity-grid');
+      if (!grid) return;
+
+      try {
+        const [journalRes, reflectionRes] = await Promise.all([
+          db.from('journal_entries')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .order('created_at', { ascending: false })
+            .limit(5),
+          db.from('reflections')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .order('created_at', { ascending: false })
+            .limit(5)
+        ]);
+
+        const journals = (journalRes.data || []).map(e => ({ ...e, _type: 'journal' }));
+        const reflections = (reflectionRes.data || []).map(e => ({ ...e, _type: 'reflection' }));
+
+        const all = [...journals, ...reflections]
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .slice(0, 6);
+
+        if (all.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1/-1; padding: 40px;">
+              <span class="empty-icon">🌱</span>
+              <h3>Your journey starts here</h3>
+              <p>Journal entries and reflections will appear here as you add them.</p>
+            </div>`;
+          return;
+        }
+
+        grid.innerHTML = all.map(item => {
+          const date = new Date(item.created_at).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+          });
+
+          if (item._type === 'journal') {
+            const moodEmoji = moodData[item.mood]?.emoji || '💭';
+            return `
+              <div class="activity-card">
+                <div class="activity-header">
+                  <span class="activity-type">${moodEmoji} Journal</span>
+                  <span class="activity-time">${date}</span>
+                </div>
+                <div class="activity-content">${item.content}</div>
+              </div>`;
+          } else {
+            return `
+              <div class="activity-card">
+                <div class="activity-header">
+                  <span class="activity-type">💡 Reflection</span>
+                  <span class="activity-time">${date}</span>
+                </div>
+                <div class="activity-content">${item.response}</div>
+                ${item.prompt ? `<div style="font-size:12px;color:var(--text-muted);margin-top:8px;font-style:italic;">Prompt: "${item.prompt}"</div>` : ''}
+              </div>`;
+          }
+        }).join('');
+      } catch (err) {
+        console.error('Load recent moments error:', err);
+      }
+    }
+
     async function loadJournalEntries() {
       if (!currentUser || !db) return;
 
