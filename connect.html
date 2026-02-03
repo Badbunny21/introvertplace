@@ -897,13 +897,17 @@
 
     .icon-grid {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
+      max-height: 180px;
+      overflow-y: auto;
+      padding: 4px;
+      margin: -4px;
     }
 
     .icon-opt {
-      width: 52px;
-      height: 52px;
+      width: 46px;
+      height: 46px;
       background: var(--bg-elevated);
       border: 2px solid var(--border-subtle);
       border-radius: var(--radius-md);
@@ -917,6 +921,44 @@
 
     .icon-opt:hover { background: var(--bg-hover); }
     .icon-opt.selected { border-color: var(--accent-soft); background: rgba(196,161,255,0.1); }
+
+    .type-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .type-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--bg-elevated);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .type-option:hover { background: var(--bg-hover); }
+    .type-option.selected,
+    .type-option:has(input:checked) {
+      border-color: var(--accent-soft);
+      background: rgba(196,161,255,0.1);
+    }
+    .type-option input { display: none; }
+    .type-icon { font-size: 24px; }
+    .type-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .type-info strong {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+    .type-info small {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
 
     .submit-btn {
       width: 100%;
@@ -1228,16 +1270,56 @@
         <div class="form-group">
           <label>Choose an Icon</label>
           <div class="icon-grid">
+            <!-- Nature & Calm -->
             <div class="icon-opt selected">🌙</div>
-            <div class="icon-opt">📚</div>
-            <div class="icon-opt">🎨</div>
-            <div class="icon-opt">🎧</div>
-            <div class="icon-opt">🧘</div>
-            <div class="icon-opt">☕</div>
             <div class="icon-opt">🌿</div>
+            <div class="icon-opt">🌧️</div>
+            <div class="icon-opt">🌻</div>
+            <div class="icon-opt">🍃</div>
+            <div class="icon-opt">🌊</div>
+            <div class="icon-opt">⛰️</div>
+            <!-- Creative -->
+            <div class="icon-opt">🎨</div>
+            <div class="icon-opt">✏️</div>
+            <div class="icon-opt">📷</div>
+            <div class="icon-opt">🎭</div>
+            <div class="icon-opt">🧶</div>
+            <!-- Reading & Learning -->
+            <div class="icon-opt">📚</div>
+            <div class="icon-opt">📖</div>
+            <div class="icon-opt">✍️</div>
+            <div class="icon-opt">🔮</div>
+            <!-- Music & Audio -->
+            <div class="icon-opt">🎧</div>
+            <div class="icon-opt">🎵</div>
+            <div class="icon-opt">🎹</div>
+            <div class="icon-opt">🎸</div>
+            <!-- Wellness -->
+            <div class="icon-opt">🧘</div>
+            <div class="icon-opt">💆</div>
+            <div class="icon-opt">🛁</div>
+            <div class="icon-opt">🌸</div>
+            <!-- Cozy & Home -->
+            <div class="icon-opt">☕</div>
+            <div class="icon-opt">🍵</div>
+            <div class="icon-opt">🏠</div>
+            <div class="icon-opt">🕯️</div>
+            <div class="icon-opt">🧸</div>
+            <!-- Hobbies -->
+            <div class="icon-opt">🎮</div>
+            <div class="icon-opt">🎲</div>
+            <div class="icon-opt">🧩</div>
+            <div class="icon-opt">🌱</div>
+            <!-- Pets & Animals -->
+            <div class="icon-opt">🐱</div>
+            <div class="icon-opt">🐶</div>
+            <div class="icon-opt">🐰</div>
+            <div class="icon-opt">🦋</div>
+            <!-- Thoughts & Feelings -->
             <div class="icon-opt">💭</div>
             <div class="icon-opt">✨</div>
-            <div class="icon-opt">🌧️</div>
+            <div class="icon-opt">💜</div>
+            <div class="icon-opt">🌈</div>
           </div>
         </div>
         <div class="form-group">
@@ -1248,13 +1330,64 @@
           <label>Category</label>
           <select>
             <option value="">Select a category...</option>
-            <option>Creative & Art</option>
-            <option>Reading & Writing</option>
-            <option>Wellness & Recovery</option>
-            <option>Music & Audio</option>
-            <option>Night Owls</option>
-            <option>Deep Conversations</option>
+            <optgroup label="Creative">
+              <option>Art & Design</option>
+              <option>Writing & Poetry</option>
+              <option>Photography</option>
+              <option>Crafts & DIY</option>
+              <option>Music</option>
+            </optgroup>
+            <optgroup label="Lifestyle">
+              <option>Reading & Books</option>
+              <option>Gaming</option>
+              <option>Cozy Hobbies</option>
+              <option>Gardening & Plants</option>
+              <option>Cooking & Baking</option>
+              <option>Pet Parents</option>
+            </optgroup>
+            <optgroup label="Wellness">
+              <option>Mental Health</option>
+              <option>Meditation & Mindfulness</option>
+              <option>Self-Care</option>
+              <option>Social Anxiety</option>
+              <option>Quiet Fitness</option>
+            </optgroup>
+            <optgroup label="Community">
+              <option>Night Owls</option>
+              <option>Deep Conversations</option>
+              <option>Introvert Life</option>
+              <option>Work & Career</option>
+              <option>Relationships</option>
+              <option>Solo Travel</option>
+            </optgroup>
+            <optgroup label="Learning">
+              <option>Science & Nature</option>
+              <option>Philosophy</option>
+              <option>Languages</option>
+              <option>Tech & Coding</option>
+            </optgroup>
           </select>
+        </div>
+        <div class="form-group">
+          <label>Community Type</label>
+          <div class="type-options">
+            <label class="type-option selected">
+              <input type="radio" name="communityType" value="public" checked>
+              <span class="type-icon">🌍</span>
+              <span class="type-info">
+                <strong>Public</strong>
+                <small>Anyone can join and see posts</small>
+              </span>
+            </label>
+            <label class="type-option">
+              <input type="radio" name="communityType" value="private">
+              <span class="type-icon">🔒</span>
+              <span class="type-info">
+                <strong>Private</strong>
+                <small>Approval required to join</small>
+              </span>
+            </label>
+          </div>
         </div>
         <button class="submit-btn" onclick="createCommunity()">✨ Create Community</button>
       </div>
@@ -1454,6 +1587,15 @@
       showToast('👋 Quiet wave sent!');
     }
 
+    // Type option click handler
+    document.querySelectorAll('.type-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        this.querySelector('input').checked = true;
+      });
+    });
+
     // Create community
     async function createCommunity() {
       // Get form values
@@ -1461,15 +1603,22 @@
       const descTextarea = document.querySelector('#createModal .form-group textarea');
       const categorySelect = document.querySelector('#createModal .form-group select');
       const selectedIcon = document.querySelector('#createModal .icon-opt.selected');
+      const selectedType = document.querySelector('#createModal input[name="communityType"]:checked');
 
       const name = nameInput?.value?.trim();
       const description = descTextarea?.value?.trim();
       const category = categorySelect?.value;
       const icon = selectedIcon?.textContent || '🌙';
+      const isPrivate = selectedType?.value === 'private';
 
       // Validate
       if (!name) {
         showToast('⚠️ Please enter a community name');
+        return;
+      }
+
+      if (!category) {
+        showToast('⚠️ Please select a category');
         return;
       }
 
@@ -1485,8 +1634,9 @@
           .insert([{
             name: name,
             description: description || '',
-            category: category || 'General',
+            category: category,
             icon: icon,
+            is_private: isPrivate,
             creator_id: currentUser?.id || null,
             member_count: 1,
             created_at: new Date().toISOString()
@@ -1507,6 +1657,13 @@
         if (nameInput) nameInput.value = '';
         if (descTextarea) descTextarea.value = '';
         if (categorySelect) categorySelect.selectedIndex = 0;
+        // Reset type to public
+        const publicOption = document.querySelector('#createModal .type-option:first-child');
+        if (publicOption) {
+          document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+          publicOption.classList.add('selected');
+          publicOption.querySelector('input').checked = true;
+        }
 
         // Reload communities
         loadCommunities();
