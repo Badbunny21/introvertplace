@@ -28,12 +28,15 @@
       --radius-full: 9999px;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
     body {
       font-family: 'DM Sans', sans-serif;
       background: var(--bg-deep);
       color: var(--text-primary);
       min-height: 100vh;
       overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
     }
     h1, h2, h3, h4 { font-family: 'Fraunces', serif; font-weight: 400; }
 

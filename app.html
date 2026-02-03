@@ -317,6 +317,16 @@
       width: 100%;
       height: calc(100vh - 56px - env(safe-area-inset-bottom, 0px));
       border: none;
+      -webkit-overflow-scrolling: touch;
+      overflow: auto;
+    }
+
+    /* Mobile scroll improvements */
+    @supports (-webkit-touch-callout: none) {
+      /* iOS specific fixes */
+      iframe.app-frame {
+        height: calc(100dvh - 56px - env(safe-area-inset-bottom, 0px));
+      }
     }
 
     /* Loading state - hide everything until auth verified */
