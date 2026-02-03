@@ -3281,7 +3281,36 @@ This could be:
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // ==================== SUPABASE INIT ====================
+    const SUPABASE_URL = 'https://dlgntsscabbhdqlxqpwd.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsZ250c3NjYWJiaGRxbHhxcHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3MDAyMzYsImV4cCI6MjA3MDI3NjIzNn0.FIyWgqehDBMMQCN3nl-dPfkDAPjv_-dFBvmGHgABEBA';
+
+    let db = null;
+    let currentUser = null;
+
+    try {
+      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch (err) {
+      console.error('Supabase init error:', err);
+    }
+
+    async function initAuth() {
+      if (!db) return;
+      try {
+        const { data: { session } } = await db.auth.getSession();
+        if (session) {
+          currentUser = session.user;
+        }
+      } catch (err) {
+        console.error('Auth error:', err);
+      }
+    }
+
+    // Initialize auth on load
+    initAuth();
+
     // ==================== WIZARD ====================
     let step = 1;
     const totalSteps = 5;
@@ -4144,7 +4173,7 @@ This could be:
       });
     });
 
-    function submitCreation() {
+    async function submitCreation() {
       const title = document.getElementById('createTitle').value.trim();
       const visibility = document.querySelector('input[name="visibility"]:checked').value;
 
@@ -4179,20 +4208,47 @@ This could be:
         return;
       }
 
-      // Save creation to localStorage
-      const creations = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
       const newCreation = {
-        id: Date.now(),
         type: selectedCreateType,
         title: title,
         content: content,
         description: description,
         mood: selectedCreateMood,
         visibility: visibility,
-        createdAt: new Date().toISOString()
+        view_mode: selectedMode,
+        created_at: new Date().toISOString()
       };
-      creations.push(newCreation);
-      localStorage.setItem('introvert_creations', JSON.stringify(creations));
+
+      // Save to Supabase if logged in
+      if (db && currentUser) {
+        try {
+          const { data, error } = await db.from('creations').insert({
+            ...newCreation,
+            user_id: currentUser.id
+          }).select();
+
+          if (error) {
+            console.error('Save creation error:', error);
+            showToast('⚠️ Error saving: ' + error.message);
+            return;
+          }
+
+          if (data && data[0]) {
+            newCreation.id = data[0].id;
+            newCreation.user_id = currentUser.id;
+          }
+        } catch (err) {
+          console.error('Save creation exception:', err);
+          showToast('⚠️ Error saving creation');
+          return;
+        }
+      } else {
+        // Fallback to localStorage if not logged in
+        newCreation.id = Date.now();
+        const creations = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+        creations.push(newCreation);
+        localStorage.setItem('introvert_creations', JSON.stringify(creations));
+      }
 
       closeCreateModal();
       showToast('✨ Creation added to your space!');
@@ -4271,6 +4327,12 @@ This could be:
       // Hide empty state when we have creations
       if (emptyState) emptyState.style.display = 'none';
 
+      // Get author info from profiles join or fallback
+      const profile = creation.profiles || {};
+      const authorName = profile.username || 'Anonymous';
+      const authorAvatar = profile.avatar || profile.avatar_emoji || '🌙';
+      const isOwnCreation = currentUser && creation.user_id === currentUser.id;
+
       const card = document.createElement('div');
       card.className = 'seasonal-creation-card';
       card.innerHTML = `
@@ -4278,21 +4340,58 @@ This could be:
           <span class="seasonal-creation-type">${typeEmojis[creation.type] || '✨'}</span>
         </div>
         <div class="seasonal-creation-info">
-          <h4 class="seasonal-creation-title">${creation.title}</h4>
+          <h4 class="seasonal-creation-title">${escapeHtml(creation.title)}</h4>
           <div class="seasonal-creation-author">
-            <div class="seasonal-creation-author-avatar">🌙</div>
-            <span>You</span>
+            <div class="seasonal-creation-author-avatar">${authorAvatar}</div>
+            <span>${isOwnCreation ? 'You' : escapeHtml(authorName)}</span>
           </div>
           ${creation.mood ? `<div class="seasonal-creation-footer"><span class="mood-tag">${creation.mood}</span></div>` : ''}
         </div>
       `;
-      card.onclick = () => showToast(`Opening: ${creation.title}`);
+      card.onclick = () => showCreationDetail(creation);
       grid.appendChild(card);
     }
 
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showCreationDetail(creation) {
+      // For now just show a toast, can expand to full modal later
+      showToast(`Opening: ${creation.title}`);
+    }
+
     // Load all saved creations on page load
-    function loadSavedCreations() {
-      const creations = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+    async function loadSavedCreations() {
+      let creations = [];
+
+      // Try to load from Supabase first
+      if (db) {
+        try {
+          // Load all public creations + user's own creations for current view mode
+          const { data, error } = await db
+            .from('creations')
+            .select('*, profiles(username, avatar, avatar_emoji, avatar_bg, avatar_url)')
+            .or(`visibility.eq.public,user_id.eq.${currentUser?.id || '00000000-0000-0000-0000-000000000000'}`)
+            .eq('view_mode', selectedMode)
+            .order('created_at', { ascending: false });
+
+          if (!error && data) {
+            creations = data;
+          }
+        } catch (err) {
+          console.error('Load creations error:', err);
+        }
+      }
+
+      // Fallback to localStorage if no DB creations
+      if (creations.length === 0) {
+        creations = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+      }
+
       if (creations.length === 0) return;
 
       const seasonalView = document.getElementById('seasonalView');
