@@ -1573,8 +1573,8 @@
     }
 
     // Supabase initialization
-    const SUPABASE_URL = 'https://inpziyxjznikinqqputz.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlucHppeXhqem5pa2lucXFwdXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MzQ0MTcsImV4cCI6MjA4NDAxMDQxN30.5QoXaD5vNcuteEmwmo82l_OIklVbGGCRpNtV0PMuSyY';
+    const SUPABASE_URL = 'https://dlgntsscabbhdqlxqpwd.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsZ250c3NjYWJiaGRxbHhxcHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3MDAyMzYsImV4cCI6MjA3MDI3NjIzNn0.FIyWgqehDBMMQCN3nl-dPfkDAPjv_-dFBvmGHgABEBA';
 
     let db = null;
     let currentUser = null;
@@ -1702,11 +1702,21 @@
         if (error && error.code !== 'PGRST116') throw error; // PGRST116 = not found
 
         if (data) {
-          // Populate avatar (supports image or emoji)
-          renderAvatarDisplay(data.avatar_url, data.avatar || data.avatar_emoji);
-          // Sync avatar_url to localStorage
+          // Sync avatar: DB is source of truth, localStorage is fallback cache
           const savedProfile = JSON.parse(localStorage.getItem('introvert_profile') || '{}');
-          savedProfile.avatar_url = data.avatar_url || null;
+          const effectiveAvatarUrl = data.avatar_url || savedProfile.avatar_url || null;
+
+          // Populate avatar (supports image or emoji)
+          renderAvatarDisplay(effectiveAvatarUrl, data.avatar || data.avatar_emoji);
+
+          // If localStorage has avatar_url but DB doesn't, attempt to re-sync
+          if (!data.avatar_url && effectiveAvatarUrl && currentUser) {
+            db.from('profiles')
+              .update({ avatar_url: effectiveAvatarUrl, updated_at: new Date().toISOString() })
+              .eq('id', currentUser.id);
+          }
+
+          savedProfile.avatar_url = effectiveAvatarUrl;
           if (data.avatar) savedProfile.avatar = data.avatar;
           localStorage.setItem('introvert_profile', JSON.stringify(savedProfile));
 
@@ -1841,7 +1851,7 @@
           profileData.id = currentUser.id;
           const { error } = await db
             .from('profiles')
-            .upsert(profileData);
+            .upsert(profileData, { onConflict: 'id' });
 
           if (error) throw error;
         } catch (err) {
@@ -2198,17 +2208,16 @@
 
       try {
         if (pendingAvatarFile && currentUser && db) {
-          // === IMAGE PATH ===
+          // === IMAGE UPLOAD PATH ===
           const progressBar = document.getElementById('avatarUploadProgress');
           const progressFill = document.getElementById('avatarProgressFill');
           progressBar.style.display = 'block';
           progressFill.style.width = '20%';
 
+          // Step 1: Upload to Supabase Storage
           let avatarUrl = null;
-
-          // Try storage upload first, fall back to data URL
           const filePath = currentUser.id + '/avatar.webp';
-          const { data: uploadData, error: uploadError } = await db.storage
+          const { error: uploadError } = await db.storage
             .from('avatars')
             .upload(filePath, pendingAvatarFile, {
               contentType: 'image/webp',
@@ -2216,45 +2225,54 @@
             });
 
           if (!uploadError) {
-            // Storage upload succeeded - use public URL
+            // Get the persistent public URL
             const { data: urlData } = db.storage.from('avatars').getPublicUrl(filePath);
             avatarUrl = urlData.publicUrl + '?t=' + Date.now();
           } else {
-            // Storage failed - use data URL directly (image is already 256x256 WebP, ~20-40KB)
-            console.warn('Storage upload failed, using data URL fallback:', uploadError.message);
+            // Storage unavailable — fall back to data URL (stored in DB directly)
+            console.warn('Storage upload failed:', uploadError.message);
             avatarUrl = pendingAvatarDataUrl;
           }
 
           progressFill.style.width = '60%';
 
-          // Save avatar_url to DB
-          const { error: dbError } = await db.from('profiles').upsert({
-            id: currentUser.id,
-            avatar_url: avatarUrl,
-            updated_at: new Date().toISOString()
-          });
+          // Step 2: Save avatar_url to profiles table
+          const { data: updateData, error: updateError } = await db.from('profiles')
+            .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+            .eq('id', currentUser.id)
+            .select();
 
-          if (dbError) {
-            console.warn('DB save avatar_url warning:', dbError.message);
+          let dbSaved = !updateError && updateData && updateData.length > 0;
+
+          // If update matched no rows, profile might not exist yet — try upsert
+          if (!dbSaved) {
+            const { error: upsertError } = await db.from('profiles').upsert({
+              id: currentUser.id,
+              avatar_url: avatarUrl,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'id' });
+            dbSaved = !upsertError;
+            if (upsertError) console.error('DB save failed:', upsertError.message);
           }
+
           progressFill.style.width = '100%';
 
-          // Update localStorage
+          // Step 3: Update localStorage cache
           const savedProfile = JSON.parse(localStorage.getItem('introvert_profile') || '{}');
           savedProfile.avatar_url = avatarUrl;
           savedProfile.updated_at = new Date().toISOString();
           localStorage.setItem('introvert_profile', JSON.stringify(savedProfile));
 
-          // Update display
+          // Step 4: Update UI
           renderAvatarDisplay(avatarUrl, savedProfile.avatar || '🌙');
 
-          // Notify parent window
+          // Notify parent window (updates nav avatar)
           if (window.parent !== window) {
             window.parent.postMessage({ type: 'profileUpdate', avatar_url: avatarUrl, avatar: savedProfile.avatar }, '*');
           }
 
           hideAvatarModal();
-          showToast('✓ Avatar updated!');
+          showToast(dbSaved ? '✓ Avatar updated!' : '⚠ Avatar saved locally — database save failed');
         } else {
           // === EMOJI PATH ===
           document.querySelector('.avatar').innerHTML = '';
@@ -2272,7 +2290,7 @@
               avatar: selectedAvatar,
               avatar_url: null,
               updated_at: new Date().toISOString()
-            });
+            }, { onConflict: 'id' });
           }
 
           hideAvatarModal();
