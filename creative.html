@@ -4201,52 +4201,113 @@ This could be:
       addCreationToView(newCreation);
     }
 
-    function addCreationToView(creation) {
-      const typeEmojis = {
-        writing: '✍️',
-        visual: '🎨',
-        music: '🎵',
-        idea: '💡'
-      };
+    const typeEmojis = {
+      writing: '✍️',
+      visual: '🎨',
+      music: '🎵',
+      idea: '💡'
+    };
 
+    function addCreationToView(creation) {
       // If in constellation view, add a new node
       const constellationView = document.getElementById('constellationView');
       if (constellationView && constellationView.classList.contains('active')) {
-        const node = document.createElement('div');
-        node.className = 'creation-node';
-        node.style.left = (30 + Math.random() * 40) + '%';
-        node.style.top = (30 + Math.random() * 40) + '%';
-        node.innerHTML = `
-          <div class="node-orb">${typeEmojis[creation.type]}</div>
-          <span class="node-label">${creation.title}</span>
-        `;
-        node.onclick = () => showToast(`Opening: ${creation.title}`);
-        constellationView.appendChild(node);
+        addCreationToConstellation(creation);
       }
 
       // If in canvas view, add a new card
       const canvasView = document.getElementById('canvasView');
       if (canvasView && canvasView.classList.contains('active')) {
-        const canvas = document.querySelector('.infinite-canvas');
-        if (canvas) {
-          const card = document.createElement('div');
-          card.className = 'canvas-creation';
-          card.style.left = (3500 + Math.random() * 1000) + 'px';
-          card.style.top = (3500 + Math.random() * 1000) + 'px';
-          card.innerHTML = `
-            <div class="creation-image">${typeEmojis[creation.type]}</div>
-            <div class="creation-info">
-              <div class="creation-title">${creation.title}</div>
-              <div class="creation-author">
-                <div class="author-avatar">🌙</div>
-                <span>You • just now</span>
-              </div>
-              ${creation.mood ? `<div class="creation-meta"><span class="mood-tag">${creation.mood}</span></div>` : ''}
-            </div>
-          `;
-          canvas.appendChild(card);
-        }
+        addCreationToCanvas(creation);
       }
+
+      // If in seasonal view, add a card
+      const seasonalView = document.getElementById('seasonalView');
+      if (seasonalView && seasonalView.classList.contains('active')) {
+        addCreationToSeasonal(creation);
+      }
+    }
+
+    function addCreationToConstellation(creation) {
+      const constellationView = document.getElementById('constellationView');
+      const node = document.createElement('div');
+      node.className = 'creation-node';
+      node.style.left = (30 + Math.random() * 40) + '%';
+      node.style.top = (30 + Math.random() * 40) + '%';
+      node.innerHTML = `
+        <div class="node-orb">${typeEmojis[creation.type] || '✨'}</div>
+        <span class="node-label">${creation.title}</span>
+      `;
+      node.onclick = () => showToast(`Opening: ${creation.title}`);
+      constellationView.appendChild(node);
+    }
+
+    function addCreationToCanvas(creation) {
+      const canvas = document.querySelector('.infinite-canvas');
+      if (!canvas) return;
+      const card = document.createElement('div');
+      card.className = 'canvas-creation';
+      card.style.left = (3500 + Math.random() * 1000) + 'px';
+      card.style.top = (3500 + Math.random() * 1000) + 'px';
+      card.innerHTML = `
+        <div class="creation-image">${typeEmojis[creation.type] || '✨'}</div>
+        <div class="creation-info">
+          <div class="creation-title">${creation.title}</div>
+          <div class="creation-author">
+            <div class="author-avatar">🌙</div>
+            <span>You • just now</span>
+          </div>
+          ${creation.mood ? `<div class="creation-meta"><span class="mood-tag">${creation.mood}</span></div>` : ''}
+        </div>
+      `;
+      canvas.appendChild(card);
+    }
+
+    function addCreationToSeasonal(creation) {
+      const grid = document.getElementById('seasonalCreationsGrid');
+      const emptyState = document.querySelector('.seasonal-empty-state-main');
+      if (!grid) return;
+
+      // Hide empty state when we have creations
+      if (emptyState) emptyState.style.display = 'none';
+
+      const card = document.createElement('div');
+      card.className = 'seasonal-creation-card';
+      card.innerHTML = `
+        <div class="seasonal-creation-image">
+          <span class="seasonal-creation-type">${typeEmojis[creation.type] || '✨'}</span>
+        </div>
+        <div class="seasonal-creation-info">
+          <h4 class="seasonal-creation-title">${creation.title}</h4>
+          <div class="seasonal-creation-author">
+            <div class="seasonal-creation-author-avatar">🌙</div>
+            <span>You</span>
+          </div>
+          ${creation.mood ? `<div class="seasonal-creation-footer"><span class="mood-tag">${creation.mood}</span></div>` : ''}
+        </div>
+      `;
+      card.onclick = () => showToast(`Opening: ${creation.title}`);
+      grid.appendChild(card);
+    }
+
+    // Load all saved creations on page load
+    function loadSavedCreations() {
+      const creations = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+      if (creations.length === 0) return;
+
+      const seasonalView = document.getElementById('seasonalView');
+      const constellationView = document.getElementById('constellationView');
+      const canvasView = document.getElementById('canvasView');
+
+      creations.forEach(creation => {
+        if (seasonalView && seasonalView.classList.contains('active')) {
+          addCreationToSeasonal(creation);
+        } else if (constellationView && constellationView.classList.contains('active')) {
+          addCreationToConstellation(creation);
+        } else if (canvasView && canvasView.classList.contains('active')) {
+          addCreationToCanvas(creation);
+        }
+      });
     }
 
     // Close modal on overlay click
@@ -4283,6 +4344,8 @@ This could be:
         if (mode === 'canvas') initInfiniteCanvas();
         else if (mode === 'constellation') initConstellation();
         else if (mode === 'seasonal') initSeasonalParticles();
+        // Load saved creations
+        setTimeout(loadSavedCreations, 100);
       }
     })();
   </script>
