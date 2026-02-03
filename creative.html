@@ -4374,13 +4374,32 @@ This could be:
           // Load all public creations + user's own creations for current view mode
           const { data, error } = await db
             .from('creations')
-            .select('*, profiles(username, avatar, avatar_emoji, avatar_bg, avatar_url)')
+            .select('*')
             .or(`visibility.eq.public,user_id.eq.${currentUser?.id || '00000000-0000-0000-0000-000000000000'}`)
             .eq('view_mode', selectedMode)
             .order('created_at', { ascending: false });
 
-          if (!error && data) {
+          if (!error && data && data.length > 0) {
             creations = data;
+
+            // Fetch profiles for all unique user_ids
+            const userIds = [...new Set(data.map(c => c.user_id).filter(Boolean))];
+            if (userIds.length > 0) {
+              const { data: profiles } = await db
+                .from('profiles')
+                .select('id, username, avatar, avatar_emoji, avatar_bg, avatar_url')
+                .in('id', userIds);
+
+              // Attach profile to each creation
+              if (profiles) {
+                const profileMap = {};
+                profiles.forEach(p => profileMap[p.id] = p);
+                creations = creations.map(c => ({
+                  ...c,
+                  profiles: profileMap[c.user_id] || null
+                }));
+              }
+            }
           }
         } catch (err) {
           console.error('Load creations error:', err);
