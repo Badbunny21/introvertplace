@@ -690,6 +690,75 @@
       border-color: var(--accent-soft);
     }
 
+    /* Cover Image Upload */
+    .cover-upload-area {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-calm) 100%);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+    .cover-upload-area:hover {
+      transform: scale(1.01);
+    }
+    .cover-upload-area.has-image {
+      background: transparent;
+    }
+    .cover-upload-area img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .cover-upload-placeholder {
+      text-align: center;
+      color: rgba(0,0,0,0.6);
+      z-index: 1;
+    }
+    .cover-upload-placeholder span {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .cover-upload-placeholder p {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .cover-upload-area.has-image .cover-upload-placeholder {
+      display: none;
+    }
+    .cover-remove-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      background: rgba(0,0,0,0.6);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    .cover-upload-area.has-image .cover-remove-btn {
+      display: flex;
+    }
+    .cover-upload-input {
+      display: none;
+    }
+
     .editor-textarea {
       width: 100%;
       min-height: 400px;
@@ -904,6 +973,19 @@
     </div>
     <div class="editor-content">
       <div class="editor-field">
+        <label>Cover Image</label>
+        <div class="cover-upload-area" id="coverUploadArea" onclick="document.getElementById('coverImageInput').click()">
+          <div class="cover-upload-placeholder">
+            <span>🖼️</span>
+            <p>Click to add a cover image</p>
+          </div>
+          <img id="coverPreview" src="" alt="" style="display: none;">
+          <button type="button" class="cover-remove-btn" onclick="event.stopPropagation(); removeCoverImage()">✕</button>
+        </div>
+        <input type="file" id="coverImageInput" class="cover-upload-input" accept="image/*" onchange="handleCoverImageSelect(event)">
+      </div>
+
+      <div class="editor-field">
         <input type="text" class="editor-title" id="postTitle" placeholder="Your story title...">
       </div>
 
@@ -1103,11 +1185,16 @@
       const avatar = getAuthorAvatar(post);
       const avatarBg = getAuthorBg(post);
       const authorName = getAuthorName(post);
+      const hasCoverImage = post.featured_image_url;
+
+      const imageStyle = hasCoverImage
+        ? `background-image: url('${post.featured_image_url}'); background-size: cover; background-position: center;`
+        : `background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-calm) 100%);`;
 
       return `
         <article class="article-card" onclick="openArticleById('${post.id}')">
-          <div class="article-image" style="background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-calm) 100%);">
-            ${icon}
+          <div class="article-image" style="${imageStyle}">
+            ${hasCoverImage ? '' : icon}
             <span class="article-type community">Community</span>
           </div>
           <div class="article-body">
@@ -1284,6 +1371,75 @@
       btn.classList.add('selected');
     }
 
+    // Cover image upload
+    let pendingCoverFile = null;
+    let pendingCoverDataUrl = null;
+
+    function handleCoverImageSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        showToast('Please select an image file');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Image must be under 5MB');
+        return;
+      }
+
+      pendingCoverFile = file;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        pendingCoverDataUrl = e.target.result;
+        const preview = document.getElementById('coverPreview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        document.getElementById('coverUploadArea').classList.add('has-image');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeCoverImage() {
+      pendingCoverFile = null;
+      pendingCoverDataUrl = null;
+      const preview = document.getElementById('coverPreview');
+      preview.src = '';
+      preview.style.display = 'none';
+      document.getElementById('coverUploadArea').classList.remove('has-image');
+      document.getElementById('coverImageInput').value = '';
+    }
+
+    async function uploadCoverImage() {
+      if (!pendingCoverFile || !db || !currentUser) return null;
+
+      try {
+        const fileExt = pendingCoverFile.name.split('.').pop();
+        const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await db.storage
+          .from('blog-covers')
+          .upload(fileName, pendingCoverFile, {
+            contentType: pendingCoverFile.type,
+            upsert: true
+          });
+
+        if (uploadError) {
+          console.error('Cover upload error:', uploadError);
+          // Return data URL as fallback
+          return pendingCoverDataUrl;
+        }
+
+        const { data: urlData } = db.storage.from('blog-covers').getPublicUrl(fileName);
+        return urlData.publicUrl;
+      } catch (err) {
+        console.error('Cover upload exception:', err);
+        return pendingCoverDataUrl;
+      }
+    }
+
     function saveDraft() {
       const title = document.getElementById('postTitle').value;
       const content = document.getElementById('postContent').value;
@@ -1342,6 +1498,13 @@
           authorName = profile.username;
         }
 
+        // Upload cover image if present
+        let coverImageUrl = null;
+        if (pendingCoverFile) {
+          showToast('Uploading cover image...');
+          coverImageUrl = await uploadCoverImage();
+        }
+
         // Save to blog_posts table
         console.log('Attempting to insert blog post...');
         const postData = {
@@ -1351,7 +1514,8 @@
           category: category,
           author_name: authorName,
           author_avatar: profile?.avatar || profile?.avatar_emoji || '🌙',
-          read_time: Math.ceil(content.split(/\s+/).length / 200) + ' min read'
+          read_time: Math.ceil(content.split(/\s+/).length / 200) + ' min read',
+          featured_image_url: coverImageUrl
         };
         console.log('Post data:', postData);
 
@@ -1379,6 +1543,7 @@
         document.getElementById('postTitle').value = '';
         document.getElementById('postContent').value = '';
         document.querySelectorAll('.category-option').forEach(c => c.classList.remove('selected'));
+        removeCoverImage();
 
         setTimeout(() => {
           closeEditor();
