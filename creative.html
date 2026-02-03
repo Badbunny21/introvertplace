@@ -4262,30 +4262,23 @@ This could be:
       }
     });
 
-    // ========== URL PARAMETER PERSISTENCE ==========
-    // Save mode to URL when entering a space
+    // ========== MODE PERSISTENCE VIA LOCALSTORAGE ==========
+    // Save mode to localStorage when entering a space
     const originalEnterSpace = enterSpace;
     enterSpace = function() {
       originalEnterSpace();
-      // Update URL with current mode
-      const url = new URL(window.location);
-      url.searchParams.set('mode', selectedMode);
-      window.history.replaceState({}, '', url);
+      localStorage.setItem('introvert_creative_mode', selectedMode);
     };
 
     const originalSelectModeAndEnter = selectModeAndEnter;
     selectModeAndEnter = function(mode) {
       originalSelectModeAndEnter(mode);
-      // Update URL with current mode
-      const url = new URL(window.location);
-      url.searchParams.set('mode', mode);
-      window.history.replaceState({}, '', url);
+      localStorage.setItem('introvert_creative_mode', mode);
     };
 
-    // On page load, check for mode in URL and restore it
-    (function restoreModeFromURL() {
-      const params = new URLSearchParams(window.location.search);
-      const mode = params.get('mode');
+    // On page load, check for saved mode and restore it
+    (function restoreModeFromStorage() {
+      const mode = localStorage.getItem('introvert_creative_mode');
       if (mode && ['constellation', 'canvas', 'garden', 'seasonal'].includes(mode)) {
         selectedMode = mode;
         // Skip wizard and go directly to the creative space with saved mode
