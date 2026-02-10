@@ -1103,6 +1103,625 @@
 
     .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
+    /* Community View */
+    .community-view {
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .community-view .modal-box {
+      max-width: 750px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .community-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+
+    .community-header-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .community-header-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-lg);
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+
+    .community-header-info h2 {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .community-header-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .community-header-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .community-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+
+    .community-tab {
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-full);
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .community-tab:hover {
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+    }
+
+    .community-tab.active {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .community-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+    }
+
+    /* Post Composer */
+    .post-composer {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .post-type-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .post-type-btn {
+      padding: 8px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .post-type-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+    }
+
+    .post-type-btn.active {
+      background: rgba(196,161,255,0.15);
+      border-color: rgba(196,161,255,0.3);
+      color: var(--accent-soft);
+    }
+
+    .post-composer-title {
+      width: 100%;
+      padding: 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .post-composer-title:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+    }
+
+    .post-composer-title::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .post-composer-link {
+      width: 100%;
+      padding: 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .post-composer-link:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+    }
+
+    .post-composer textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .post-composer textarea:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+    }
+
+    .post-composer textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .post-composer-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    .post-composer-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .post-btn {
+      padding: 10px 24px;
+      background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-calm) 100%);
+      border: none;
+      border-radius: var(--radius-md);
+      color: var(--bg-deep);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .post-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(196,161,255,0.3);
+    }
+
+    .post-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Posts Feed */
+    .posts-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .post-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      transition: border-color 0.2s ease;
+    }
+
+    .post-card:hover {
+      border-color: var(--border-light);
+    }
+
+    .post-card.pinned {
+      border-color: rgba(240,232,124,0.3);
+      background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(240,232,124,0.05) 100%);
+    }
+
+    .post-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .post-type-badge.thought { background: rgba(196,161,255,0.1); color: var(--accent-soft); }
+    .post-type-badge.resource { background: rgba(124,184,232,0.1); color: var(--accent-calm); }
+    .post-type-badge.creation { background: rgba(232,168,124,0.1); color: var(--accent-warm); }
+    .post-type-badge.lesson { background: rgba(124,232,168,0.1); color: var(--accent-green); }
+    .post-type-badge.question { background: rgba(240,232,124,0.1); color: var(--accent-gold); }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .post-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .post-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+    }
+
+    .post-author-info {
+      flex: 1;
+    }
+
+    .post-author-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .post-time {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .post-pin-badge {
+      font-size: 12px;
+      color: var(--accent-gold);
+    }
+
+    .post-title {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 400;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .post-content {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .post-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-top: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+    }
+
+    .post-link:hover {
+      border-color: var(--accent-calm);
+      background: var(--bg-hover);
+    }
+
+    .post-link-icon {
+      font-size: 20px;
+    }
+
+    .post-link-text {
+      flex: 1;
+      font-size: 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .post-link-domain {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .post-image {
+      margin-top: 12px;
+      border-radius: var(--radius-md);
+      max-width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+    }
+
+    /* Post Actions */
+    .post-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+
+    .reaction-btn {
+      padding: 6px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .reaction-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+    }
+
+    .reaction-btn.active {
+      background: rgba(196,161,255,0.15);
+      border-color: rgba(196,161,255,0.3);
+      color: var(--accent-soft);
+    }
+
+    .reaction-btn .count {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .action-spacer {
+      flex: 1;
+    }
+
+    .bookmark-btn {
+      padding: 6px 12px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .bookmark-btn:hover {
+      color: var(--accent-gold);
+    }
+
+    .bookmark-btn.active {
+      color: var(--accent-gold);
+    }
+
+    .comment-toggle {
+      padding: 6px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .comment-toggle:hover {
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+    }
+
+    /* Comments Section */
+    .comments-section {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .comment-composer {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .comment-composer input {
+      flex: 1;
+      padding: 10px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .comment-composer input:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+    }
+
+    .comment-composer input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .comment-send-btn {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-soft);
+      border: none;
+      border-radius: 50%;
+      color: var(--bg-deep);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .comment-send-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .comment {
+      display: flex;
+      gap: 10px;
+    }
+
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .comment-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+    }
+
+    .comment-body {
+      flex: 1;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+    }
+
+    .comment-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .comment-author {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .comment-time {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .comment-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .comments-empty {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .posts-empty {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+
+    .posts-empty .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .join-prompt {
+      text-align: center;
+      padding: 32px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+    }
+
+    .join-prompt p {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    /* Lurk mode indicator */
+    .lurk-mode-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       .content-wrapper { padding: 24px; }
@@ -2246,62 +2865,683 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       }
     }
 
-    // Open community detail modal
+    // Store current community for posting
+    let currentCommunity = null;
+    let currentCommunityJoined = false;
+    let currentPostType = 'thought';
+    let currentFilter = 'all';
+    let userReactions = {}; // { postId: ['appreciate', ...] }
+    let userBookmarks = new Set();
+    let expandedComments = new Set();
+
+    // Post type config
+    const POST_TYPES = {
+      thought: { icon: '💭', label: 'Thought', placeholder: 'Share a reflection, idea, or feeling...' },
+      resource: { icon: '📚', label: 'Resource', placeholder: 'Share what you learned or found helpful...' },
+      creation: { icon: '✨', label: 'Creation', placeholder: 'Share your art, writing, or creative work...' },
+      lesson: { icon: '🎓', label: 'Lesson', placeholder: 'Teach something you know...' },
+      question: { icon: '❓', label: 'Question', placeholder: 'Ask the community something...' }
+    };
+
+    // Reaction config
+    const REACTIONS = {
+      appreciate: { icon: '✨', label: 'Appreciate' },
+      thoughtful: { icon: '💭', label: 'Thoughtful' },
+      helpful: { icon: '🌱', label: 'Helpful' },
+      support: { icon: '💜', label: 'Support' }
+    };
+
+    // Open community detail modal with posts
     function openCommunityModal(community, memberCount, isJoined) {
       const memberText = memberCount === 1 ? '1 member' : `${memberCount} members`;
+      
+      // Store for use in other functions
+      currentCommunity = community;
+      currentCommunityJoined = isJoined;
+      currentPostType = 'thought';
+      currentFilter = 'all';
 
       // Create modal if it doesn't exist
       let modal = document.getElementById('communityViewModal');
       if (!modal) {
         modal = document.createElement('div');
         modal.id = 'communityViewModal';
-        modal.className = 'modal';
+        modal.className = 'modal community-view';
         document.body.appendChild(modal);
+      } else {
+        modal.className = 'modal community-view';
       }
 
+      const postTypeButtons = Object.entries(POST_TYPES).map(([type, config]) => 
+        `<button class="post-type-btn ${type === 'thought' ? 'active' : ''}" data-type="${type}" onclick="selectPostType('${type}')">${config.icon} ${config.label}</button>`
+      ).join('');
+
       modal.innerHTML = `
-        <div class="modal-box" style="max-width: 600px;">
+        <div class="modal-box">
           <button class="close-btn" onclick="closeCommunityModal()">✕</button>
-          <div class="modal-header">
-            <div class="icon" style="font-size: 64px;">${community.icon || '🏠'}</div>
-            <h2>${escapeHtml(community.name)}</h2>
-            <p style="font-size: 14px; color: var(--text-muted);">${memberText} • ${escapeHtml(community.category || 'General')}</p>
+          
+          <div class="community-header">
+            <div class="community-header-top">
+              <div class="community-header-icon">${community.icon || '🏠'}</div>
+              <div class="community-header-info">
+                <h2>${escapeHtml(community.name)}</h2>
+                <div class="community-header-meta">
+                  ${memberText} • ${escapeHtml(community.category || 'General')}
+                  <button 
+                    id="communityJoinBtnSmall"
+                    onclick="${isJoined ? `leaveCommunityFromModal('${community.id}')` : `joinCommunityFromModal('${community.id}')`}"
+                    style="margin-left: 12px; padding: 4px 12px; background: ${isJoined ? 'rgba(124,232,168,0.15)' : 'var(--bg-elevated)'}; border: 1px solid ${isJoined ? 'rgba(124,232,168,0.3)' : 'var(--border-subtle)'}; border-radius: var(--radius-full); color: ${isJoined ? 'var(--accent-green)' : 'var(--text-secondary)'}; font-size: 12px; cursor: pointer;"
+                  >${isJoined ? '✓ Joined' : 'Join'}</button>
+                </div>
+              </div>
+            </div>
+            ${community.description ? `<p class="community-header-desc">${escapeHtml(community.description)}</p>` : ''}
           </div>
-          <div class="modal-body">
-            <div style="margin-bottom: 24px;">
-              <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.7;">
-                ${escapeHtml(community.description || 'A space for introverts to connect.')}
-              </p>
+          
+          <div class="community-tabs">
+            <button class="community-tab active" data-filter="all" onclick="filterPosts('all')">🌟 All</button>
+            <button class="community-tab" data-filter="thought" onclick="filterPosts('thought')">💭 Thoughts</button>
+            <button class="community-tab" data-filter="resource" onclick="filterPosts('resource')">📚 Resources</button>
+            <button class="community-tab" data-filter="creation" onclick="filterPosts('creation')">✨ Creations</button>
+            <button class="community-tab" data-filter="lesson" onclick="filterPosts('lesson')">🎓 Lessons</button>
+            <button class="community-tab" data-filter="question" onclick="filterPosts('question')">❓ Questions</button>
+          </div>
+          
+          <div class="community-body">
+            ${isJoined ? `
+              <div class="post-composer">
+                <div class="post-type-selector">
+                  ${postTypeButtons}
+                </div>
+                <input type="text" class="post-composer-title" id="postTitle" placeholder="Title (optional)" style="display: none;">
+                <input type="text" class="post-composer-link" id="postLink" placeholder="Link URL (optional)" style="display: none;">
+                <textarea id="postContent" placeholder="${POST_TYPES.thought.placeholder}"></textarea>
+                <div class="post-composer-footer">
+                  <span class="post-composer-hint">Take your time. No rush here. 🌙</span>
+                  <button class="post-btn" onclick="createPost()">Share</button>
+                </div>
+              </div>
+            ` : `
+              <div class="lurk-mode-hint">
+                👁️ Browsing mode — Join to share and interact
+              </div>
+            `}
+            
+            <div class="posts-feed" id="postsFeed">
+              <div class="posts-empty">
+                <div class="icon">💭</div>
+                <p>Loading posts...</p>
+              </div>
             </div>
-
-            <div style="display: flex; gap: 12px; margin-bottom: 24px;">
-              <div style="flex: 1; padding: 16px; background: var(--bg-elevated); border-radius: var(--radius-md); text-align: center;">
-                <div style="font-size: 24px; font-weight: 600;">${memberCount}</div>
-                <div style="font-size: 13px; color: var(--text-muted);">Members</div>
-              </div>
-              <div style="flex: 1; padding: 16px; background: var(--bg-elevated); border-radius: var(--radius-md); text-align: center;">
-                <div style="font-size: 24px;">💬</div>
-                <div style="font-size: 13px; color: var(--text-muted);">Async Chat</div>
-              </div>
-              <div style="flex: 1; padding: 16px; background: var(--bg-elevated); border-radius: var(--radius-md); text-align: center;">
-                <div style="font-size: 24px;">🔒</div>
-                <div style="font-size: 13px; color: var(--text-muted);">Safe Space</div>
-              </div>
-            </div>
-
-            <button
-              class="submit-btn ${isJoined ? 'joined' : ''}"
-              id="communityJoinBtn"
-              onclick="${isJoined ? `leaveCommunityFromModal('${community.id}')` : `joinCommunityFromModal('${community.id}')`}"
-              style="${isJoined ? 'background: rgba(124,232,168,0.15); color: var(--accent-green);' : ''}"
-            >
-              ${isJoined ? '✓ Joined - Click to Leave' : '✨ Join Community'}
-            </button>
           </div>
         </div>
       `;
 
       modal.classList.add('active');
+      
+      // Load user's reactions and bookmarks, then posts
+      loadUserInteractions(community.id).then(() => {
+        loadCommunityPosts(community.id);
+      });
+    }
+
+    // Select post type
+    function selectPostType(type) {
+      currentPostType = type;
+      
+      // Update buttons
+      document.querySelectorAll('.post-type-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type);
+      });
+      
+      // Update placeholder
+      const textarea = document.getElementById('postContent');
+      if (textarea) {
+        textarea.placeholder = POST_TYPES[type].placeholder;
+      }
+      
+      // Show/hide title and link fields based on type
+      const titleInput = document.getElementById('postTitle');
+      const linkInput = document.getElementById('postLink');
+      
+      if (titleInput) {
+        titleInput.style.display = ['resource', 'lesson', 'creation'].includes(type) ? 'block' : 'none';
+        titleInput.placeholder = type === 'lesson' ? 'What are you teaching?' : 
+                                  type === 'creation' ? 'Title of your creation' : 
+                                  'Title (optional)';
+      }
+      
+      if (linkInput) {
+        linkInput.style.display = type === 'resource' ? 'block' : 'none';
+      }
+    }
+
+    // Filter posts by type
+    function filterPosts(filter) {
+      currentFilter = filter;
+      
+      // Update tab buttons
+      document.querySelectorAll('.community-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.filter === filter);
+      });
+      
+      // Reload posts with filter
+      if (currentCommunity) {
+        loadCommunityPosts(currentCommunity.id);
+      }
+    }
+
+    // Load user's reactions and bookmarks
+    async function loadUserInteractions(communityId) {
+      userReactions = {};
+      userBookmarks = new Set();
+      
+      if (!db || !currentUser) return;
+      
+      try {
+        // Get user's reactions for posts in this community
+        const { data: reactions } = await db
+          .from('post_reactions')
+          .select('post_id, reaction')
+          .eq('user_id', currentUser.id);
+        
+        if (reactions) {
+          reactions.forEach(r => {
+            if (!userReactions[r.post_id]) userReactions[r.post_id] = [];
+            userReactions[r.post_id].push(r.reaction);
+          });
+        }
+        
+        // Get user's bookmarks
+        const { data: bookmarks } = await db
+          .from('post_bookmarks')
+          .select('post_id')
+          .eq('user_id', currentUser.id);
+        
+        if (bookmarks) {
+          bookmarks.forEach(b => userBookmarks.add(b.post_id));
+        }
+      } catch (err) {
+        console.log('Could not load user interactions:', err);
+      }
+    }
+
+    // Load posts for a community
+    async function loadCommunityPosts(communityId) {
+      if (!db) return;
+      
+      const feed = document.getElementById('postsFeed');
+      if (!feed) return;
+
+      try {
+        // Build query with optional filter
+        let query = db
+          .from('community_posts')
+          .select('*')
+          .eq('community_id', communityId)
+          .order('is_pinned', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(50);
+        
+        if (currentFilter !== 'all') {
+          query = query.eq('post_type', currentFilter);
+        }
+        
+        const { data: posts, error } = await query;
+
+        if (error) {
+          console.error('Load posts error:', error);
+          feed.innerHTML = `
+            <div class="posts-empty">
+              <div class="icon">⚠️</div>
+              <p>Could not load posts</p>
+            </div>
+          `;
+          return;
+        }
+
+        if (!posts || posts.length === 0) {
+          const filterLabel = currentFilter === 'all' ? '' : POST_TYPES[currentFilter]?.label.toLowerCase() + ' ';
+          feed.innerHTML = `
+            <div class="posts-empty">
+              <div class="icon">${currentFilter === 'all' ? '🌱' : POST_TYPES[currentFilter]?.icon || '🌱'}</div>
+              <p>No ${filterLabel}posts yet</p>
+              <p style="font-size: 13px; margin-top: 8px;">Be the first to share something!</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Get author profiles
+        const authorIds = [...new Set(posts.map(p => p.author_id))];
+        const { data: profiles } = await db
+          .from('profiles')
+          .select('id, username, avatar, avatar_emoji, avatar_bg, avatar_url')
+          .in('id', authorIds);
+
+        const profileMap = {};
+        if (profiles) {
+          profiles.forEach(p => { profileMap[p.id] = p; });
+        }
+
+        // Get reaction counts and comment counts for all posts
+        const postIds = posts.map(p => p.id);
+        
+        const { data: allReactions } = await db
+          .from('post_reactions')
+          .select('post_id, reaction')
+          .in('post_id', postIds);
+        
+        const { data: allComments } = await db
+          .from('community_comments')
+          .select('post_id')
+          .in('post_id', postIds);
+        
+        // Aggregate reaction counts
+        const reactionCounts = {};
+        if (allReactions) {
+          allReactions.forEach(r => {
+            if (!reactionCounts[r.post_id]) reactionCounts[r.post_id] = {};
+            reactionCounts[r.post_id][r.reaction] = (reactionCounts[r.post_id][r.reaction] || 0) + 1;
+          });
+        }
+        
+        // Aggregate comment counts
+        const commentCounts = {};
+        if (allComments) {
+          allComments.forEach(c => {
+            commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1;
+          });
+        }
+
+        // Render posts
+        feed.innerHTML = posts.map(post => {
+          const author = profileMap[post.author_id] || {};
+          const avatar = author.avatar_emoji || author.avatar || '🌙';
+          const avatarBg = author.avatar_bg || 'var(--bg-elevated)';
+          const avatarUrl = author.avatar_url || null;
+          const name = author.username || 'Anonymous';
+          const time = formatMessageTime(post.created_at);
+          const postType = post.post_type || 'thought';
+          const typeConfig = POST_TYPES[postType] || POST_TYPES.thought;
+          const postReactions = reactionCounts[post.id] || {};
+          const postCommentCount = commentCounts[post.id] || 0;
+          const isBookmarked = userBookmarks.has(post.id);
+          const myReactions = userReactions[post.id] || [];
+
+          return `
+            <div class="post-card ${post.is_pinned ? 'pinned' : ''}" data-post-id="${post.id}">
+              ${post.is_pinned ? '<span class="post-pin-badge">📌 Pinned</span>' : ''}
+              <span class="post-type-badge ${postType}">${typeConfig.icon} ${typeConfig.label}</span>
+              
+              <div class="post-header">
+                ${renderAvatarHtml(avatarUrl, avatar, avatarBg, 'post-avatar')}
+                <div class="post-author-info">
+                  <div class="post-author-name">${escapeHtml(name)}</div>
+                  <div class="post-time">${time}</div>
+                </div>
+              </div>
+              
+              ${post.title ? `<h3 class="post-title">${escapeHtml(post.title)}</h3>` : ''}
+              <div class="post-content">${escapeHtml(post.content)}</div>
+              
+              ${post.link_url ? `
+                <a href="${escapeHtml(post.link_url)}" target="_blank" rel="noopener" class="post-link">
+                  <span class="post-link-icon">🔗</span>
+                  <span class="post-link-text">${escapeHtml(post.link_title || post.link_url)}</span>
+                  <span class="post-link-domain">${getDomain(post.link_url)}</span>
+                </a>
+              ` : ''}
+              
+              ${post.image_url ? `<img src="${post.image_url}" class="post-image" alt="">` : ''}
+              
+              <div class="post-actions">
+                ${Object.entries(REACTIONS).map(([key, config]) => {
+                  const count = postReactions[key] || 0;
+                  const isActive = myReactions.includes(key);
+                  return `
+                    <button class="reaction-btn ${isActive ? 'active' : ''}" 
+                            onclick="toggleReaction('${post.id}', '${key}')"
+                            title="${config.label}">
+                      ${config.icon}${count > 0 ? ` <span class="count">${count}</span>` : ''}
+                    </button>
+                  `;
+                }).join('')}
+                
+                <button class="comment-toggle" onclick="toggleComments('${post.id}')">
+                  💬 ${postCommentCount > 0 ? postCommentCount : 'Reply'}
+                </button>
+                
+                <span class="action-spacer"></span>
+                
+                <button class="bookmark-btn ${isBookmarked ? 'active' : ''}" 
+                        onclick="toggleBookmark('${post.id}')"
+                        title="Save for later">
+                  ${isBookmarked ? '🔖' : '📑'}
+                </button>
+              </div>
+              
+              <div class="comments-section" id="comments-${post.id}" style="display: none;"></div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error('Load posts exception:', err);
+        feed.innerHTML = `
+          <div class="posts-empty">
+            <div class="icon">⚠️</div>
+            <p>Error loading posts</p>
+          </div>
+        `;
+      }
+    }
+
+    // Get domain from URL
+    function getDomain(url) {
+      try {
+        return new URL(url).hostname.replace('www.', '');
+      } catch {
+        return '';
+      }
+    }
+
+    // Toggle reaction on a post
+    async function toggleReaction(postId, reaction) {
+      if (!db || !currentUser) {
+        showToast('Sign in to react');
+        return;
+      }
+      
+      const myReactions = userReactions[postId] || [];
+      const hasReaction = myReactions.includes(reaction);
+      
+      try {
+        if (hasReaction) {
+          // Remove reaction
+          await db
+            .from('post_reactions')
+            .delete()
+            .eq('post_id', postId)
+            .eq('user_id', currentUser.id)
+            .eq('reaction', reaction);
+          
+          userReactions[postId] = myReactions.filter(r => r !== reaction);
+        } else {
+          // Add reaction
+          await db
+            .from('post_reactions')
+            .insert({
+              post_id: postId,
+              user_id: currentUser.id,
+              reaction: reaction
+            });
+          
+          if (!userReactions[postId]) userReactions[postId] = [];
+          userReactions[postId].push(reaction);
+        }
+        
+        // Refresh posts to update counts
+        loadCommunityPosts(currentCommunity.id);
+        
+      } catch (err) {
+        console.error('Toggle reaction error:', err);
+      }
+    }
+
+    // Toggle bookmark on a post
+    async function toggleBookmark(postId) {
+      if (!db || !currentUser) {
+        showToast('Sign in to save posts');
+        return;
+      }
+      
+      const isBookmarked = userBookmarks.has(postId);
+      
+      try {
+        if (isBookmarked) {
+          await db
+            .from('post_bookmarks')
+            .delete()
+            .eq('post_id', postId)
+            .eq('user_id', currentUser.id);
+          
+          userBookmarks.delete(postId);
+          showToast('Removed from saved');
+        } else {
+          await db
+            .from('post_bookmarks')
+            .insert({
+              post_id: postId,
+              user_id: currentUser.id
+            });
+          
+          userBookmarks.add(postId);
+          showToast('🔖 Saved for later');
+        }
+        
+        // Update the button
+        const btn = document.querySelector(`.post-card[data-post-id="${postId}"] .bookmark-btn`);
+        if (btn) {
+          btn.classList.toggle('active', userBookmarks.has(postId));
+          btn.textContent = userBookmarks.has(postId) ? '🔖' : '📑';
+        }
+        
+      } catch (err) {
+        console.error('Toggle bookmark error:', err);
+      }
+    }
+
+    // Toggle comments section
+    async function toggleComments(postId) {
+      const section = document.getElementById(`comments-${postId}`);
+      if (!section) return;
+      
+      const isVisible = section.style.display !== 'none';
+      
+      if (isVisible) {
+        section.style.display = 'none';
+        expandedComments.delete(postId);
+      } else {
+        section.style.display = 'block';
+        expandedComments.add(postId);
+        await loadComments(postId);
+      }
+    }
+
+    // Load comments for a post
+    async function loadComments(postId) {
+      const section = document.getElementById(`comments-${postId}`);
+      if (!section) return;
+      
+      section.innerHTML = '<div class="comments-empty">Loading comments...</div>';
+      
+      try {
+        const { data: comments, error } = await db
+          .from('community_comments')
+          .select('*')
+          .eq('post_id', postId)
+          .is('parent_id', null) // Top-level only for now
+          .order('created_at', { ascending: true })
+          .limit(50);
+        
+        if (error) throw error;
+        
+        // Get author profiles
+        const authorIds = [...new Set((comments || []).map(c => c.author_id))];
+        let profileMap = {};
+        
+        if (authorIds.length > 0) {
+          const { data: profiles } = await db
+            .from('profiles')
+            .select('id, username, avatar, avatar_emoji, avatar_bg, avatar_url')
+            .in('id', authorIds);
+          
+          if (profiles) {
+            profiles.forEach(p => { profileMap[p.id] = p; });
+          }
+        }
+        
+        section.innerHTML = `
+          ${currentCommunityJoined ? `
+            <div class="comment-composer">
+              <input type="text" id="comment-input-${postId}" placeholder="Add a thoughtful reply..." 
+                     onkeydown="if(event.key==='Enter') submitComment('${postId}')">
+              <button class="comment-send-btn" onclick="submitComment('${postId}')">→</button>
+            </div>
+          ` : ''}
+          <div class="comments-list" id="comments-list-${postId}">
+            ${(!comments || comments.length === 0) ? `
+              <div class="comments-empty">No comments yet. Be the first to share your thoughts!</div>
+            ` : comments.map(comment => {
+              const author = profileMap[comment.author_id] || {};
+              const avatar = author.avatar_emoji || author.avatar || '🌙';
+              const avatarBg = author.avatar_bg || 'var(--bg-elevated)';
+              const avatarUrl = author.avatar_url || null;
+              const name = author.username || 'Anonymous';
+              const time = formatMessageTime(comment.created_at);
+              
+              return `
+                <div class="comment">
+                  ${renderAvatarHtml(avatarUrl, avatar, avatarBg, 'comment-avatar')}
+                  <div class="comment-body">
+                    <div class="comment-header">
+                      <span class="comment-author">${escapeHtml(name)}</span>
+                      <span class="comment-time">${time}</span>
+                    </div>
+                    <div class="comment-content">${escapeHtml(comment.content)}</div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+        
+      } catch (err) {
+        console.error('Load comments error:', err);
+        section.innerHTML = '<div class="comments-empty">Could not load comments</div>';
+      }
+    }
+
+    // Submit a comment
+    async function submitComment(postId) {
+      if (!db || !currentUser) {
+        showToast('Sign in to comment');
+        return;
+      }
+      
+      const input = document.getElementById(`comment-input-${postId}`);
+      const content = input?.value?.trim();
+      
+      if (!content) return;
+      
+      try {
+        const { error } = await db
+          .from('community_comments')
+          .insert({
+            post_id: postId,
+            author_id: currentUser.id,
+            content: content
+          });
+        
+        if (error) throw error;
+        
+        input.value = '';
+        showToast('💬 Reply added');
+        
+        // Reload comments
+        loadComments(postId);
+        
+        // Update comment count in the button
+        loadCommunityPosts(currentCommunity.id);
+        
+      } catch (err) {
+        console.error('Submit comment error:', err);
+        showToast('Error adding reply');
+      }
+    }
+
+    // Create a new post
+    async function createPost() {
+      if (!db || !currentUser || !currentCommunity) {
+        showToast('⚠️ Please sign in to post');
+        return;
+      }
+
+      if (!currentCommunityJoined) {
+        showToast('⚠️ Join the community to post');
+        return;
+      }
+
+      const textarea = document.getElementById('postContent');
+      const titleInput = document.getElementById('postTitle');
+      const linkInput = document.getElementById('postLink');
+      
+      const content = textarea?.value?.trim();
+      const title = titleInput?.value?.trim() || null;
+      const linkUrl = linkInput?.value?.trim() || null;
+
+      if (!content) {
+        showToast('⚠️ Write something to share');
+        return;
+      }
+
+      if (content.length > 3000) {
+        showToast('⚠️ Post is too long (max 3000 characters)');
+        return;
+      }
+
+      // Disable button while posting
+      const btn = document.querySelector('.post-btn');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Sharing...';
+      }
+
+      try {
+        const postData = {
+          community_id: currentCommunity.id,
+          author_id: currentUser.id,
+          content: content,
+          post_type: currentPostType,
+          title: title,
+          link_url: linkUrl
+        };
+
+        const { data, error } = await db
+          .from('community_posts')
+          .insert(postData)
+          .select();
+
+        if (error) {
+          console.error('Create post error:', error);
+          showToast('⚠️ Error creating post');
+          return;
+        }
+
+        // Clear inputs
+        if (textarea) textarea.value = '';
+        if (titleInput) titleInput.value = '';
+        if (linkInput) linkInput.value = '';
+        
+        showToast('✨ Post shared!');
+        
+        // Reset filter to show all and reload
+        currentFilter = 'all';
+        document.querySelectorAll('.community-tab').forEach(tab => {
+          tab.classList.toggle('active', tab.dataset.filter === 'all');
+        });
+        loadCommunityPosts(currentCommunity.id);
+
+      } catch (err) {
+        console.error('Create post exception:', err);
+        showToast('⚠️ Error creating post');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Share';
+        }
+      }
     }
 
     function closeCommunityModal() {
@@ -2330,14 +3570,18 @@ CREATE POLICY "Authenticated users can create communities" ON communities
           throw error;
         }
 
-        const btn = document.getElementById('communityJoinBtn');
-        btn.innerHTML = '✓ Joined - Click to Leave';
-        btn.style.background = 'rgba(124,232,168,0.15)';
-        btn.style.color = 'var(--accent-green)';
-        btn.onclick = () => leaveCommunityFromModal(communityId);
-
+        currentCommunityJoined = true;
         showToast('🏠 Welcome to the community!');
         loadCommunities(); // Refresh the grid
+        
+        // Refresh the modal to show post composer
+        if (currentCommunity && currentCommunity.id === communityId) {
+          const { count: memberCount } = await db
+            .from('community_members')
+            .select('*', { count: 'exact', head: true })
+            .eq('community_id', communityId);
+          openCommunityModal(currentCommunity, memberCount || 0, true);
+        }
 
       } catch (err) {
         console.error('Join error:', err);
@@ -2358,14 +3602,18 @@ CREATE POLICY "Authenticated users can create communities" ON communities
 
         if (error) throw error;
 
-        const btn = document.getElementById('communityJoinBtn');
-        btn.innerHTML = '✨ Join Community';
-        btn.style.background = '';
-        btn.style.color = '';
-        btn.onclick = () => joinCommunityFromModal(communityId);
-
+        currentCommunityJoined = false;
         showToast('👋 Left community');
         loadCommunities(); // Refresh the grid
+        
+        // Refresh the modal to hide post composer
+        if (currentCommunity && currentCommunity.id === communityId) {
+          const { count: memberCount } = await db
+            .from('community_members')
+            .select('*', { count: 'exact', head: true })
+            .eq('community_id', communityId);
+          openCommunityModal(currentCommunity, memberCount || 0, false);
+        }
 
       } catch (err) {
         console.error('Leave error:', err);
