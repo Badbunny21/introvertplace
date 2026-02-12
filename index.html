@@ -1816,6 +1816,34 @@
     .pricing-card .cta-btn.secondary { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary); }
     .pricing-card .cta-btn.secondary:hover { background: var(--bg-elevated); }
     .pricing-note { font-size: 13px; color: var(--text-muted); text-align: center; }
+    /* Main Page Pricing Section */
+    .pricing-section { padding: 80px 0; background: linear-gradient(180deg, transparent 0%, rgba(196,161,255,0.03) 50%, transparent 100%); }
+    .pricing-cards-main { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1000px; margin: 40px auto 0; }
+    .pricing-card-main { padding: 32px 28px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 20px; text-align: center; position: relative; display: flex; flex-direction: column; transition: all 0.3s ease; }
+    .pricing-card-main:hover { transform: translateY(-4px); border-color: var(--border-light); }
+    .pricing-card-main.featured { border: 2px solid var(--accent-soft); background: linear-gradient(180deg, var(--bg-surface) 0%, rgba(196,161,255,0.05) 100%); }
+    .pricing-badge-main { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--bg-elevated); color: var(--text-secondary); padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .pricing-badge-main.highlight { background: var(--accent-soft); color: var(--bg-deep); }
+    .pricing-badge-main.save { background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; }
+    .pricing-card-main h3 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 400; margin: 16px 0 8px; }
+    .pricing-price-main { margin: 8px 0; }
+    .pricing-price-main span { font-size: 48px; font-weight: 700; color: var(--text-primary); }
+    .pricing-price-main small { font-size: 16px; color: var(--text-muted); }
+    .pricing-period { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+    .pricing-features-main { list-style: none; padding: 0; margin: 0 0 24px; text-align: left; flex-grow: 1; }
+    .pricing-features-main li { padding: 10px 0; font-size: 14px; border-bottom: 1px solid var(--border-subtle); }
+    .pricing-features-main li:last-child { border-bottom: none; }
+    .pricing-features-main li.dimmed { color: var(--text-muted); }
+    .pricing-btn { width: 100%; padding: 14px 24px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+    .pricing-btn.primary { background: var(--accent-soft); color: var(--bg-deep); }
+    .pricing-btn.primary:hover { opacity: 0.9; transform: translateY(-2px); }
+    .pricing-btn.secondary { background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); }
+    .pricing-btn.secondary:hover { background: var(--bg-elevated); }
+    .pricing-reassurance { text-align: center; color: var(--text-muted); font-size: 14px; margin-top: 32px; }
+    @media (max-width: 768px) {
+      .pricing-cards-main { grid-template-columns: 1fr; max-width: 400px; }
+      .pricing-card-main.featured { order: -1; }
+    }
     /* Roadmap */
     .roadmap-section { margin-bottom: 20px; }
     .roadmap-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
@@ -2946,6 +2974,69 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="pricing-section">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-label">When You're Ready</span>
+        <h2>Support Your Sanctuary</h2>
+        <p>No pressure. Free is always an option. If you'd like to support what we're building, here's how.</p>
+      </div>
+
+      <div class="pricing-cards-main">
+        <!-- Free Trial -->
+        <div class="pricing-card-main">
+          <div class="pricing-badge-main">Start Here</div>
+          <h3>Free Trial</h3>
+          <div class="pricing-price-main"><span>$0</span></div>
+          <p class="pricing-period">14 days free</p>
+          <ul class="pricing-features-main">
+            <li>✓ Full access to Sanctuary</li>
+            <li>✓ Wellness tools & tracking</li>
+            <li>✓ Community access</li>
+            <li>✓ Journaling & mood tracking</li>
+            <li class="dimmed">◦ Creative spaces (limited)</li>
+          </ul>
+          <button class="pricing-btn secondary" onclick="openModal('signup')">Start Free</button>
+        </div>
+
+        <!-- Monthly -->
+        <div class="pricing-card-main featured">
+          <div class="pricing-badge-main highlight">Most Flexible</div>
+          <h3>Quiet Soul</h3>
+          <div class="pricing-price-main"><span>$6</span><small>/month</small></div>
+          <p class="pricing-period">Cancel anytime</p>
+          <ul class="pricing-features-main">
+            <li>✓ Everything in Free, plus:</li>
+            <li>✓ Unlimited creative spaces</li>
+            <li>✓ Priority community features</li>
+            <li>✓ Advanced mood insights</li>
+            <li>✓ Support quiet development</li>
+          </ul>
+          <button class="pricing-btn primary" onclick="openModal('signup')">Get Started</button>
+        </div>
+
+        <!-- Annual -->
+        <div class="pricing-card-main">
+          <div class="pricing-badge-main save">Save 24%</div>
+          <h3>Quiet Soul</h3>
+          <div class="pricing-price-main"><span>$55</span><small>/year</small></div>
+          <p class="pricing-period">~$4.58/month</p>
+          <ul class="pricing-features-main">
+            <li>✓ Everything in Monthly</li>
+            <li>✓ Best value for quiet souls</li>
+            <li>✓ Lock in your rate</li>
+            <li>✓ 2 months free vs monthly</li>
+            <li>✓ Early access to new features</li>
+          </ul>
+          <button class="pricing-btn primary" onclick="openModal('signup')">Get Started</button>
+        </div>
+      </div>
+
+      <p class="pricing-reassurance">✨ All plans include a 14-day free trial. No credit card required to start. Cancel anytime.</p>
     </div>
   </section>
 
