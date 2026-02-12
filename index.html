@@ -1800,14 +1800,21 @@
     .preview-article h4 { margin-bottom: 6px; }
     .preview-article p { margin: 0; font-size: 13px; }
     /* Pricing */
-    .pricing-cards { margin: 20px 0; }
-    .pricing-card { padding: 28px; background: var(--bg-elevated); border: 2px solid var(--accent-soft); border-radius: 16px; text-align: center; position: relative; }
-    .pricing-card .pricing-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent-soft); color: var(--bg-deep); padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .pricing-card h3 { font-size: 32px; margin: 12px 0 4px; }
-    .pricing-card .pricing-desc { color: var(--text-muted); margin-bottom: 20px; }
-    .pricing-features { list-style: none; padding: 0; margin: 20px 0; text-align: left; }
-    .pricing-features li { padding: 8px 0; border-bottom: 1px solid var(--border-subtle); }
-    .pricing-features li:last-child { border-bottom: none; }
+    .pricing-cards { margin: 20px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .pricing-card { padding: 24px; background: var(--bg-elevated); border: 2px solid var(--border-subtle); border-radius: 16px; text-align: center; position: relative; display: flex; flex-direction: column; }
+    .pricing-card.featured { border-color: var(--accent-soft); }
+    .pricing-card .pricing-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent-soft); color: var(--bg-deep); padding: 4px 16px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .pricing-card .pricing-badge.save { background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; }
+    .pricing-card h3 { font-size: 28px; margin: 12px 0 4px; }
+    .pricing-card .pricing-price { font-size: 14px; color: var(--text-muted); margin-bottom: 4px; }
+    .pricing-card .pricing-price span { font-size: 36px; font-weight: 700; color: var(--text-primary); }
+    .pricing-card .pricing-desc { color: var(--text-muted); margin-bottom: 16px; font-size: 13px; }
+    .pricing-features { list-style: none; padding: 0; margin: 16px 0; text-align: left; flex-grow: 1; }
+    .pricing-features li { padding: 6px 0; font-size: 13px; }
+    .pricing-features li.dimmed { color: var(--text-muted); }
+    .pricing-card .cta-btn { margin-top: auto; }
+    .pricing-card .cta-btn.secondary { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary); }
+    .pricing-card .cta-btn.secondary:hover { background: var(--bg-elevated); }
     .pricing-note { font-size: 13px; color: var(--text-muted); text-align: center; }
     /* Roadmap */
     .roadmap-section { margin-bottom: 20px; }
@@ -2137,7 +2144,7 @@
       </div>
       <div class="stat">
         <div class="stat-value">Free</div>
-        <div class="stat-label" data-i18n="hero.stats.free">One Month Free</div>
+        <div class="stat-label" data-i18n="hero.stats.free">14 Days Free</div>
       </div>
       <div class="stat">
         <div class="stat-value">0</div>
@@ -3422,23 +3429,56 @@
       </div>
       <div class="info-modal-body">
         <div class="pricing-cards">
-          <div class="pricing-card featured">
-            <div class="pricing-badge">Current Offer</div>
-            <h3>Free</h3>
-            <p class="pricing-desc">One month free trial</p>
+          <!-- Free Trial -->
+          <div class="pricing-card">
+            <div class="pricing-badge">Start Here</div>
+            <h3>Free Trial</h3>
+            <p class="pricing-price"><span>$0</span></p>
+            <p class="pricing-desc">14 days free</p>
             <ul class="pricing-features">
               <li>✓ Full access to Sanctuary</li>
               <li>✓ Wellness tools & tracking</li>
-              <li>✓ Creative spaces</li>
               <li>✓ Community access</li>
-              <li>✓ Unlimited journaling</li>
-              <li>✓ Mood tracking</li>
+              <li>✓ Journaling & mood tracking</li>
+              <li class="dimmed">◦ Creative spaces (limited)</li>
             </ul>
-            <button class="cta-btn" onclick="closeModal('pricing'); openModal('signup');">Start Free Trial</button>
+            <button class="cta-btn secondary" onclick="closeModal('pricing'); openModal('signup');">Start Free Trial</button>
+          </div>
+
+          <!-- Monthly -->
+          <div class="pricing-card featured">
+            <div class="pricing-badge">Most Flexible</div>
+            <h3>Quiet Soul</h3>
+            <p class="pricing-price"><span>$6</span>/month</p>
+            <p class="pricing-desc">Cancel anytime</p>
+            <ul class="pricing-features">
+              <li>✓ Everything in Free, plus:</li>
+              <li>✓ Unlimited creative spaces</li>
+              <li>✓ Priority community features</li>
+              <li>✓ Advanced mood insights</li>
+              <li>✓ Support quiet development</li>
+            </ul>
+            <button class="cta-btn" onclick="closeModal('pricing'); openModal('signup');">Get Started</button>
+          </div>
+
+          <!-- Annual -->
+          <div class="pricing-card">
+            <div class="pricing-badge save">Save 24%</div>
+            <h3>Quiet Soul</h3>
+            <p class="pricing-price"><span>$55</span>/year</p>
+            <p class="pricing-desc">~$4.58/month</p>
+            <ul class="pricing-features">
+              <li>✓ Everything in Monthly</li>
+              <li>✓ Best value for quiet souls</li>
+              <li>✓ Lock in your rate</li>
+              <li>✓ 2 months free vs monthly</li>
+              <li>✓ Early access to new features</li>
+            </ul>
+            <button class="cta-btn" onclick="closeModal('pricing'); openModal('signup');">Get Started</button>
           </div>
         </div>
 
-        <p class="pricing-note">After your free month, choose a plan that works for you. We'll never surprise you with charges.</p>
+        <p class="pricing-note">All plans include a 14-day free trial. No credit card required to start. Cancel anytime.</p>
       </div>
     </div>
   </div>
