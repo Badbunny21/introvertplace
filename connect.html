@@ -601,83 +601,183 @@
       pointer-events: none;
     }
 
-    /* Messages */
+    /* Messages Section - Redesigned */
     .messages-section { max-width: 800px; margin: 0 auto; }
 
     .async-banner {
       display: flex;
       align-items: center;
       gap: 20px;
-      padding: 24px;
-      background: linear-gradient(135deg, rgba(124,232,168,0.1) 0%, rgba(124,184,232,0.1) 100%);
-      border: 1px solid rgba(124,232,168,0.2);
-      border-radius: var(--radius-lg);
-      margin-bottom: 24px;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, rgba(124,232,168,0.08) 0%, rgba(196,161,255,0.08) 100%);
+      border: 1px solid rgba(124,232,168,0.15);
+      border-radius: var(--radius-xl);
+      margin-bottom: 20px;
     }
-
-    .async-banner .icon { font-size: 40px; }
-    .async-banner h4 { font-size: 18px; margin-bottom: 6px; }
-    .async-banner p { font-size: 14px; color: var(--text-secondary); }
+    .async-banner .icon { font-size: 32px; }
+    .async-banner h4 { font-size: 16px; margin-bottom: 4px; color: var(--text-primary); }
+    .async-banner p { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
 
     .async-badges {
       display: flex;
-      gap: 12px;
-      margin-bottom: 28px;
+      gap: 10px;
+      margin-bottom: 24px;
       flex-wrap: wrap;
     }
-
     .async-badge {
-      padding: 10px 18px;
-      background: var(--bg-surface);
+      padding: 8px 14px;
+      background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-full);
-      font-size: 13px;
-      color: var(--text-secondary);
+      font-size: 12px;
+      color: var(--text-muted);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+    }
+    .async-badge span { font-size: 14px; }
+
+    /* Conversations Search */
+    .messages-search {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .messages-search input {
+      width: 100%;
+      padding: 14px 18px 14px 48px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .messages-search input:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+      background: var(--bg-elevated);
+    }
+    .messages-search input::placeholder { color: var(--text-muted); }
+    .messages-search-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 16px;
+      pointer-events: none;
     }
 
-    .conversations { display: flex; flex-direction: column; gap: 12px; }
+    /* Conversations List */
+    .conversations { display: flex; flex-direction: column; gap: 8px; }
+    
+    .conversations-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .conversations-header h3 {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .conversations-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg-elevated);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+    }
 
     .conversation {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 20px;
+      gap: 14px;
+      padding: 16px 18px;
       background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
+      border: 1px solid transparent;
       border-radius: var(--radius-lg);
       cursor: pointer;
       transition: all 0.2s ease;
+      position: relative;
+    }
+    .conversation:hover { 
+      background: var(--bg-elevated); 
+      border-color: var(--border-subtle);
+      transform: translateX(4px);
+    }
+    .conversation.unread { 
+      background: linear-gradient(135deg, rgba(196,161,255,0.05) 0%, transparent 100%);
+      border-color: rgba(196,161,255,0.2);
+    }
+    .conversation.unread::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 60%;
+      background: var(--accent-soft);
+      border-radius: 0 3px 3px 0;
     }
 
-    .conversation:hover { background: var(--bg-elevated); }
-    .conversation.unread { border-left: 3px solid var(--accent-soft); }
-
     .convo-avatar {
-      width: 52px;
-      height: 52px;
+      width: 48px;
+      height: 48px;
       border-radius: var(--radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
+      font-size: 24px;
       flex-shrink: 0;
+      position: relative;
     }
     .convo-avatar img { width: 100%; height: 100%; border-radius: var(--radius-md); object-fit: cover; }
 
     .convo-content { flex: 1; min-width: 0; }
-    .convo-header { display: flex; justify-stretch: space-between; margin-bottom: 4px; }
-    .convo-name { font-size: 15px; font-weight: 500; }
-    .convo-time { font-size: 12px; color: var(--text-muted); }
-    .convo-preview { font-size: 14px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .convo-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      margin-bottom: 6px; 
+    }
+    .convo-name { 
+      font-size: 15px; 
+      font-weight: 500; 
+      color: var(--text-primary);
+    }
+    .conversation.unread .convo-name { font-weight: 600; }
+    .convo-time { 
+      font-size: 11px; 
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .convo-preview { 
+      font-size: 13px; 
+      color: var(--text-secondary); 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis;
+      line-height: 1.4;
+    }
+    .conversation.unread .convo-preview { color: var(--text-primary); }
 
-    .unread-dot {
-      width: 10px;
-      height: 10px;
+    .unread-badge {
+      min-width: 20px;
+      height: 20px;
       background: var(--accent-soft);
-      border-radius: 50%;
+      border-radius: var(--radius-full);
+      color: var(--bg-deep);
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
       flex-shrink: 0;
     }
 
@@ -686,113 +786,252 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 20px 24px;
+      padding: 16px 20px;
+      background: var(--bg-surface);
       border-bottom: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
     .convo-view-header .back-btn {
-      width: 36px; height: 36px;
+      width: 38px; height: 38px;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
-      border-radius: 50%;
+      border-radius: var(--radius-md);
       color: var(--text-secondary);
       font-size: 18px;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
     }
-    .convo-view-header .back-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .convo-view-header .back-btn:hover { 
+      background: var(--bg-hover); 
+      color: var(--text-primary);
+      border-color: var(--accent-soft);
+    }
     .convo-view-header .convo-user-info { flex: 1; }
     .convo-view-header .convo-user-name { font-size: 16px; font-weight: 500; }
-    .convo-view-header .convo-user-status { font-size: 12px; color: var(--text-muted); }
+    .convo-view-header .convo-user-status { 
+      font-size: 12px; 
+      color: var(--accent-green);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .convo-view-header .convo-user-status::before {
+      content: '🌱';
+      font-size: 10px;
+    }
     .convo-view-avatar {
-      width: 42px; height: 42px;
+      width: 44px; height: 44px;
       border-radius: var(--radius-md);
       display: flex; align-items: center; justify-content: center;
       font-size: 22px; flex-shrink: 0;
     }
     .convo-view-avatar img { width: 100%; height: 100%; border-radius: var(--radius-md); object-fit: cover; }
+    .convo-view-options {
+      width: 38px; height: 38px;
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .convo-view-options:hover { background: var(--bg-elevated); color: var(--text-primary); }
 
+    /* Messages List */
     .messages-list {
       flex: 1;
       overflow-y: auto;
-      padding: 20px 24px;
+      padding: 24px 20px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      max-height: 400px;
-      min-height: 200px;
+      gap: 16px;
+      max-height: 450px;
+      min-height: 250px;
+      background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-surface) 100%);
     }
 
+    .message-date-divider {
+      text-align: center;
+      padding: 12px 0;
+      position: relative;
+    }
+    .message-date-divider span {
+      background: var(--bg-surface);
+      padding: 6px 16px;
+      font-size: 11px;
+      color: var(--text-muted);
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .message-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .message-group.sent { align-items: flex-end; }
+    .message-group.received { align-items: flex-start; }
+
     .message-bubble {
-      max-width: 75%;
+      max-width: 70%;
       padding: 12px 16px;
-      border-radius: 16px;
+      border-radius: 18px;
       font-size: 14px;
       line-height: 1.5;
       word-wrap: break-word;
+      position: relative;
+      animation: messageSlide 0.2s ease-out;
+    }
+    @keyframes messageSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .message-bubble.sent {
-      align-self: flex-end;
-      background: rgba(196,161,255,0.2);
-      border: 1px solid rgba(196,161,255,0.15);
+      background: linear-gradient(135deg, rgba(196,161,255,0.25) 0%, rgba(196,161,255,0.15) 100%);
+      border: 1px solid rgba(196,161,255,0.2);
       color: var(--text-primary);
-      border-bottom-right-radius: 4px;
+      border-bottom-right-radius: 6px;
     }
     .message-bubble.received {
-      align-self: flex-start;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       color: var(--text-primary);
-      border-bottom-left-radius: 4px;
+      border-bottom-left-radius: 6px;
     }
-    .message-time {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-    .message-bubble.sent .message-time { text-align: right; }
+    .message-bubble.sent + .message-bubble.sent { border-top-right-radius: 6px; }
+    .message-bubble.received + .message-bubble.received { border-top-left-radius: 6px; }
 
+    .message-text { margin-bottom: 4px; }
+    .message-time {
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .message-bubble.sent .message-time { justify-content: flex-end; }
+
+    /* Message Input Area */
     .message-input-area {
       display: flex;
-      gap: 10px;
-      padding: 16px 24px;
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--bg-surface);
       border-top: 1px solid var(--border-subtle);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      align-items: flex-end;
     }
-    .message-input-area input {
+    .message-input-wrapper {
       flex: 1;
-      padding: 12px 18px;
+      position: relative;
+    }
+    .message-input-area textarea {
+      width: 100%;
+      padding: 14px 18px;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-full);
+      border-radius: var(--radius-lg);
       color: var(--text-primary);
       font-family: inherit;
       font-size: 14px;
+      line-height: 1.4;
+      resize: none;
+      min-height: 48px;
+      max-height: 120px;
+      transition: all 0.2s;
+    }
+    .message-input-area textarea:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+      background: var(--bg-surface);
+    }
+    .message-input-area textarea::placeholder { color: var(--text-muted); }
+    .message-input-area input {
+      flex: 1;
+      padding: 14px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s;
     }
     .message-input-area input:focus {
       outline: none;
       border-color: var(--accent-soft);
+      background: var(--bg-surface);
     }
     .message-input-area input::placeholder { color: var(--text-muted); }
+    
     .send-btn {
-      width: 44px; height: 44px;
-      background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-calm) 100%);
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--accent-soft) 0%, #a78bfa 100%);
       border: none;
-      border-radius: 50%;
+      border-radius: var(--radius-md);
       color: var(--bg-deep);
       font-size: 18px;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      transition: transform 0.2s;
+      transition: all 0.2s;
       flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(196,161,255,0.3);
     }
-    .send-btn:hover { transform: scale(1.05); }
-    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .send-btn:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 6px 16px rgba(196,161,255,0.4);
+    }
+    .send-btn:active { transform: translateY(0); }
+    .send-btn:disabled { 
+      opacity: 0.4; 
+      cursor: not-allowed; 
+      transform: none;
+      box-shadow: none;
+    }
 
+    /* Messages Empty State */
     .messages-empty {
       padding: 60px 24px;
       text-align: center;
-      color: var(--text-muted);
     }
-    .messages-empty .icon { font-size: 48px; margin-bottom: 16px; }
+    .messages-empty .icon { 
+      font-size: 56px; 
+      margin-bottom: 20px;
+      display: block;
+    }
+    .messages-empty h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 400;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+    .messages-empty p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .messages-empty-btn {
+      margin-top: 24px;
+      padding: 12px 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-primary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .messages-empty-btn:hover {
+      background: var(--accent-soft);
+      color: var(--bg-deep);
+      border-color: var(--accent-soft);
+    }
 
     /* Profile View Modal */
     .profile-view-card {
@@ -1851,24 +2090,35 @@
           <div class="messages-section">
 
             <div class="async-banner">
-              <div class="icon">💬</div>
+              <div class="icon">🌙</div>
               <div>
                 <h4>Async-First Messaging</h4>
-                <p>Take your time. No pressure to respond quickly — we all understand.</p>
+                <p>Take your time responding. No pressure, no rush — we all understand the need for space.</p>
               </div>
             </div>
 
             <div class="async-badges">
-              <div class="async-badge"><span>👁️‍🗨️</span> No read receipts</div>
+              <div class="async-badge"><span>👁️</span> No read receipts</div>
               <div class="async-badge"><span>⌨️</span> No typing indicators</div>
-              <div class="async-badge"><span>🟢</span> No online status</div>
+              <div class="async-badge"><span>🔕</span> No online status</div>
             </div>
 
-            <div class="conversations">
-              <div style="padding: 60px 24px; text-align: center;">
-                <span style="font-size: 48px;">💬</span>
-                <h3 style="margin-top: 16px;">No messages yet</h3>
-                <p style="color: var(--text-muted); margin-top: 8px;">When you connect with someone, your conversations will appear here.</p>
+            <div class="messages-search">
+              <span class="messages-search-icon">🔍</span>
+              <input type="text" placeholder="Search conversations..." id="conversationsSearch" autocomplete="off">
+            </div>
+
+            <div class="conversations-header">
+              <h3>Conversations</h3>
+              <span class="conversations-count" id="convosCount">0 chats</span>
+            </div>
+
+            <div class="conversations" id="conversationsList">
+              <div class="messages-empty">
+                <span class="icon">💜</span>
+                <h3>Your quiet inbox</h3>
+                <p>When you connect with similar souls, your conversations will appear here. No pressure to respond quickly.</p>
+                <button class="messages-empty-btn" onclick="switchView('souls')">Find Similar Souls</button>
               </div>
             </div>
 
