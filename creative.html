@@ -2651,6 +2651,169 @@
       .interior-creations-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
+    /* ==================== */
+    /* CREATION DETAIL      */
+    /* ==================== */
+    .creation-detail-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(16px);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .creation-detail-overlay.active { display: flex; }
+
+    .creation-detail-modal {
+      background: #0c120c;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: gardenModalIn 0.3s ease;
+    }
+
+    .creation-detail-header {
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .creation-detail-emoji { font-size: 36px; flex-shrink: 0; }
+    .creation-detail-meta { flex: 1; min-width: 0; }
+    .creation-detail-title {
+      font-size: 24px;
+      font-family: 'Cormorant Garamond', serif;
+      color: #f0eeeb;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+    .creation-detail-tags {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .creation-detail-tag {
+      font-size: 11px;
+      color: #6b7a6b;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 100px;
+    }
+    .creation-detail-tag.mood {
+      color: #7ce8a8;
+      background: rgba(124,232,168,0.08);
+    }
+    .creation-detail-close {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.06);
+      border: none;
+      border-radius: 50%;
+      color: #6b7a6b;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .creation-detail-close:hover { background: rgba(255,255,255,0.12); color: #f0eeeb; }
+
+    .creation-detail-body {
+      padding: 28px;
+      overflow-y: auto;
+      flex: 1;
+      -webkit-overflow-scrolling: touch;
+    }
+    .creation-detail-content {
+      font-size: 16px;
+      color: #c8d4c8;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      font-family: 'Cormorant Garamond', serif;
+    }
+    .creation-detail-image {
+      width: 100%;
+      border-radius: 14px;
+      object-fit: cover;
+      max-height: 360px;
+    }
+    .creation-detail-music-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      color: #9ca89c;
+      font-size: 14px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .creation-detail-music-link:hover { border-color: rgba(255,255,255,0.2); color: #f0eeeb; }
+
+    .creation-detail-footer {
+      padding: 16px 28px 24px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .creation-detail-date { font-size: 12px; color: #4a5a4a; }
+    .creation-detail-delete {
+      padding: 10px 18px;
+      background: rgba(255,80,80,0.08);
+      border: 1px solid rgba(255,80,80,0.2);
+      border-radius: 10px;
+      color: rgba(255,120,120,0.8);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .creation-detail-delete:hover {
+      background: rgba(255,80,80,0.15);
+      color: #ff8080;
+      border-color: rgba(255,80,80,0.4);
+    }
+
+    /* Card delete badge on hover */
+    .interior-creation-card .card-delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 26px;
+      height: 26px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      color: rgba(255,120,120,0.7);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 2;
+    }
+    .interior-creation-card:hover .card-delete-btn { opacity: 1; }
+    .interior-creation-card { position: relative; }
+
     /* Garden responsive */
     @media (max-width: 900px) {
       .garden-main { padding: 100px 24px 60px; }
@@ -3507,6 +3670,27 @@
             <div class="interior-visitor-empty-icon">🌿</div>
             <div class="interior-visitor-empty-text">Your garden is young. Visitors will leave quiet traces as they pass through.</div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Creation Detail Modal -->
+    <div class="creation-detail-overlay" id="creationDetailOverlay" onclick="closeCreationDetail(event)">
+      <div class="creation-detail-modal" onclick="event.stopPropagation()">
+        <div class="creation-detail-header">
+          <div class="creation-detail-emoji" id="detailEmoji"></div>
+          <div class="creation-detail-meta">
+            <div class="creation-detail-title" id="detailTitle"></div>
+            <div class="creation-detail-tags" id="detailTags"></div>
+          </div>
+          <button class="creation-detail-close" onclick="closeCreationDetail()">✕</button>
+        </div>
+        <div class="creation-detail-body" id="detailBody"></div>
+        <div class="creation-detail-footer">
+          <div class="creation-detail-date" id="detailDate"></div>
+          <button class="creation-detail-delete" id="detailDeleteBtn" onclick="deleteCurrentCreation()" style="display:none;">
+            🗑 Delete
+          </button>
         </div>
       </div>
     </div>
@@ -4668,6 +4852,7 @@ This could be:
       const typeEmoji = { writing: '✍️', visual: '🎨', music: '🎵', idea: '💡' };
       const card = document.createElement('div');
       card.className = 'interior-creation-card';
+      card.dataset.creationId = String(creation.id);
       card.style.cssText = `
         aspect-ratio: 1; border-radius: 18px; overflow: hidden;
         border: 1px solid rgba(255,255,255,0.08);
@@ -4675,13 +4860,20 @@ This could be:
         background: rgba(255,255,255,0.03);
       `;
 
+      // Delete button (owner only, shown on hover via CSS)
+      const isOwner = currentUser && creation.user_id === currentUser.id;
+      const deleteBtnHtml = isOwner
+        ? `<button class="card-delete-btn" onclick="event.stopPropagation(); quickDeleteCreation('${creation.id}', this)" title="Delete">✕</button>`
+        : '';
+
       if (creation.cover_image_url) {
         card.style.backgroundImage = `url('${creation.cover_image_url}')`;
         card.style.backgroundSize = 'cover';
         card.style.backgroundPosition = 'center';
         card.innerHTML = `
+          ${deleteBtnHtml}
           <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 60%);display:flex;flex-direction:column;justify-content:flex-end;padding:14px;">
-            <div style="font-size:13px;color:#f0eeeb;font-family:'Cormorant Garamond',serif;line-height:1.3;">${creation.title}</div>
+            <div style="font-size:13px;color:#f0eeeb;font-family:'Cormorant Garamond',serif;line-height:1.3;">${escapeHtml(creation.title)}</div>
             <div style="font-size:11px;color:rgba(240,238,235,0.5);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;">${creation.type}</div>
           </div>
         `;
@@ -4694,15 +4886,36 @@ This could be:
         card.style.padding = '20px';
         card.style.textAlign = 'center';
         card.innerHTML = `
+          ${deleteBtnHtml}
           <div style="font-size:36px;">${typeEmoji[creation.type] || '✨'}</div>
-          <div style="font-size:14px;color:#f0eeeb;font-family:'Cormorant Garamond',serif;">${creation.title}</div>
+          <div style="font-size:14px;color:#f0eeeb;font-family:'Cormorant Garamond',serif;">${escapeHtml(creation.title)}</div>
           <div style="font-size:11px;color:#6b7a6b;text-transform:uppercase;letter-spacing:0.1em;">${creation.type}</div>
         `;
       }
 
+      card.onclick = () => showCreationDetail(creation);
       card.onmouseenter = () => { card.style.borderColor = 'rgba(124,232,168,0.3)'; card.style.transform = 'scale(1.02)'; };
       card.onmouseleave = () => { card.style.borderColor = 'rgba(255,255,255,0.08)'; card.style.transform = 'scale(1)'; };
       grid.insertBefore(card, grid.firstChild);
+    }
+
+    async function quickDeleteCreation(creationId, btn) {
+      const confirmed = confirm('Delete this creation? This cannot be undone.');
+      if (!confirmed) return;
+
+      if (db && currentUser) {
+        try {
+          const { error } = await db.from('creations').delete().eq('id', creationId).eq('user_id', currentUser.id);
+          if (error) { showToast('⚠️ Could not delete: ' + error.message); return; }
+        } catch (e) { showToast('⚠️ Error deleting'); return; }
+      } else {
+        const saved = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+        localStorage.setItem('introvert_creations', JSON.stringify(saved.filter(c => String(c.id) !== String(creationId))));
+      }
+
+      // Remove the card from the grid
+      btn.closest('.interior-creation-card').remove();
+      showToast('🗑 Deleted');
     }
 
     function closeRoomInterior() {
@@ -4774,9 +4987,13 @@ This could be:
     // Close modals with Escape
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        closeGardenKnockModal();
-        closeGardenOnboarding();
-        closeRoomInterior();
+        if (document.getElementById('creationDetailOverlay').classList.contains('active')) {
+          closeCreationDetail();
+        } else {
+          closeGardenKnockModal();
+          closeGardenOnboarding();
+          closeRoomInterior();
+        }
       }
     });
 
@@ -5425,9 +5642,91 @@ This could be:
       return div.innerHTML;
     }
 
+    let activeDetailCreation = null;
+
     function showCreationDetail(creation) {
-      // For now just show a toast, can expand to full modal later
-      showToast(`Opening: ${creation.title}`);
+      activeDetailCreation = creation;
+      const typeEmoji = { writing: '✍️', visual: '🎨', music: '🎵', idea: '💡' };
+
+      document.getElementById('detailEmoji').textContent = typeEmoji[creation.type] || '✨';
+      document.getElementById('detailTitle').textContent = creation.title;
+
+      // Tags
+      const tagsEl = document.getElementById('detailTags');
+      tagsEl.innerHTML = `<span class="creation-detail-tag">${creation.type}</span>`;
+      if (creation.mood) tagsEl.innerHTML += `<span class="creation-detail-tag mood">${creation.mood}</span>`;
+
+      // Body content
+      const body = document.getElementById('detailBody');
+      body.innerHTML = '';
+      if (creation.type === 'visual' && creation.cover_image_url) {
+        body.innerHTML = `<img class="creation-detail-image" src="${creation.cover_image_url}" alt="${creation.title}">`;
+        if (creation.description) {
+          body.innerHTML += `<p class="creation-detail-content" style="margin-top:20px;">${escapeHtml(creation.description)}</p>`;
+        }
+      } else if (creation.type === 'music') {
+        const isLink = creation.content && creation.content.startsWith('http');
+        body.innerHTML = isLink
+          ? `<a class="creation-detail-music-link" href="${creation.content}" target="_blank" rel="noopener">🎵 &nbsp;Listen to this piece</a>`
+          : `<div class="creation-detail-content">🎵 ${escapeHtml(creation.content || '')}</div>`;
+        if (creation.description) {
+          body.innerHTML += `<p class="creation-detail-content" style="margin-top:20px;">${escapeHtml(creation.description)}</p>`;
+        }
+      } else {
+        body.innerHTML = `<div class="creation-detail-content">${escapeHtml(creation.content || creation.description || '')}</div>`;
+      }
+
+      // Date
+      const date = creation.created_at ? new Date(creation.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+      document.getElementById('detailDate').textContent = date;
+
+      // Show delete button only for owner
+      const deleteBtn = document.getElementById('detailDeleteBtn');
+      deleteBtn.style.display = (currentUser && creation.user_id === currentUser.id) ? 'block' : 'none';
+
+      document.getElementById('creationDetailOverlay').classList.add('active');
+    }
+
+    function closeCreationDetail(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('creationDetailOverlay').classList.remove('active');
+      activeDetailCreation = null;
+    }
+
+    async function deleteCurrentCreation() {
+      if (!activeDetailCreation) return;
+      const creation = activeDetailCreation;
+
+      const confirmed = confirm(`Delete "${creation.title}"? This cannot be undone.`);
+      if (!confirmed) return;
+
+      // Delete from Supabase
+      if (db && currentUser && creation.id && typeof creation.id === 'string') {
+        try {
+          const { error } = await db.from('creations').delete().eq('id', creation.id).eq('user_id', currentUser.id);
+          if (error) { showToast('⚠️ Could not delete: ' + error.message); return; }
+        } catch (e) {
+          showToast('⚠️ Error deleting creation'); return;
+        }
+      } else {
+        // Remove from localStorage
+        const saved = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+        localStorage.setItem('introvert_creations', JSON.stringify(saved.filter(c => c.id !== creation.id)));
+      }
+
+      // Remove card from grid
+      const grid = document.getElementById('interiorCreationsGrid');
+      if (grid) {
+        grid.querySelectorAll('.interior-creation-card').forEach(card => {
+          if (card.dataset.creationId === String(creation.id)) card.remove();
+        });
+      }
+
+      closeCreationDetail();
+      showToast('🗑 Creation deleted');
+
+      // Reload room to stay in sync
+      loadRoomCreations();
     }
 
     // Load all saved creations on page load
