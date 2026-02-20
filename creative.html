@@ -4661,6 +4661,32 @@ This could be:
       gardenInitialized = true;
       initGardenFireflies();
       loadFeaturedRooms();
+      checkUserRoomCard();
+    }
+
+    function checkUserRoomCard() {
+      const savedMood = localStorage.getItem('gardenRoomMood');
+      let hasCreations = false;
+      try {
+        const local = JSON.parse(localStorage.getItem('creations') || '[]');
+        hasCreations = local.some(c => c.view_mode === 'garden');
+      } catch(e) {}
+
+      if (savedMood || hasCreations) {
+        const card = document.querySelector('.garden-room-card.your-room');
+        if (!card) return;
+        card.onclick = openMyRoom;
+        const btn = card.querySelector('.garden-enter-btn');
+        if (btn) {
+          btn.innerHTML = '<span>🏡</span> Enter Your Room';
+          btn.onclick = function(e) { e.stopPropagation(); openMyRoom(); };
+        }
+        const preview = card.querySelector('.garden-room-preview');
+        if (preview) {
+          preview.classList.remove('empty');
+          preview.innerHTML = '<div style="font-size:48px;opacity:0.8;">🌿</div><div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:8px;">Your sanctuary</div>';
+        }
+      }
     }
 
     // Garden onboarding
@@ -4749,7 +4775,8 @@ This could be:
     };
 
     function openRoomInterior(config) {
-      const { name, desc, mood, growthLevel, appreciations, visits, isNew } = config;
+      const { name, desc, mood, growthLevel, appreciations, visits, isNew, isUserRoom } = config;
+      const isMyRoom = isNew || isUserRoom;
       const mc = MOOD_CONFIG[mood] || MOOD_CONFIG.calm;
 
       // Hero background orbs
@@ -4774,7 +4801,7 @@ This could be:
 
       // Build creation grid
       const grid = document.getElementById('interiorCreationsGrid');
-      if (isNew) {
+      if (isMyRoom) {
         grid.innerHTML = `
           <div class="interior-plant-slot" onclick="openGardenCreateEditor(gardenRoomMood)">
             <div class="interior-plant-icon">🌱</div>
@@ -4800,7 +4827,7 @@ This could be:
       });
 
       // Load saved creations if this is the user's own room
-      if (isNew) {
+      if (isMyRoom) {
         loadRoomCreations();
       }
     }
@@ -4933,14 +4960,21 @@ This could be:
     function completeGardenOnboarding() {
       closeGardenOnboarding();
       gardenRoomMood = selectedOnboardingMood;
+      localStorage.setItem('gardenRoomMood', selectedOnboardingMood);
+      openMyRoom();
+    }
+
+    function openMyRoom() {
+      const savedMood = localStorage.getItem('gardenRoomMood') || gardenRoomMood || 'calm';
+      gardenRoomMood = savedMood;
       openRoomInterior({
         name: 'Your Garden Room',
         desc: 'A sanctuary only you design. Plant creations, watch them grow, and let visitors knock before they enter.',
-        mood: selectedOnboardingMood,
+        mood: savedMood,
         growthLevel: 0,
         appreciations: 0,
         visits: 0,
-        isNew: true
+        isUserRoom: true
       });
     }
 
