@@ -2178,12 +2178,485 @@
       box-shadow: 0 0 30px rgba(124,232,168,0.4);
     }
 
+    /* Fireflies */
+    .garden-firefly {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      animation: firefly-drift linear infinite;
+    }
+    @keyframes firefly-drift {
+      0%   { transform: translate(0, 0) scale(1);   opacity: 0; }
+      10%  { opacity: 1; }
+      50%  { transform: translate(calc(var(--dx) * 0.5), calc(var(--dy) * 0.5)) scale(1.2); opacity: 0.8; }
+      90%  { opacity: 0.6; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(0.8); opacity: 0; }
+    }
+
+    /* Growth bar */
+    .garden-growth-bar-wrap {
+      padding: 0 24px 14px;
+    }
+    .garden-growth-label {
+      font-size: 11px;
+      color: #6b7a6b;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .garden-growth-bar-track {
+      height: 3px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .garden-growth-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #7ce8a8, #c4a1ff);
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Featured label */
+    .garden-featured-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #c4a1ff;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 10px;
+      background: rgba(196,161,255,0.1);
+      border-radius: 100px;
+      margin-bottom: 12px;
+    }
+
+    /* Room preview big emoji */
+    .garden-room-preview-emoji {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      font-size: 72px;
+      opacity: 0.6;
+      transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+    .garden-room-card:hover .garden-room-preview-emoji {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+
+    /* Ghost placeholder rooms */
+    .garden-ghost-rooms {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 28px;
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: ghost-fade-in 2s ease forwards;
+    }
+    @keyframes ghost-fade-in {
+      to { opacity: 1; }
+    }
+    .garden-ghost-room {
+      background: rgba(255,255,255,0.01);
+      border: 1px dashed rgba(255,255,255,0.05);
+      border-radius: 24px;
+      height: 300px;
+      position: relative;
+      overflow: hidden;
+    }
+    .garden-ghost-room::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(124,232,168,0.02) 100%);
+      animation: ghost-pulse 4s ease-in-out infinite;
+    }
+    @keyframes ghost-pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+    .garden-ghost-seed {
+      position: absolute;
+      font-size: 20px;
+      opacity: 0.12;
+      animation: seed-drift 8s ease-in-out infinite;
+    }
+    @keyframes seed-drift {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50%       { transform: translate(12px, -18px) rotate(25deg); }
+    }
+
+    /* Ambient glow on rooms */
+    .garden-room-calm-glow    { box-shadow: 0 0 40px rgba(124,232,168,0.1); border-color: rgba(124,232,168,0.15) !important; }
+    .garden-room-dreamy-glow  { box-shadow: 0 0 40px rgba(196,161,255,0.1); border-color: rgba(196,161,255,0.15) !important; }
+    .garden-room-warm-glow    { box-shadow: 0 0 40px rgba(232,168,124,0.1); border-color: rgba(232,168,124,0.15) !important; }
+
+    /* Onboarding modal */
+    .garden-onboarding-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(14px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .garden-onboarding-overlay.active { display: flex; }
+    .garden-onboarding-modal {
+      background: #0c120c;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px;
+      width: 100%;
+      max-width: 520px;
+      overflow: hidden;
+      animation: gardenModalIn 0.35s ease;
+    }
+    .garden-onboarding-header {
+      padding: 36px 36px 0;
+      text-align: center;
+    }
+    .garden-onboarding-icon { font-size: 52px; margin-bottom: 14px; }
+    .garden-onboarding-step {
+      font-size: 11px;
+      color: #6b7a6b;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 8px;
+    }
+    .garden-onboarding-title {
+      font-size: 26px;
+      font-family: 'Cormorant Garamond', serif;
+      color: #f0eeeb;
+      margin-bottom: 8px;
+    }
+    .garden-onboarding-subtitle {
+      font-size: 14px;
+      color: #6b7a6b;
+      line-height: 1.6;
+      padding-bottom: 4px;
+    }
+    .garden-onboarding-body { padding: 28px 36px; }
+    .garden-mood-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .garden-mood-option {
+      padding: 20px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 2px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .garden-mood-option:hover {
+      border-color: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+    }
+    .garden-mood-option.selected {
+      border-color: #7ce8a8;
+      background: rgba(124,232,168,0.08);
+    }
+    .garden-mood-option-emoji { font-size: 30px; margin-bottom: 8px; }
+    .garden-mood-option-name  { font-size: 15px; color: #f0eeeb; margin-bottom: 4px; }
+    .garden-mood-option-desc  { font-size: 12px; color: #6b7a6b; line-height: 1.4; }
+    .garden-onboarding-actions {
+      display: flex;
+      gap: 12px;
+      padding: 0 36px 36px;
+    }
+    .garden-onboarding-skip {
+      padding: 16px 20px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      color: #6b7a6b;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .garden-onboarding-skip:hover { color: #9ca89c; border-color: rgba(255,255,255,0.15); }
+    .garden-onboarding-next {
+      flex: 1;
+      padding: 16px;
+      background: #7ce8a8;
+      border: none;
+      border-radius: 14px;
+      color: #060806;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .garden-onboarding-next:hover:not(:disabled) { box-shadow: 0 0 30px rgba(124,232,168,0.4); }
+    .garden-onboarding-next:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* ==================== */
+    /* ROOM INTERIOR        */
+    /* ==================== */
+    .garden-room-interior {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: #060806;
+      animation: interior-slide-in 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .garden-room-interior.active { display: flex; }
+
+    @keyframes interior-card-bloom {
+      from { transform: scale(0.7); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    @keyframes interior-slide-in {
+      from { transform: translateY(40px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* Interior hero */
+    .interior-hero {
+      position: relative;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 32px 48px 40px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .interior-hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .interior-hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+    }
+    .interior-hero-back {
+      position: absolute;
+      top: 24px;
+      left: 32px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 100px;
+      color: #9ca89c;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 2;
+    }
+    .interior-hero-back:hover { color: #f0eeeb; border-color: rgba(255,255,255,0.2); }
+
+    .interior-hero-content {
+      position: relative;
+      z-index: 2;
+    }
+    .interior-mood-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      padding: 5px 12px;
+      border-radius: 100px;
+      margin-bottom: 14px;
+    }
+    .interior-room-emoji {
+      font-size: 56px;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .interior-room-name {
+      font-size: 42px;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      color: #f0eeeb;
+      margin-bottom: 10px;
+      line-height: 1.1;
+    }
+    .interior-room-desc {
+      font-size: 16px;
+      color: rgba(240,238,235,0.6);
+      max-width: 520px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .interior-hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 13px;
+      color: rgba(240,238,235,0.5);
+    }
+    .interior-hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+    /* Interior growth bar in hero */
+    .interior-growth-section {
+      margin-top: 20px;
+      max-width: 360px;
+    }
+    .interior-growth-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: rgba(240,238,235,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    .interior-growth-track {
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .interior-growth-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #7ce8a8, #c4a1ff);
+      transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Interior body */
+    .interior-body {
+      flex: 1;
+      padding: 48px 48px 80px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .interior-section-label {
+      font-size: 12px;
+      color: #6b7a6b;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .interior-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    /* Creation grid */
+    .interior-creations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 56px;
+    }
+
+    /* Plant first creation slot */
+    .interior-plant-slot {
+      aspect-ratio: 1;
+      background: rgba(255,255,255,0.02);
+      border: 2px dashed rgba(255,255,255,0.08);
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .interior-plant-slot:hover {
+      border-color: rgba(124,232,168,0.4);
+      background: rgba(124,232,168,0.04);
+    }
+    .interior-plant-slot:hover .interior-plant-icon {
+      transform: scale(1.1);
+    }
+    .interior-plant-icon {
+      font-size: 32px;
+      transition: transform 0.3s ease;
+    }
+    .interior-plant-text {
+      font-size: 13px;
+      color: #6b7a6b;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* Ghost creation slots */
+    .interior-ghost-slot {
+      aspect-ratio: 1;
+      background: rgba(255,255,255,0.015);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 18px;
+      animation: ghost-slot-pulse 3.5s ease-in-out infinite;
+    }
+    .interior-ghost-slot:nth-child(2) { animation-delay: -0.8s; }
+    .interior-ghost-slot:nth-child(3) { animation-delay: -1.6s; }
+    .interior-ghost-slot:nth-child(4) { animation-delay: -2.4s; }
+    .interior-ghost-slot:nth-child(5) { animation-delay: -3.2s; }
+    @keyframes ghost-slot-pulse {
+      0%, 100% { opacity: 0.4; }
+      50%       { opacity: 0.7; }
+    }
+
+    /* Visitor log */
+    .interior-visitor-log {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 20px;
+      padding: 24px;
+    }
+    .interior-visitor-empty {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .interior-visitor-empty-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.4; }
+    .interior-visitor-empty-text { font-size: 14px; color: #6b7a6b; }
+
+    /* Interior responsive */
+    @media (max-width: 768px) {
+      .interior-hero { min-height: 240px; padding: 24px 24px 32px; }
+      .interior-room-name { font-size: 30px; }
+      .interior-body { padding: 32px 24px 60px; }
+      .interior-creations-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
     /* Garden responsive */
     @media (max-width: 900px) {
       .garden-main { padding: 100px 24px 60px; }
       .garden-page-header h1 { font-size: 36px; }
       .garden-rooms-grid { grid-template-columns: 1fr; }
+      .garden-ghost-rooms { grid-template-columns: 1fr; }
       .garden-stats-bar { gap: 24px; flex-wrap: wrap; }
+      .garden-mood-grid { grid-template-columns: 1fr 1fr; }
+      .garden-onboarding-header, .garden-onboarding-body, .garden-onboarding-actions { padding-left: 24px; padding-right: 24px; }
     }
 
     @media (max-width: 600px) {
@@ -2858,6 +3331,7 @@
         <div class="garden-ambient-orb"></div>
         <div class="garden-ambient-orb"></div>
         <div class="garden-ambient-orb"></div>
+        <div id="gardenFireflies"></div>
       </div>
 
       <main class="garden-main">
@@ -2874,18 +3348,18 @@
 
         <div class="garden-rooms-grid" style="margin-bottom: 32px;">
           <!-- Your Room Card -->
-          <div class="garden-room-card your-room" onclick="showToast('🏠 Opening your room editor...')">
+          <div class="garden-room-card your-room" onclick="openGardenOnboarding()">
             <div class="garden-room-preview empty">
               <div class="garden-empty-icon">🌱</div>
-              <div class="garden-empty-text">Design Your Garden Room</div>
+              <div class="garden-empty-text">Your garden begins here</div>
             </div>
             <div class="garden-room-info">
               <div class="garden-room-title">🏠 Your Garden Room</div>
-              <div class="garden-room-description">Create a personal space to curate and share your creations. Visitors will knock before entering.</div>
+              <div class="garden-room-description">Every garden begins with a single seed. Yours starts here — a sanctuary others can visit, a world only you design.</div>
               <div class="garden-room-actions">
-                <button class="garden-enter-btn" onclick="event.stopPropagation(); showToast('✨ Opening room editor...')">
-                  <span>✨</span>
-                  Start Designing
+                <button class="garden-enter-btn" onclick="event.stopPropagation(); openGardenOnboarding()">
+                  <span>🌱</span>
+                  Plant Your First Seed
                 </button>
               </div>
             </div>
@@ -2897,20 +3371,115 @@
           <span class="garden-section-title">Explore Rooms</span>
         </div>
 
-        <!-- Empty State for Explore -->
-        <div class="garden-empty-state">
-          <div class="garden-empty-state-icon">🌿</div>
-          <h3>No Garden Rooms Yet</h3>
-          <p>Be the first to create a garden room! Design your personal creative sanctuary where others can visit and appreciate your work.</p>
-          <button class="garden-empty-state-btn" onclick="showToast('✨ Opening room editor...')">
-            <span>✨</span> Create Your Room
-          </button>
+        <!-- Ghost structures shown while rooms load -->
+        <div class="garden-ghost-rooms" id="gardenGhostRooms">
+          <div class="garden-ghost-room">
+            <div class="garden-ghost-seed" style="top:30%;left:20%;animation-delay:-2s;">🌿</div>
+            <div class="garden-ghost-seed" style="top:60%;left:65%;animation-delay:-5s;">✨</div>
+          </div>
+          <div class="garden-ghost-room">
+            <div class="garden-ghost-seed" style="top:40%;left:50%;animation-delay:-1s;">🌙</div>
+            <div class="garden-ghost-seed" style="top:70%;left:25%;animation-delay:-6s;">🌿</div>
+          </div>
+          <div class="garden-ghost-room">
+            <div class="garden-ghost-seed" style="top:25%;left:40%;animation-delay:-3s;">💭</div>
+            <div class="garden-ghost-seed" style="top:65%;left:70%;animation-delay:-4s;">🌸</div>
+          </div>
         </div>
 
+        <!-- Featured rooms grid (populated by JS) -->
         <div class="garden-rooms-grid" id="gardenRoomsGrid">
-          <!-- Rooms will be dynamically loaded here -->
+          <!-- Featured gardens load here -->
         </div>
       </main>
+
+      <!-- Room Interior -->
+      <div class="garden-room-interior" id="gardenRoomInterior">
+        <!-- Hero -->
+        <div class="interior-hero" id="interiorHero">
+          <div class="interior-hero-bg" id="interiorHeroBg"></div>
+          <button class="interior-hero-back" onclick="closeRoomInterior()">
+            ← Back to Garden
+          </button>
+          <div class="interior-hero-content">
+            <div class="interior-mood-badge" id="interiorMoodBadge"></div>
+            <span class="interior-room-emoji" id="interiorRoomEmoji"></span>
+            <div class="interior-room-name" id="interiorRoomName"></div>
+            <div class="interior-room-desc" id="interiorRoomDesc"></div>
+            <div class="interior-hero-meta">
+              <span>🌿 <span id="interiorAppreciations">0</span> appreciations</span>
+              <span>👣 <span id="interiorVisits">0</span> visits</span>
+            </div>
+            <div class="interior-growth-section">
+              <div class="interior-growth-label">
+                <span>Garden Growth</span>
+                <span id="interiorGrowthPct">0%</span>
+              </div>
+              <div class="interior-growth-track">
+                <div class="interior-growth-fill" id="interiorGrowthFill" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="interior-body">
+          <div class="interior-section-label">Creations</div>
+          <div class="interior-creations-grid" id="interiorCreationsGrid">
+            <!-- Populated by JS -->
+          </div>
+
+          <div class="interior-section-label">Recent Visitors</div>
+          <div class="interior-visitor-log">
+            <div class="interior-visitor-empty">
+              <div class="interior-visitor-empty-icon">🌿</div>
+              <div class="interior-visitor-empty-text">Your garden is young. Visitors will leave quiet traces as they pass through.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Garden Onboarding Modal -->
+      <div class="garden-onboarding-overlay" id="gardenOnboardingModal" onclick="closeGardenOnboarding()">
+        <div class="garden-onboarding-modal" onclick="event.stopPropagation()">
+          <div class="garden-onboarding-header">
+            <div class="garden-onboarding-icon">🌱</div>
+            <div class="garden-onboarding-step">Step 1 of 2 &nbsp;·&nbsp; Your Sanctuary</div>
+            <div class="garden-onboarding-title">Choose your garden's mood</div>
+            <div class="garden-onboarding-subtitle">This shapes how your space feels to visitors — the light, the atmosphere, the quiet.</div>
+          </div>
+          <div class="garden-onboarding-body">
+            <div class="garden-mood-grid">
+              <div class="garden-mood-option" onclick="selectOnboardingMood(this, 'calm')">
+                <div class="garden-mood-option-emoji">😌</div>
+                <div class="garden-mood-option-name">Calm</div>
+                <div class="garden-mood-option-desc">Still waters. Soft light. Room to breathe.</div>
+              </div>
+              <div class="garden-mood-option" onclick="selectOnboardingMood(this, 'dreamy')">
+                <div class="garden-mood-option-emoji">🌙</div>
+                <div class="garden-mood-option-name">Dreamy</div>
+                <div class="garden-mood-option-desc">Moonlit corners. Soft haze. Half-remembered things.</div>
+              </div>
+              <div class="garden-mood-option" onclick="selectOnboardingMood(this, 'energetic')">
+                <div class="garden-mood-option-emoji">🌅</div>
+                <div class="garden-mood-option-name">Energetic</div>
+                <div class="garden-mood-option-desc">Warm tones. Early light. Creative momentum.</div>
+              </div>
+              <div class="garden-mood-option" onclick="selectOnboardingMood(this, 'reflective')">
+                <div class="garden-mood-option-emoji">🪷</div>
+                <div class="garden-mood-option-name">Reflective</div>
+                <div class="garden-mood-option-desc">Deep thoughts. Slow time. Words that surface.</div>
+              </div>
+            </div>
+          </div>
+          <div class="garden-onboarding-actions">
+            <button class="garden-onboarding-skip" onclick="closeGardenOnboarding()">Maybe later</button>
+            <button class="garden-onboarding-next" id="gardenOnboardingNext" disabled onclick="completeGardenOnboarding()">
+              <span>🌱</span> Plant My Seed
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Knock Modal -->
       <div class="garden-modal-overlay" id="gardenKnockModal" onclick="closeGardenKnockModal(event)">
@@ -3434,6 +4003,11 @@ This could be:
       if (view === 'seasonal') {
         initSeasonalParticles();
       }
+
+      // Initialize garden world when showing garden view
+      if (view === 'garden') {
+        initGardenWorld();
+      }
     }
 
     function openSettings() {
@@ -3490,6 +4064,11 @@ This could be:
       // Initialize seasonal when switching to seasonal view
       if (view === 'seasonal') {
         initSeasonalParticles();
+      }
+
+      // Initialize garden world when switching to garden view
+      if (view === 'garden') {
+        initGardenWorld();
       }
     }
 
@@ -3734,6 +4313,343 @@ This could be:
     let currentKnockRoom = '';
     let currentKnockOwner = '';
 
+    // Seeded featured rooms (mirrors the DB migration data)
+    const FEATURED_GARDEN_ROOMS = [
+      {
+        name: 'Midnight Poetry Garden',
+        description: 'A quiet corner where words bloom under moonlight. Leave a verse, take a breath.',
+        mood: 'dreamy',
+        emoji: '🌙',
+        gradient: 'linear-gradient(135deg, rgba(196,161,255,0.35), rgba(124,184,232,0.25)), #141c14',
+        glowClass: 'garden-room-dreamy-glow',
+        growthLevel: 75,
+        appreciations: 124,
+        visits: 89,
+        status: 'quiet'
+      },
+      {
+        name: 'Quiet Sketch Sanctuary',
+        description: 'Pencil lines and soft shadows. A place for visual whispers and half-finished ideas.',
+        mood: 'calm',
+        emoji: '🎨',
+        gradient: 'linear-gradient(135deg, rgba(232,168,124,0.35), rgba(240,232,124,0.25)), #141c14',
+        glowClass: 'garden-room-warm-glow',
+        growthLevel: 60,
+        appreciations: 87,
+        visits: 63,
+        status: 'open'
+      },
+      {
+        name: 'Dream Archive Room',
+        description: 'Collect fragments of dreams. Half-remembered images and impossible landscapes welcome.',
+        mood: 'dreamy',
+        emoji: '💭',
+        gradient: 'linear-gradient(135deg, rgba(124,184,232,0.35), rgba(196,161,255,0.25)), #141c14',
+        glowClass: 'garden-room-dreamy-glow',
+        growthLevel: 85,
+        appreciations: 203,
+        visits: 156,
+        status: 'quiet'
+      },
+      {
+        name: 'Morning Light Studio',
+        description: 'Warm tones and gentle starts. Create before the world wakes and expectations form.',
+        mood: 'energetic',
+        emoji: '🌅',
+        gradient: 'linear-gradient(135deg, rgba(232,200,124,0.35), rgba(124,232,168,0.25)), #141c14',
+        glowClass: 'garden-room-warm-glow',
+        growthLevel: 45,
+        appreciations: 52,
+        visits: 38,
+        status: 'open'
+      },
+      {
+        name: 'Reflection Pool',
+        description: 'Still waters for deep thoughts. Write what surfaces. Stay as long as you need.',
+        mood: 'reflective',
+        emoji: '🪷',
+        gradient: 'linear-gradient(135deg, rgba(124,232,168,0.35), rgba(124,184,232,0.25)), #141c14',
+        glowClass: 'garden-room-calm-glow',
+        growthLevel: 90,
+        appreciations: 341,
+        visits: 278,
+        status: 'quiet'
+      }
+    ];
+
+    function loadFeaturedRooms() {
+      const grid = document.getElementById('gardenRoomsGrid');
+      const ghosts = document.getElementById('gardenGhostRooms');
+      if (!grid) return;
+
+      // Animate ghosts out then show rooms
+      setTimeout(() => {
+        if (ghosts) ghosts.style.display = 'none';
+        grid.innerHTML = FEATURED_GARDEN_ROOMS.map(room => {
+          const statusLabel = room.status === 'open'
+            ? '<span class="garden-status-dot"></span> Open'
+            : room.status === 'quiet'
+            ? '<span class="garden-status-dot"></span> Quiet Hours'
+            : '<span class="garden-status-dot"></span> Closed';
+          return `
+            <div class="garden-room-card ${room.glowClass}" onclick="openGardenKnockModal('${room.name}', 'curator')">
+              <div class="garden-room-preview" style="background:${room.gradient};">
+                <div class="garden-room-status ${room.status}">${statusLabel}</div>
+                <div class="garden-room-preview-emoji">${room.emoji}</div>
+              </div>
+              <div class="garden-growth-bar-wrap">
+                <div class="garden-growth-label"><span>Garden Growth</span><span>${room.growthLevel}%</span></div>
+                <div class="garden-growth-bar-track">
+                  <div class="garden-growth-bar-fill" style="width:0%" data-target="${room.growthLevel}"></div>
+                </div>
+              </div>
+              <div class="garden-room-info">
+                <div class="garden-featured-label">✨ Featured Garden</div>
+                <div class="garden-room-title">${room.emoji} ${room.name}</div>
+                <div class="garden-room-description">${room.description}</div>
+                <div class="garden-room-meta">
+                  <div class="garden-meta-item">🌿 ${room.appreciations} appreciations</div>
+                  <div class="garden-meta-item">👣 ${room.visits} visits</div>
+                </div>
+                <div class="garden-room-actions">
+                  <button class="garden-knock-btn" onclick="event.stopPropagation(); openGardenKnockModal('${room.name}', 'curator')">
+                    <span>🚪</span> Knock to Enter
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Animate growth bars after render
+        requestAnimationFrame(() => {
+          document.querySelectorAll('.garden-growth-bar-fill[data-target]').forEach(bar => {
+            setTimeout(() => { bar.style.width = bar.dataset.target + '%'; }, 200);
+          });
+        });
+      }, 900);
+    }
+
+    function initGardenFireflies() {
+      const container = document.getElementById('gardenFireflies');
+      if (!container || container.childElementCount > 0) return;
+      const colors = [
+        ['rgba(124,232,168,0.9)', 'rgba(124,232,168,0.3)'],
+        ['rgba(196,161,255,0.8)', 'rgba(196,161,255,0.3)'],
+        ['rgba(232,210,124,0.7)', 'rgba(232,210,124,0.3)']
+      ];
+      for (let i = 0; i < 16; i++) {
+        const fly = document.createElement('div');
+        fly.className = 'garden-firefly';
+        const startX = Math.random() * window.innerWidth;
+        const startY = Math.random() * window.innerHeight;
+        const dx = (Math.random() - 0.5) * 320;
+        const dy = (Math.random() - 0.5) * 320;
+        const duration = 7 + Math.random() * 12;
+        const delay = Math.random() * -20;
+        const size = 2 + Math.random() * 3;
+        const [main, glow] = colors[Math.floor(Math.random() * colors.length)];
+        fly.style.cssText = `
+          left:${startX}px; top:${startY}px;
+          --dx:${dx}px; --dy:${dy}px;
+          animation-duration:${duration}s; animation-delay:${delay}s;
+          width:${size}px; height:${size}px;
+          background:${main};
+          box-shadow:0 0 8px ${main},0 0 20px ${glow};
+        `;
+        container.appendChild(fly);
+      }
+    }
+
+    // Initialize garden world when entering the view
+    let gardenInitialized = false;
+    function initGardenWorld() {
+      if (gardenInitialized) return;
+      gardenInitialized = true;
+      initGardenFireflies();
+      loadFeaturedRooms();
+    }
+
+    // Garden onboarding
+    let selectedOnboardingMood = null;
+    // Track whether create modal was opened from garden room
+    let gardenCreateContext = false;
+    let gardenRoomMood = null;
+
+    const ROOM_MOOD_TO_CREATION_MOOD = {
+      calm: 'peaceful',
+      dreamy: 'reflective',
+      energetic: 'energetic',
+      reflective: 'reflective'
+    };
+
+    function openGardenCreateEditor(roomMood) {
+      gardenCreateContext = true;
+      gardenRoomMood = roomMood;
+
+      // Open the existing modal
+      openCreateModal();
+
+      // Skin it for garden context
+      document.querySelector('.create-modal-title').textContent = 'Plant a Creation';
+      document.querySelector('.create-modal-subtitle').textContent = 'What will you grow in your garden today?';
+      document.getElementById('createSubmitBtn').textContent = 'Plant & Bloom 🌱';
+    }
+
+    function addCreationToRoom(creation) {
+      const grid = document.getElementById('interiorCreationsGrid');
+      if (!grid) return;
+
+      const typeEmoji = { writing: '✍️', visual: '🎨', music: '🎵', idea: '💡' };
+      const emoji = typeEmoji[creation.type] || '✨';
+
+      // Build the new creation card
+      const card = document.createElement('div');
+      card.className = 'interior-creation-card';
+      card.style.cssText = `
+        aspect-ratio: 1;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        animation: interior-card-bloom 0.5s cubic-bezier(0.4,0,0.2,1);
+      `;
+      card.innerHTML = `
+        <div style="font-size:36px;">${emoji}</div>
+        <div style="font-size:14px;color:#f0eeeb;font-family:'Cormorant Garamond',serif;">${creation.title}</div>
+        <div style="font-size:11px;color:#6b7a6b;text-transform:uppercase;letter-spacing:0.1em;">${creation.type}</div>
+      `;
+      card.onmouseenter = () => card.style.borderColor = 'rgba(124,232,168,0.3)';
+      card.onmouseleave = () => card.style.borderColor = 'rgba(255,255,255,0.08)';
+
+      // Remove the "plant first" slot and one ghost slot
+      const plantSlot = grid.querySelector('.interior-plant-slot');
+      const firstGhost = grid.querySelector('.interior-ghost-slot');
+      if (plantSlot) grid.removeChild(plantSlot);
+      if (firstGhost) grid.removeChild(firstGhost);
+
+      // Insert card at the start
+      grid.insertBefore(card, grid.firstChild);
+
+      // Update growth bar — small bump for first creation
+      const fillEl = document.getElementById('interiorGrowthFill');
+      const pctEl = document.getElementById('interiorGrowthPct');
+      if (fillEl) {
+        const newPct = Math.min(100, (parseInt(fillEl.style.width) || 0) + 8);
+        fillEl.style.width = newPct + '%';
+        if (pctEl) pctEl.textContent = newPct + '%';
+      }
+
+      // Re-add the plant slot at end if there are still ghost slots
+      if (grid.querySelector('.interior-ghost-slot')) {
+        const newPlant = document.createElement('div');
+        newPlant.className = 'interior-plant-slot';
+        newPlant.innerHTML = `<div class="interior-plant-icon">🌱</div><div class="interior-plant-text">Plant another<br>creation</div>`;
+        newPlant.onclick = () => openGardenCreateEditor(gardenRoomMood);
+        grid.appendChild(newPlant);
+      }
+    }
+
+    function openGardenOnboarding() {
+      selectedOnboardingMood = null;
+      document.querySelectorAll('.garden-mood-option').forEach(o => o.classList.remove('selected'));
+      document.getElementById('gardenOnboardingNext').disabled = true;
+      document.getElementById('gardenOnboardingModal').classList.add('active');
+    }
+    function closeGardenOnboarding() {
+      document.getElementById('gardenOnboardingModal').classList.remove('active');
+    }
+    function selectOnboardingMood(el, mood) {
+      document.querySelectorAll('.garden-mood-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedOnboardingMood = mood;
+      document.getElementById('gardenOnboardingNext').disabled = false;
+    }
+    // Mood config for room interior
+    const MOOD_CONFIG = {
+      calm:       { emoji: '😌', label: 'Calm',       color: '#7ce8a8', badge: 'rgba(124,232,168,0.15)', orb1: 'rgba(124,232,168,0.25)', orb2: 'rgba(124,184,232,0.15)', roomEmoji: '🌿' },
+      dreamy:     { emoji: '🌙', label: 'Dreamy',     color: '#c4a1ff', badge: 'rgba(196,161,255,0.15)', orb1: 'rgba(196,161,255,0.25)', orb2: 'rgba(124,184,232,0.15)', roomEmoji: '🌙' },
+      energetic:  { emoji: '🌅', label: 'Energetic',  color: '#e8c87c', badge: 'rgba(232,200,124,0.15)', orb1: 'rgba(232,168,124,0.25)', orb2: 'rgba(232,210,124,0.15)', roomEmoji: '🌅' },
+      reflective: { emoji: '🪷', label: 'Reflective', color: '#7cb8e8', badge: 'rgba(124,184,232,0.15)', orb1: 'rgba(124,184,232,0.25)', orb2: 'rgba(196,161,255,0.15)', roomEmoji: '🪷' }
+    };
+
+    function openRoomInterior(config) {
+      const { name, desc, mood, growthLevel, appreciations, visits, isNew } = config;
+      const mc = MOOD_CONFIG[mood] || MOOD_CONFIG.calm;
+
+      // Hero background orbs
+      document.getElementById('interiorHeroBg').innerHTML = `
+        <div class="interior-hero-orb" style="width:500px;height:500px;background:${mc.orb1};top:-150px;left:-100px;"></div>
+        <div class="interior-hero-orb" style="width:350px;height:350px;background:${mc.orb2};bottom:-80px;right:-60px;animation-delay:-6s;"></div>
+      `;
+
+      // Mood badge
+      const badge = document.getElementById('interiorMoodBadge');
+      badge.textContent = `${mc.emoji} ${mc.label}`;
+      badge.style.background = mc.badge;
+      badge.style.color = mc.color;
+      badge.style.border = `1px solid ${mc.color}30`;
+
+      document.getElementById('interiorRoomEmoji').textContent = mc.roomEmoji;
+      document.getElementById('interiorRoomName').textContent = name;
+      document.getElementById('interiorRoomDesc').textContent = desc;
+      document.getElementById('interiorAppreciations').textContent = appreciations || 0;
+      document.getElementById('interiorVisits').textContent = visits || 0;
+      document.getElementById('interiorGrowthPct').textContent = (growthLevel || 0) + '%';
+
+      // Build creation grid
+      const grid = document.getElementById('interiorCreationsGrid');
+      if (isNew) {
+        grid.innerHTML = `
+          <div class="interior-plant-slot" onclick="openGardenCreateEditor(gardenRoomMood)">
+            <div class="interior-plant-icon">🌱</div>
+            <div class="interior-plant-text">Plant your<br>first creation</div>
+          </div>
+          <div class="interior-ghost-slot"></div>
+          <div class="interior-ghost-slot"></div>
+          <div class="interior-ghost-slot"></div>
+          <div class="interior-ghost-slot"></div>
+          <div class="interior-ghost-slot"></div>
+        `;
+      }
+
+      // Show interior
+      document.getElementById('gardenRoomInterior').classList.add('active');
+
+      // Animate growth bar
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          document.getElementById('interiorGrowthFill').style.width = (growthLevel || 0) + '%';
+        }, 300);
+      });
+    }
+
+    function closeRoomInterior() {
+      document.getElementById('gardenRoomInterior').classList.remove('active');
+    }
+
+    function completeGardenOnboarding() {
+      closeGardenOnboarding();
+      gardenRoomMood = selectedOnboardingMood;
+      openRoomInterior({
+        name: 'Your Garden Room',
+        desc: 'A sanctuary only you design. Plant creations, watch them grow, and let visitors knock before they enter.',
+        mood: selectedOnboardingMood,
+        growthLevel: 0,
+        appreciations: 0,
+        visits: 0,
+        isNew: true
+      });
+    }
+
     // Garden view toggle
     function setGardenView(btn, view) {
       document.querySelectorAll('.garden-view-btn').forEach(b => b.classList.remove('active'));
@@ -3743,7 +4659,18 @@ This could be:
 
     // Enter room (for open rooms)
     function enterGardenRoom(roomName) {
-      showToast(`🚪 Entering ${roomName}...`);
+      const room = FEATURED_GARDEN_ROOMS.find(r => r.name === roomName);
+      if (room) {
+        openRoomInterior({
+          name: room.name,
+          desc: room.description,
+          mood: room.mood,
+          growthLevel: room.growthLevel,
+          appreciations: room.appreciations,
+          visits: room.visits,
+          isNew: false
+        });
+      }
     }
 
     // Knock modal
@@ -3770,10 +4697,12 @@ This could be:
       showToast(`🚪 Knock sent to ${currentKnockRoom}! You'll be notified when they respond.`);
     }
 
-    // Close modal with Escape
+    // Close modals with Escape
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeGardenKnockModal();
+        closeGardenOnboarding();
+        closeRoomInterior();
       }
     });
 
@@ -3899,6 +4828,11 @@ This could be:
       setTimeout(() => {
         goToCreateStep(1);
         resetCreateModal();
+        // Reset garden context and button label if cancelled
+        if (gardenCreateContext) {
+          gardenCreateContext = false;
+          document.getElementById('createSubmitBtn').textContent = 'Create & Share ✨';
+        }
       }, 300);
     }
 
@@ -4254,10 +5188,17 @@ This could be:
       }
 
       closeCreateModal();
-      showToast('✨ Creation added to your space!');
 
-      // Add to current view if applicable
-      addCreationToView(newCreation);
+      // Garden room context: plant the creation into the room interior
+      if (gardenCreateContext) {
+        gardenCreateContext = false;
+        document.getElementById('createSubmitBtn').textContent = 'Create & Share ✨';
+        addCreationToRoom(newCreation);
+        showToast('🌱 Your creation is taking root...');
+      } else {
+        showToast('✨ Creation added to your space!');
+        addCreationToView(newCreation);
+      }
     }
 
     const typeEmojis = {
