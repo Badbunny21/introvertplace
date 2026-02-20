@@ -315,6 +315,7 @@
     /* CREATIVE SPACE PAGE */
     /* ==================== */
     .creative-page { position: relative; }
+    .creative-page.interior-open .header { display: none; }
 
     /* Header */
     .header {
@@ -2411,7 +2412,7 @@
     .garden-room-interior {
       position: fixed;
       inset: 0;
-      z-index: 100;
+      z-index: 200;
       display: none;
       flex-direction: column;
       overflow-y: auto;
@@ -2479,18 +2480,17 @@
     .interior-mood-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
+      gap: 5px;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
-      padding: 5px 12px;
+      letter-spacing: 0.12em;
+      padding: 4px 10px;
       border-radius: 100px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      opacity: 0.85;
     }
     .interior-room-emoji {
-      font-size: 56px;
-      margin-bottom: 12px;
-      display: block;
+      display: none;
     }
     .interior-room-name {
       font-size: 42px;
@@ -2498,6 +2498,9 @@
       font-weight: 400;
       color: #f0eeeb;
       margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
       line-height: 1.1;
     }
     .interior-room-desc {
@@ -3302,7 +3305,6 @@
     <header class="header">
       <div class="logo">
         <span>🌙</span>
-        <span>Creative</span>
       </div>
       <div class="header-right">
         <button class="create-btn" onclick="openCreateModal()">+ Create</button>
@@ -3393,52 +3395,6 @@
         </div>
       </main>
 
-      <!-- Room Interior -->
-      <div class="garden-room-interior" id="gardenRoomInterior">
-        <!-- Hero -->
-        <div class="interior-hero" id="interiorHero">
-          <div class="interior-hero-bg" id="interiorHeroBg"></div>
-          <button class="interior-hero-back" onclick="closeRoomInterior()">
-            ← Back to Garden
-          </button>
-          <div class="interior-hero-content">
-            <div class="interior-mood-badge" id="interiorMoodBadge"></div>
-            <span class="interior-room-emoji" id="interiorRoomEmoji"></span>
-            <div class="interior-room-name" id="interiorRoomName"></div>
-            <div class="interior-room-desc" id="interiorRoomDesc"></div>
-            <div class="interior-hero-meta">
-              <span>🌿 <span id="interiorAppreciations">0</span> appreciations</span>
-              <span>👣 <span id="interiorVisits">0</span> visits</span>
-            </div>
-            <div class="interior-growth-section">
-              <div class="interior-growth-label">
-                <span>Garden Growth</span>
-                <span id="interiorGrowthPct">0%</span>
-              </div>
-              <div class="interior-growth-track">
-                <div class="interior-growth-fill" id="interiorGrowthFill" style="width:0%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Body -->
-        <div class="interior-body">
-          <div class="interior-section-label">Creations</div>
-          <div class="interior-creations-grid" id="interiorCreationsGrid">
-            <!-- Populated by JS -->
-          </div>
-
-          <div class="interior-section-label">Recent Visitors</div>
-          <div class="interior-visitor-log">
-            <div class="interior-visitor-empty">
-              <div class="interior-visitor-empty-icon">🌿</div>
-              <div class="interior-visitor-empty-text">Your garden is young. Visitors will leave quiet traces as they pass through.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Garden Onboarding Modal -->
       <div class="garden-onboarding-overlay" id="gardenOnboardingModal" onclick="closeGardenOnboarding()">
         <div class="garden-onboarding-modal" onclick="event.stopPropagation()">
@@ -3504,6 +3460,52 @@
               <span>🚪</span>
               Send Knock
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room Interior — outside garden-view so z-index works correctly -->
+    <div class="garden-room-interior" id="gardenRoomInterior">
+      <!-- Hero -->
+      <div class="interior-hero" id="interiorHero">
+        <div class="interior-hero-bg" id="interiorHeroBg"></div>
+        <button class="interior-hero-back" onclick="closeRoomInterior()">
+          ← Back to Garden
+        </button>
+        <div class="interior-hero-content">
+          <div class="interior-mood-badge" id="interiorMoodBadge"></div>
+          <span class="interior-room-emoji" id="interiorRoomEmoji"></span>
+          <div class="interior-room-name" id="interiorRoomName"></div>
+          <div class="interior-room-desc" id="interiorRoomDesc"></div>
+          <div class="interior-hero-meta">
+            <span>🌿 <span id="interiorAppreciations">0</span> appreciations</span>
+            <span>👣 <span id="interiorVisits">0</span> visits</span>
+          </div>
+          <div class="interior-growth-section">
+            <div class="interior-growth-label">
+              <span>Garden Growth</span>
+              <span id="interiorGrowthPct">0%</span>
+            </div>
+            <div class="interior-growth-track">
+              <div class="interior-growth-fill" id="interiorGrowthFill" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="interior-body">
+        <div class="interior-section-label">Creations</div>
+        <div class="interior-creations-grid" id="interiorCreationsGrid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="interior-section-label">Recent Visitors</div>
+        <div class="interior-visitor-log">
+          <div class="interior-visitor-empty">
+            <div class="interior-visitor-empty-icon">🌿</div>
+            <div class="interior-visitor-empty-text">Your garden is young. Visitors will leave quiet traces as they pass through.</div>
           </div>
         </div>
       </div>
@@ -4572,8 +4574,8 @@ This could be:
       badge.style.color = mc.color;
       badge.style.border = `1px solid ${mc.color}30`;
 
-      document.getElementById('interiorRoomEmoji').textContent = mc.roomEmoji;
-      document.getElementById('interiorRoomName').textContent = name;
+      document.getElementById('interiorRoomEmoji').textContent = '';
+      document.getElementById('interiorRoomName').innerHTML = `<span style="font-size:36px;line-height:1;">${mc.roomEmoji}</span>${name}`;
       document.getElementById('interiorRoomDesc').textContent = desc;
       document.getElementById('interiorAppreciations').textContent = appreciations || 0;
       document.getElementById('interiorVisits').textContent = visits || 0;
@@ -4595,8 +4597,9 @@ This could be:
         `;
       }
 
-      // Show interior
+      // Show interior and hide the page header
       document.getElementById('gardenRoomInterior').classList.add('active');
+      document.getElementById('creativePage').classList.add('interior-open');
 
       // Animate growth bar
       requestAnimationFrame(() => {
@@ -4704,6 +4707,7 @@ This could be:
 
     function closeRoomInterior() {
       document.getElementById('gardenRoomInterior').classList.remove('active');
+      document.getElementById('creativePage').classList.remove('interior-open');
     }
 
     function completeGardenOnboarding() {
@@ -5256,6 +5260,14 @@ This could be:
         created_at: new Date().toISOString()
       };
 
+      // Refresh auth session in case it expired
+      if (db && !currentUser) {
+        try {
+          const { data: { session } } = await db.auth.getSession();
+          if (session) currentUser = session.user;
+        } catch (e) {}
+      }
+
       // Save to Supabase if logged in
       if (db && currentUser) {
         try {
@@ -5266,7 +5278,7 @@ This could be:
 
           if (error) {
             console.error('Save creation error:', error);
-            showToast('⚠️ Error saving: ' + error.message);
+            showToast('⚠️ Could not save: ' + error.message);
             return;
           }
 
@@ -5276,15 +5288,25 @@ This could be:
           }
         } catch (err) {
           console.error('Save creation exception:', err);
-          showToast('⚠️ Error saving creation');
+          showToast('⚠️ Could not reach the server. Please check your connection.');
           return;
         }
       } else {
-        // Fallback to localStorage if not logged in
+        // Not logged in — save locally and prompt to log in
         newCreation.id = Date.now();
         const creations = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
         creations.push(newCreation);
         localStorage.setItem('introvert_creations', JSON.stringify(creations));
+        showToast('⚠️ You\'re not logged in — saved locally only. Log in to keep your work.');
+        closeCreateModal();
+        if (gardenCreateContext) {
+          gardenCreateContext = false;
+          document.getElementById('createSubmitBtn').textContent = 'Create & Share ✨';
+          addCreationToRoom(newCreation);
+        } else {
+          addCreationToView(newCreation);
+        }
+        return;
       }
 
       closeCreateModal();
