@@ -4500,55 +4500,29 @@ This could be:
       const grid = document.getElementById('interiorCreationsGrid');
       if (!grid) return;
 
-      const typeEmoji = { writing: '✍️', visual: '🎨', music: '🎵', idea: '💡' };
-      const emoji = typeEmoji[creation.type] || '✨';
-
-      // Build the new creation card
-      const card = document.createElement('div');
-      card.className = 'interior-creation-card';
-      card.style.cssText = `
-        aspect-ratio: 1;
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 18px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        padding: 20px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-align: center;
-        animation: interior-card-bloom 0.5s cubic-bezier(0.4,0,0.2,1);
-      `;
-      card.innerHTML = `
-        <div style="font-size:36px;">${emoji}</div>
-        <div style="font-size:14px;color:#f0eeeb;font-family:'Cormorant Garamond',serif;">${creation.title}</div>
-        <div style="font-size:11px;color:#6b7a6b;text-transform:uppercase;letter-spacing:0.1em;">${creation.type}</div>
-      `;
-      card.onmouseenter = () => card.style.borderColor = 'rgba(124,232,168,0.3)';
-      card.onmouseleave = () => card.style.borderColor = 'rgba(255,255,255,0.08)';
-
       // Remove the "plant first" slot and one ghost slot
       const plantSlot = grid.querySelector('.interior-plant-slot');
       const firstGhost = grid.querySelector('.interior-ghost-slot');
       if (plantSlot) grid.removeChild(plantSlot);
       if (firstGhost) grid.removeChild(firstGhost);
 
-      // Insert card at the start
-      grid.insertBefore(card, grid.firstChild);
+      // Render the new card
+      renderCreationCard(grid, creation);
 
-      // Update growth bar — small bump for first creation
+      // Animate it in
+      const newCard = grid.firstChild;
+      if (newCard) newCard.style.animation = 'interior-card-bloom 0.5s cubic-bezier(0.4,0,0.2,1)';
+
+      // Update growth bar
       const fillEl = document.getElementById('interiorGrowthFill');
-      const pctEl = document.getElementById('interiorGrowthPct');
+      const pctEl  = document.getElementById('interiorGrowthPct');
       if (fillEl) {
         const newPct = Math.min(100, (parseInt(fillEl.style.width) || 0) + 8);
         fillEl.style.width = newPct + '%';
         if (pctEl) pctEl.textContent = newPct + '%';
       }
 
-      // Re-add the plant slot at end if there are still ghost slots
+      // Keep a "plant another" slot at end if there are still ghost slots
       if (grid.querySelector('.interior-ghost-slot')) {
         const newPlant = document.createElement('div');
         newPlant.className = 'interior-plant-slot';
@@ -4630,6 +4604,102 @@ This could be:
           document.getElementById('interiorGrowthFill').style.width = (growthLevel || 0) + '%';
         }, 300);
       });
+
+      // Load saved creations if this is the user's own room
+      if (isNew) {
+        loadRoomCreations();
+      }
+    }
+
+    async function loadRoomCreations() {
+      const grid = document.getElementById('interiorCreationsGrid');
+      if (!grid) return;
+
+      let creations = [];
+
+      if (db && currentUser) {
+        try {
+          const { data, error } = await db
+            .from('creations')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .eq('view_mode', 'garden')
+            .order('created_at', { ascending: false });
+
+          if (!error && data) creations = data;
+        } catch (e) {
+          console.error('Load room creations error:', e);
+        }
+      }
+
+      // Also check localStorage for offline creations
+      if (creations.length === 0) {
+        const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+        creations = local.filter(c => c.view_mode === 'garden');
+      }
+
+      if (creations.length === 0) return; // keep the empty "plant" state
+
+      // Clear ghost slots and plant slot, then render saved creations
+      grid.innerHTML = '';
+      creations.forEach(c => renderCreationCard(grid, c));
+
+      // Always add a "plant another" slot at the end
+      const plantSlot = document.createElement('div');
+      plantSlot.className = 'interior-plant-slot';
+      plantSlot.innerHTML = `<div class="interior-plant-icon">🌱</div><div class="interior-plant-text">Plant another<br>creation</div>`;
+      plantSlot.onclick = () => openGardenCreateEditor(gardenRoomMood);
+      grid.appendChild(plantSlot);
+
+      // Update growth bar based on number of creations
+      const fillEl = document.getElementById('interiorGrowthFill');
+      const pctEl  = document.getElementById('interiorGrowthPct');
+      if (fillEl) {
+        const pct = Math.min(100, creations.length * 8);
+        fillEl.style.width = pct + '%';
+        if (pctEl) pctEl.textContent = pct + '%';
+      }
+    }
+
+    function renderCreationCard(grid, creation) {
+      const typeEmoji = { writing: '✍️', visual: '🎨', music: '🎵', idea: '💡' };
+      const card = document.createElement('div');
+      card.className = 'interior-creation-card';
+      card.style.cssText = `
+        aspect-ratio: 1; border-radius: 18px; overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+        cursor: pointer; transition: all 0.3s ease; position: relative;
+        background: rgba(255,255,255,0.03);
+      `;
+
+      if (creation.cover_image_url) {
+        card.style.backgroundImage = `url('${creation.cover_image_url}')`;
+        card.style.backgroundSize = 'cover';
+        card.style.backgroundPosition = 'center';
+        card.innerHTML = `
+          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 60%);display:flex;flex-direction:column;justify-content:flex-end;padding:14px;">
+            <div style="font-size:13px;color:#f0eeeb;font-family:'Cormorant Garamond',serif;line-height:1.3;">${creation.title}</div>
+            <div style="font-size:11px;color:rgba(240,238,235,0.5);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;">${creation.type}</div>
+          </div>
+        `;
+      } else {
+        card.style.display = 'flex';
+        card.style.flexDirection = 'column';
+        card.style.alignItems = 'center';
+        card.style.justifyContent = 'center';
+        card.style.gap = '10px';
+        card.style.padding = '20px';
+        card.style.textAlign = 'center';
+        card.innerHTML = `
+          <div style="font-size:36px;">${typeEmoji[creation.type] || '✨'}</div>
+          <div style="font-size:14px;color:#f0eeeb;font-family:'Cormorant Garamond',serif;">${creation.title}</div>
+          <div style="font-size:11px;color:#6b7a6b;text-transform:uppercase;letter-spacing:0.1em;">${creation.type}</div>
+        `;
+      }
+
+      card.onmouseenter = () => { card.style.borderColor = 'rgba(124,232,168,0.3)'; card.style.transform = 'scale(1.02)'; };
+      card.onmouseleave = () => { card.style.borderColor = 'rgba(255,255,255,0.08)'; card.style.transform = 'scale(1)'; };
+      grid.insertBefore(card, grid.firstChild);
     }
 
     function closeRoomInterior() {
@@ -5116,14 +5186,40 @@ This could be:
 
       let content = '';
       let description = '';
+      let cover_image_url = null;
 
       switch(selectedCreateType) {
         case 'writing':
           content = document.getElementById('writingContent').value.trim();
           break;
         case 'visual':
-          content = uploadedVisualFile ? uploadedVisualFile.name : '';
           description = document.getElementById('visualDescription').value.trim();
+          content = description || 'visual';
+          // Upload image to storage if available
+          if (uploadedVisualFile && db && currentUser) {
+            try {
+              const ext = uploadedVisualFile.name.split('.').pop().toLowerCase();
+              const path = `creations/${currentUser.id}/${Date.now()}.${ext}`;
+              const { error: uploadError } = await db.storage
+                .from('images')
+                .upload(path, uploadedVisualFile, { upsert: false });
+              if (!uploadError) {
+                const { data: urlData } = db.storage.from('images').getPublicUrl(path);
+                cover_image_url = urlData.publicUrl;
+              } else {
+                // Fallback: store data URL from preview
+                const previewSrc = document.getElementById('visualPreviewImg').src;
+                if (previewSrc && previewSrc.startsWith('data:')) cover_image_url = previewSrc;
+              }
+            } catch (e) {
+              const previewSrc = document.getElementById('visualPreviewImg').src;
+              if (previewSrc && previewSrc.startsWith('data:')) cover_image_url = previewSrc;
+            }
+          } else if (uploadedVisualFile) {
+            // Not logged in — use data URL as preview
+            const previewSrc = document.getElementById('visualPreviewImg').src;
+            if (previewSrc && previewSrc.startsWith('data:')) cover_image_url = previewSrc;
+          }
           break;
         case 'music':
           const linkArea = document.getElementById('musicLinkArea');
@@ -5145,6 +5241,9 @@ This could be:
         return;
       }
 
+      // Use 'garden' as the view_mode when creating from within the garden room
+      const effectiveViewMode = gardenCreateContext ? 'garden' : selectedMode;
+
       const newCreation = {
         type: selectedCreateType,
         title: title,
@@ -5152,7 +5251,8 @@ This could be:
         description: description,
         mood: selectedCreateMood,
         visibility: visibility,
-        view_mode: selectedMode,
+        view_mode: effectiveViewMode,
+        cover_image_url: cover_image_url,
         created_at: new Date().toISOString()
       };
 
