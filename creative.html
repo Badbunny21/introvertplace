@@ -1764,6 +1764,109 @@
       color: #6b7a6b;
     }
 
+    /* Room Edit Modal */
+    .room-edit-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .room-edit-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .room-edit-modal {
+      background: #151c15;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+      transform: translateY(20px);
+      transition: transform 0.3s;
+    }
+    .room-edit-overlay.active .room-edit-modal {
+      transform: translateY(0);
+    }
+    .room-edit-cover-area {
+      height: 160px;
+      background: linear-gradient(135deg, rgba(124,232,168,0.2), rgba(196,161,255,0.15));
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .room-edit-cover-area img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .room-edit-cover-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.4);
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+    .room-edit-cover-area:hover .room-edit-cover-placeholder {
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.7);
+    }
+    .room-edit-cover-placeholder span { font-size: 28px; }
+    .room-edit-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .room-edit-field { display: flex; flex-direction: column; gap: 6px; }
+    .room-edit-label { font-size: 12px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; }
+    .room-edit-input, .room-edit-textarea {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #f0eeeb;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .room-edit-input:focus, .room-edit-textarea:focus { border-color: rgba(124,232,168,0.4); }
+    .room-edit-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+    .room-edit-actions { display: flex; gap: 10px; margin-top: 4px; }
+    .room-edit-cancel {
+      flex: 1;
+      padding: 13px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .room-edit-save {
+      flex: 2;
+      padding: 13px;
+      background: rgba(124,232,168,0.15);
+      border: 1px solid rgba(124,232,168,0.3);
+      border-radius: 12px;
+      color: #7ce8a8;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .room-edit-save:hover { background: rgba(124,232,168,0.25); }
+
     /* Garden Empty State */
     .garden-empty-state {
       text-align: center;
@@ -3562,6 +3665,34 @@
         </div>
       </main>
 
+      <!-- Room Edit Modal -->
+      <div class="room-edit-overlay" id="roomEditModal" onclick="closeRoomEditModal()">
+        <div class="room-edit-modal" onclick="event.stopPropagation()">
+          <div class="room-edit-cover-area" id="roomEditCoverArea" onclick="document.getElementById('roomCoverInput').click()">
+            <img id="roomCoverPreview" alt="Cover">
+            <div class="room-edit-cover-placeholder" id="roomCoverPlaceholder">
+              <span>🖼</span>
+              Tap to add a cover image
+            </div>
+          </div>
+          <input type="file" id="roomCoverInput" accept="image/*" style="display:none" onchange="previewRoomCover(this)">
+          <div class="room-edit-body">
+            <div class="room-edit-field">
+              <div class="room-edit-label">Room Name</div>
+              <input class="room-edit-input" id="roomEditName" type="text" placeholder="Give your room a name..." maxlength="50">
+            </div>
+            <div class="room-edit-field">
+              <div class="room-edit-label">About this room</div>
+              <textarea class="room-edit-textarea" id="roomEditDesc" placeholder="What is this room about? What kind of creations live here?" maxlength="200"></textarea>
+            </div>
+            <div class="room-edit-actions">
+              <button class="room-edit-cancel" onclick="closeRoomEditModal()">Cancel</button>
+              <button class="room-edit-save" onclick="saveRoomSettings()">🌿 Save Room</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Garden Onboarding Modal -->
       <div class="garden-onboarding-overlay" id="gardenOnboardingModal" onclick="closeGardenOnboarding()">
         <div class="garden-onboarding-modal" onclick="event.stopPropagation()">
@@ -4666,27 +4797,141 @@ This could be:
 
     function checkUserRoomCard() {
       const savedMood = localStorage.getItem('gardenRoomMood');
+      const config = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
       let hasCreations = false;
       try {
         const local = JSON.parse(localStorage.getItem('creations') || '[]');
         hasCreations = local.some(c => c.view_mode === 'garden');
       } catch(e) {}
 
-      if (savedMood || hasCreations) {
-        const card = document.querySelector('.garden-room-card.your-room');
-        if (!card) return;
-        card.onclick = openMyRoom;
-        const btn = card.querySelector('.garden-enter-btn');
-        if (btn) {
-          btn.innerHTML = '<span>🏡</span> Enter Your Room';
-          btn.onclick = function(e) { e.stopPropagation(); openMyRoom(); };
+      const hasRoom = savedMood || hasCreations || config.name;
+      const card = document.querySelector('.garden-room-card.your-room');
+      if (!card) return;
+
+      if (hasRoom) {
+        const mood = savedMood || 'calm';
+        const MOOD_GRADIENTS = {
+          calm:       'linear-gradient(135deg, rgba(124,232,168,0.3) 0%, rgba(124,184,232,0.2) 100%)',
+          dreamy:     'linear-gradient(135deg, rgba(196,161,255,0.3) 0%, rgba(124,184,232,0.2) 100%)',
+          energetic:  'linear-gradient(135deg, rgba(232,168,124,0.3) 0%, rgba(232,210,124,0.2) 100%)',
+          reflective: 'linear-gradient(135deg, rgba(124,184,232,0.3) 0%, rgba(196,161,255,0.2) 100%)'
+        };
+        const MOOD_EMOJI = { calm: '🌿', dreamy: '🌙', energetic: '🌅', reflective: '🪷' };
+        const emoji = MOOD_EMOJI[mood] || '🌿';
+        const roomName = config.name || 'Your Garden Room';
+        const roomDesc = config.description || 'A sanctuary only you design. Plant creations, watch them grow.';
+
+        let previewBg = `background: ${MOOD_GRADIENTS[mood]};`;
+        let previewImg = '';
+        if (config.coverImage) {
+          previewImg = `<img src="${config.coverImage}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.7;">`;
         }
-        const preview = card.querySelector('.garden-room-preview');
-        if (preview) {
-          preview.classList.remove('empty');
-          preview.innerHTML = '<div style="font-size:48px;opacity:0.8;">🌿</div><div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:8px;">Your sanctuary</div>';
+
+        card.style.borderStyle = 'solid';
+        card.style.borderColor = 'rgba(255,255,255,0.04)';
+        card.onclick = openMyRoom;
+        card.innerHTML = `
+          <div class="garden-room-preview" style="${previewBg}position:relative;">
+            ${previewImg}
+            <div class="garden-room-status your-room-status" style="position:absolute;top:12px;left:12px;z-index:2;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);border-radius:100px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,0.7);">🏡 Your Room</div>
+            <div class="garden-room-preview-emoji" style="position:absolute;bottom:12px;right:16px;z-index:2;font-size:40px;opacity:0.6;">${emoji}</div>
+          </div>
+          <div class="garden-growth-bar-wrap">
+            <div class="garden-growth-label"><span>Garden Growth</span><span id="myRoomGrowthPct">0%</span></div>
+            <div class="garden-growth-bar-track">
+              <div class="garden-growth-bar-fill" style="width:0%" id="myRoomGrowthFill"></div>
+            </div>
+          </div>
+          <div class="garden-room-info">
+            <div class="garden-room-title">${emoji} ${roomName}</div>
+            <div class="garden-room-description">${roomDesc}</div>
+            <div class="garden-room-actions" style="display:flex;gap:8px;">
+              <button class="garden-enter-btn" style="flex:1;" onclick="event.stopPropagation(); openMyRoom()">
+                <span>🏡</span> Enter Your Room
+              </button>
+              <button class="garden-enter-btn" style="padding:12px 14px;flex-shrink:0;" onclick="event.stopPropagation(); openRoomEditModal()" title="Edit room">
+                ✏️
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Room edit modal
+    function openRoomEditModal() {
+      const config = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
+      document.getElementById('roomEditName').value = config.name || '';
+      document.getElementById('roomEditDesc').value = config.description || '';
+      const preview = document.getElementById('roomCoverPreview');
+      const placeholder = document.getElementById('roomCoverPlaceholder');
+      if (config.coverImage) {
+        preview.src = config.coverImage;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+      } else {
+        preview.style.display = 'none';
+        placeholder.style.display = 'flex';
+      }
+      document.getElementById('roomEditModal').classList.add('active');
+    }
+
+    function closeRoomEditModal() {
+      document.getElementById('roomEditModal').classList.remove('active');
+    }
+
+    function previewRoomCover(input) {
+      if (!input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const preview = document.getElementById('roomCoverPreview');
+        const placeholder = document.getElementById('roomCoverPlaceholder');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    async function saveRoomSettings() {
+      const name = document.getElementById('roomEditName').value.trim() || 'Your Garden Room';
+      const desc = document.getElementById('roomEditDesc').value.trim();
+      const fileInput = document.getElementById('roomCoverInput');
+      const existing = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
+      let coverImage = existing.coverImage || null;
+
+      if (fileInput.files[0]) {
+        const file = fileInput.files[0];
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            const ext = file.name.split('.').pop();
+            const path = `garden-covers/${session.user.id}.${ext}`;
+            await supabase.storage.from('images').upload(path, file, { upsert: true });
+            const { data: urlData } = supabase.storage.from('images').getPublicUrl(path);
+            coverImage = urlData.publicUrl;
+          } else {
+            coverImage = await new Promise(resolve => {
+              const reader = new FileReader();
+              reader.onload = e => resolve(e.target.result);
+              reader.readAsDataURL(file);
+            });
+          }
+        } catch(e) {
+          coverImage = await new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = e => resolve(e.target.result);
+            reader.readAsDataURL(file);
+          });
         }
       }
+
+      localStorage.setItem('gardenRoomConfig', JSON.stringify({ name, description: desc, coverImage }));
+      fileInput.value = '';
+      closeRoomEditModal();
+      gardenInitialized = false;
+      checkUserRoomCard();
+      showToast('🌿 Room updated!');
     }
 
     // Garden onboarding
@@ -4775,15 +5020,32 @@ This could be:
     };
 
     function openRoomInterior(config) {
-      const { name, desc, mood, growthLevel, appreciations, visits, isNew, isUserRoom } = config;
+      const { name, desc, mood, growthLevel, appreciations, visits, isNew, isUserRoom, coverImage } = config;
       const isMyRoom = isNew || isUserRoom;
       const mc = MOOD_CONFIG[mood] || MOOD_CONFIG.calm;
 
-      // Hero background orbs
-      document.getElementById('interiorHeroBg').innerHTML = `
+      // Hero background orbs + optional cover image
+      let heroBg = `
         <div class="interior-hero-orb" style="width:500px;height:500px;background:${mc.orb1};top:-150px;left:-100px;"></div>
         <div class="interior-hero-orb" style="width:350px;height:350px;background:${mc.orb2};bottom:-80px;right:-60px;animation-delay:-6s;"></div>
       `;
+      if (coverImage) {
+        heroBg += `<div style="position:absolute;inset:0;background:url('${coverImage}') center/cover;opacity:0.25;z-index:1;"></div>`;
+      }
+      document.getElementById('interiorHeroBg').innerHTML = heroBg;
+
+      // Edit button in topbar (only for user's own room)
+      const topbar = document.querySelector('.interior-topbar');
+      const existingEdit = topbar ? topbar.querySelector('.interior-edit-btn') : null;
+      if (existingEdit) existingEdit.remove();
+      if (isMyRoom && topbar) {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'interior-edit-btn';
+        editBtn.innerHTML = '✏️ Edit Room';
+        editBtn.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:100px;color:rgba(255,255,255,0.5);font-size:13px;cursor:pointer;margin-left:10px;';
+        editBtn.onclick = openRoomEditModal;
+        topbar.appendChild(editBtn);
+      }
 
       // Mood badge
       const badge = document.getElementById('interiorMoodBadge');
@@ -4966,10 +5228,12 @@ This could be:
 
     function openMyRoom() {
       const savedMood = localStorage.getItem('gardenRoomMood') || gardenRoomMood || 'calm';
+      const config = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
       gardenRoomMood = savedMood;
       openRoomInterior({
-        name: 'Your Garden Room',
-        desc: 'A sanctuary only you design. Plant creations, watch them grow, and let visitors knock before they enter.',
+        name: config.name || 'Your Garden Room',
+        desc: config.description || 'A sanctuary only you design. Plant creations, watch them grow, and let visitors knock before they enter.',
+        coverImage: config.coverImage || null,
         mood: savedMood,
         growthLevel: 0,
         appreciations: 0,
