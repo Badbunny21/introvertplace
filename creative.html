@@ -4541,11 +4541,15 @@ This could be:
     }
 
     // ==================== CONSTELLATION ====================
+    let constellationInitialized = false;
     function initConstellation() {
-      const el = document.getElementById('constellationView');
-      if (el.children.length > 0) return; // Already initialized
+      if (constellationInitialized) return;
+      constellationInitialized = true;
 
-      // Stars
+      const el = document.getElementById('constellationView');
+      const emptyState = el.querySelector('.constellation-empty-state');
+
+      // Background stars
       for (let i = 0; i < 80; i++) {
         const star = document.createElement('div');
         const sizes = ['sm', 'sm', 'sm', 'md', 'md', 'lg'];
@@ -4555,21 +4559,17 @@ This could be:
         el.appendChild(star);
       }
 
-      // Creation nodes
-      // Creations will be loaded from user data
-      const creations = [];
+      // Load existing creations from localStorage
+      let saved = [];
+      try {
+        const all = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+        saved = all.filter(c => c.view_mode !== 'garden');
+      } catch(e) {}
 
-      creations.forEach(c => {
-        const node = document.createElement('div');
-        node.className = 'creation-node';
-        node.style.left = c.x + '%';
-        node.style.top = c.y + '%';
-        node.innerHTML = `
-          <div class="node-orb">${c.emoji}</div>
-          <div class="node-label">${c.label}</div>
-        `;
-        el.appendChild(node);
-      });
+      if (saved.length > 0) {
+        if (emptyState) emptyState.style.display = 'none';
+        saved.forEach(c => addCreationToConstellation(c));
+      }
     }
 
     // ==================== INFINITE CANVAS ====================
@@ -6268,6 +6268,11 @@ This could be:
 
     function addCreationToConstellation(creation) {
       const constellationView = document.getElementById('constellationView');
+
+      // Hide empty state as soon as first star is added
+      const emptyState = constellationView.querySelector('.constellation-empty-state');
+      if (emptyState) emptyState.style.display = 'none';
+
       const node = document.createElement('div');
       node.className = 'creation-node';
       node.style.left = (30 + Math.random() * 40) + '%';
