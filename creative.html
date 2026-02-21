@@ -402,96 +402,234 @@
     .constellation {
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse at center, #0a0a15 0%, #000 100%);
+      background: radial-gradient(ellipse at 50% 40%, #080c1a 0%, #030508 60%, #000 100%);
       display: none;
+      overflow: hidden;
     }
-
     .creative-page.active .constellation.active {
       display: block;
       position: fixed;
       z-index: 10;
     }
-
+    /* Nebula clouds */
+    .const-nebula {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* SVG lines */
+    .const-lines-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+    /* Parallax layer */
+    .const-parallax {
+      position: absolute;
+      inset: -5%;
+      width: 110%;
+      height: 110%;
+      pointer-events: none;
+      z-index: 1;
+      transition: transform 0.15s ease-out;
+    }
+    /* Background stars */
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.7);
+      animation: twinkle var(--td,4s) ease-in-out infinite;
+      animation-delay: var(--dl,0s);
+    }
+    .star.sm { width: 1px; height: 1px; }
+    .star.md { width: 2px; height: 2px; background: rgba(255,255,255,0.9); }
+    .star.lg { width: 3px; height: 3px; background: white; box-shadow: 0 0 4px rgba(255,255,255,0.8); }
+    @keyframes twinkle {
+      0%,100% { opacity:0.5; transform:scale(1); }
+      50% { opacity:1; transform:scale(1.5); }
+    }
     /* Constellation Empty State */
     .constellation-empty-state {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
       padding: 48px;
-      background: rgba(10,10,21,0.8);
-      border: 2px dashed rgba(255,255,255,0.15);
+      background: rgba(8,12,26,0.85);
+      border: 2px dashed rgba(255,255,255,0.12);
       border-radius: 24px;
       backdrop-filter: blur(12px);
       z-index: 20;
     }
     .constellation-empty-state .constellation-empty-icon { font-size: 64px; margin-bottom: 20px; }
-    .constellation-empty-state h3 { font-size: 24px; margin-bottom: 12px; color: var(--text-white); }
-    .constellation-empty-state p { font-size: 15px; color: var(--text-gray-400); max-width: 350px; margin: 0 auto 24px; line-height: 1.6; }
+    .constellation-empty-state h3 { font-size: 24px; margin-bottom: 12px; color: #f0eeeb; }
+    .constellation-empty-state p { font-size: 15px; color: #9ca3af; max-width: 350px; margin: 0 auto 24px; line-height: 1.6; }
     .constellation-empty-btn {
       padding: 14px 28px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
       border-radius: 12px;
-      color: var(--text-white);
+      color: #f0eeeb;
       font-size: 15px;
       cursor: pointer;
       transition: all 0.3s;
     }
-    .constellation-empty-btn:hover {
-      background: rgba(255,255,255,0.15);
-      border-color: rgba(255,255,255,0.3);
-      transform: translateY(-2px);
-    }
-
-    .star {
+    .constellation-empty-btn:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
+    /* User center star */
+    .user-center-star {
       position: absolute;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.6);
+      z-index: 10;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
     }
-
-    .star.sm { width: 2px; height: 2px; }
-    .star.md { width: 4px; height: 4px; background: rgba(255,255,255,0.8); }
-    .star.lg { width: 8px; height: 8px; background: white; box-shadow: 0 0 10px white; }
-
+    .user-star-core {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,240,160,0.95) 0%, rgba(255,200,60,0.5) 55%, transparent 100%);
+      box-shadow: 0 0 18px rgba(255,220,80,0.9), 0 0 50px rgba(255,200,40,0.35);
+      margin: 0 auto 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      animation: user-pulse 3.5s ease-in-out infinite;
+      position: relative;
+    }
+    .user-star-ring {
+      position: absolute; inset: -10px; border-radius: 50%;
+      border: 1px solid rgba(255,220,80,0.25);
+      animation: ring-pulse 3.5s ease-in-out infinite;
+    }
+    .user-star-ring-2 {
+      position: absolute; inset: -22px; border-radius: 50%;
+      border: 1px solid rgba(255,220,80,0.12);
+      animation: ring-pulse 3.5s ease-in-out infinite 0.6s;
+    }
+    @keyframes user-pulse {
+      0%,100% { box-shadow: 0 0 18px rgba(255,220,80,0.9), 0 0 50px rgba(255,200,40,0.35); }
+      50% { box-shadow: 0 0 28px rgba(255,220,80,1), 0 0 70px rgba(255,200,40,0.55); }
+    }
+    @keyframes ring-pulse {
+      0%,100% { opacity:0.4; transform:scale(1); }
+      50% { opacity:0.7; transform:scale(1.06); }
+    }
+    .user-star-label {
+      font-size: 11px; color: rgba(255,240,160,0.65); letter-spacing: 0.08em;
+    }
+    /* Cluster labels */
+    .cluster-label {
+      position: absolute;
+      font-size: 9px;
+      color: rgba(255,255,255,0.18);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      pointer-events: none;
+      z-index: 3;
+      transform: translate(-50%, -50%);
+    }
+    /* Creation node */
     .creation-node {
       position: absolute;
       cursor: pointer;
       text-align: center;
-      transition: transform 0.3s ease;
+      z-index: 5;
+      transform: translate(-50%, -50%);
+      transition: transform 0.25s ease;
     }
-
-    .creation-node:hover { transform: scale(1.15); }
-
+    .creation-node:hover { transform: translate(-50%, -50%) scale(1.18); }
     .node-orb {
-      width: 70px;
-      height: 70px;
+      width: 44px; height: 44px;
       border-radius: 50%;
-      background: rgba(31,41,55,0.7);
-      border: 1px solid var(--border-white-20);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      margin: 0 auto 8px;
-      backdrop-filter: blur(8px);
-      transition: all 0.3s ease;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      margin: 0 auto 6px;
+      border: 1px solid transparent;
+      transition: all 0.3s;
+      position: relative;
     }
-
-    .creation-node:hover .node-orb {
-      border-color: white;
-      box-shadow: 0 0 30px rgba(255,255,255,0.4);
+    .node-orb::after {
+      content:'';
+      position:absolute; inset:-5px; border-radius:50%;
+      border:1px solid currentColor;
+      opacity:0; transition:opacity 0.3s;
     }
-
+    .creation-node:hover .node-orb::after { opacity:0.25; }
+    .node-orb.type-writing { background:rgba(196,161,255,0.12); border-color:rgba(196,161,255,0.3); color:#c4a1ff; box-shadow:0 0 10px rgba(196,161,255,0.18); }
+    .node-orb.type-visual  { background:rgba(124,184,232,0.12); border-color:rgba(124,184,232,0.3); color:#7cb8e8; box-shadow:0 0 10px rgba(124,184,232,0.18); }
+    .node-orb.type-music   { background:rgba(124,232,168,0.12); border-color:rgba(124,232,168,0.3); color:#7ce8a8; box-shadow:0 0 10px rgba(124,232,168,0.18); }
+    .node-orb.type-idea    { background:rgba(232,200,124,0.12); border-color:rgba(232,200,124,0.3); color:#e8c87c; box-shadow:0 0 10px rgba(232,200,124,0.18); }
+    .creation-node:hover .node-orb.type-writing { box-shadow:0 0 22px rgba(196,161,255,0.5); }
+    .creation-node:hover .node-orb.type-visual  { box-shadow:0 0 22px rgba(124,184,232,0.5); }
+    .creation-node:hover .node-orb.type-music   { box-shadow:0 0 22px rgba(124,232,168,0.5); }
+    .creation-node:hover .node-orb.type-idea    { box-shadow:0 0 22px rgba(232,200,124,0.5); }
     .node-label {
-      font-size: 11px;
-      color: var(--text-gray-500);
-      opacity: 0;
-      transition: opacity 0.3s ease;
+      font-size: 10px; color: rgba(255,255,255,0.35);
+      max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      transition: color 0.2s;
     }
-
-    .creation-node:hover .node-label { opacity: 1; }
+    .creation-node:hover .node-label { color: rgba(255,255,255,0.75); }
+    /* Star info card */
+    .star-info-card {
+      position: fixed;
+      z-index: 300;
+      background: rgba(6,9,20,0.95);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px;
+      padding: 16px;
+      width: 210px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      transform: translateY(8px) scale(0.97);
+    }
+    .star-info-card.visible {
+      opacity: 1; pointer-events: all;
+      transform: translateY(0) scale(1);
+    }
+    .star-info-type { font-size: 9px; color: rgba(255,255,255,0.28); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 5px; }
+    .star-info-title { font-size: 14px; color: #f0eeeb; font-weight: 600; margin-bottom: 5px; line-height: 1.3; }
+    .star-info-snippet { font-size: 12px; color: rgba(255,255,255,0.38); line-height: 1.5; margin-bottom: 12px; max-height: 40px; overflow: hidden; }
+    .star-info-actions { display: flex; gap: 7px; }
+    .star-info-btn {
+      flex:1; padding: 7px 8px; border-radius: 8px; font-size: 11px;
+      cursor: pointer; border: 1px solid rgba(255,255,255,0.09);
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5);
+      transition: all 0.2s;
+    }
+    .star-info-btn:hover { background: rgba(255,255,255,0.09); color: #f0eeeb; }
+    .star-info-btn.danger:hover { background: rgba(255,70,70,0.08); border-color: rgba(255,70,70,0.25); color: #ff7070; }
+    .star-info-close { position:absolute; top:9px; right:9px; background:none; border:none; color:rgba(255,255,255,0.25); cursor:pointer; font-size:15px; line-height:1; padding:2px; }
+    /* Constellation controls */
+    .const-controls {
+      position: fixed;
+      bottom: 110px; right: 16px;
+      z-index: 50;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .const-controls.visible { display: flex; }
+    .const-control-btn {
+      width: 38px; height: 38px;
+      border-radius: 11px;
+      background: rgba(6,9,20,0.82);
+      border: 1px solid rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.38);
+      font-size: 15px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s;
+    }
+    .const-control-btn:hover, .const-control-btn.active {
+      background: rgba(196,161,255,0.1); border-color: rgba(196,161,255,0.3); color: #c4a1ff;
+    }
 
     .hint {
       position: fixed;
@@ -4465,6 +4603,10 @@ This could be:
         initGardenWorld();
       }
 
+      // Show/hide constellation controls
+      const constCtrl = document.getElementById('constControls');
+      if (constCtrl) constCtrl.classList.toggle('visible', view === 'constellation');
+
       // Swap the create button label for garden vs other views
       const createBtn = document.querySelector('.create-btn');
       if (createBtn) {
@@ -4542,6 +4684,17 @@ This could be:
 
     // ==================== CONSTELLATION ====================
     let constellationInitialized = false;
+    let activeStarCreation = null;
+    const TYPE_COLORS = {
+      writing: '#c4a1ff', visual: '#7cb8e8', music: '#7ce8a8', idea: '#e8c87c'
+    };
+    const TYPE_EMOJIS_CONST = { writing: '✍️', visual: '🎨', music: '🎵', idea: '💡' };
+    // Cluster angles: degrees from center
+    const CLUSTER_ANGLES = { writing: 45, visual: 135, music: 225, idea: 315 };
+    const CLUSTER_NAMES = { writing: 'Writing', visual: 'Visual', music: 'Music', idea: 'Ideas' };
+    // Track node positions for line drawing
+    const clusterNodes = { writing: [], visual: [], music: [], idea: [] };
+
     function initConstellation() {
       if (constellationInitialized) return;
       constellationInitialized = true;
@@ -4549,17 +4702,94 @@ This could be:
       const el = document.getElementById('constellationView');
       const emptyState = el.querySelector('.constellation-empty-state');
 
-      // Background stars
-      for (let i = 0; i < 80; i++) {
-        const star = document.createElement('div');
-        const sizes = ['sm', 'sm', 'sm', 'md', 'md', 'lg'];
-        star.className = 'star ' + sizes[Math.floor(Math.random() * sizes.length)];
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        el.appendChild(star);
+      // Nebula clouds
+      [
+        { c:'rgba(196,161,255,0.04)', s:550, x:18, y:28 },
+        { c:'rgba(124,184,232,0.04)', s:420, x:75, y:65 },
+        { c:'rgba(124,232,168,0.03)', s:500, x:45, y:78 },
+      ].forEach(n => {
+        const d = document.createElement('div');
+        d.className = 'const-nebula';
+        d.style.cssText = `width:${n.s}px;height:${n.s}px;background:${n.c};left:${n.x}%;top:${n.y}%;transform:translate(-50%,-50%)`;
+        el.appendChild(d);
+      });
+
+      // SVG lines layer
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('class','const-lines-svg');
+      svg.setAttribute('id','constLinesSvg');
+      el.appendChild(svg);
+
+      // Parallax star layer
+      const parallax = document.createElement('div');
+      parallax.className = 'const-parallax';
+      parallax.id = 'constParallax';
+      for (let i = 0; i < 130; i++) {
+        const s = document.createElement('div');
+        const sz = ['sm','sm','sm','sm','md','md','lg'][Math.floor(Math.random()*7)];
+        s.className = 'star ' + sz;
+        s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;--td:${(3+Math.random()*5).toFixed(1)}s;--dl:${(-Math.random()*5).toFixed(1)}s`;
+        parallax.appendChild(s);
+      }
+      el.appendChild(parallax);
+
+      // Center user star
+      const center = document.createElement('div');
+      center.className = 'user-center-star';
+      center.id = 'userCenterStar';
+      center.style.cssText = 'left:50%;top:50%';
+      center.innerHTML = `<div class="user-star-core"><div class="user-star-ring"></div><div class="user-star-ring-2"></div>✨</div><div class="user-star-label">You</div>`;
+      el.appendChild(center);
+
+      // Cluster labels
+      Object.keys(CLUSTER_ANGLES).forEach(type => {
+        const angle = CLUSTER_ANGLES[type] * Math.PI / 180;
+        const r = Math.min(window.innerWidth, window.innerHeight) * 0.28;
+        const lx = 50 + (r / window.innerWidth) * 100 * Math.cos(angle);
+        const ly = 50 + (r / window.innerHeight) * 100 * Math.sin(angle);
+        const lbl = document.createElement('div');
+        lbl.className = 'cluster-label';
+        lbl.id = 'clabel-' + type;
+        lbl.style.cssText = `left:${lx}%;top:${ly}%`;
+        lbl.textContent = CLUSTER_NAMES[type];
+        el.appendChild(lbl);
+      });
+
+      // Info card
+      let card = document.getElementById('starInfoCard');
+      if (!card) {
+        card = document.createElement('div');
+        card.className = 'star-info-card';
+        card.id = 'starInfoCard';
+        card.innerHTML = `<button class="star-info-close" onclick="hideStarInfoCard()">×</button><div class="star-info-type" id="starInfoType"></div><div class="star-info-title" id="starInfoTitle"></div><div class="star-info-snippet" id="starInfoSnippet"></div><div class="star-info-actions"><button class="star-info-btn" onclick="hideStarInfoCard()">Close Space</button><button class="star-info-btn danger" id="starInfoDelete">Remove</button></div>`;
+        document.body.appendChild(card);
       }
 
-      // Load existing creations from localStorage
+      // Controls
+      let controls = document.getElementById('constControls');
+      if (!controls) {
+        controls = document.createElement('div');
+        controls.className = 'const-controls';
+        controls.id = 'constControls';
+        controls.innerHTML = `<button class="const-control-btn active" id="filterAll" title="All" onclick="filterConstellation(null,this)">✦</button><button class="const-control-btn" title="Writing" onclick="filterConstellation('writing',this)">✍️</button><button class="const-control-btn" title="Visual" onclick="filterConstellation('visual',this)">🎨</button><button class="const-control-btn" title="Music" onclick="filterConstellation('music',this)">🎵</button><button class="const-control-btn" title="Ideas" onclick="filterConstellation('idea',this)">💡</button>`;
+        document.body.appendChild(controls);
+      }
+      controls.classList.add('visible');
+
+      // Parallax on mouse move
+      el.addEventListener('mousemove', e => {
+        const dx = (e.clientX / window.innerWidth - 0.5) * 18;
+        const dy = (e.clientY / window.innerHeight - 0.5) * 18;
+        const p = document.getElementById('constParallax');
+        if (p) p.style.transform = `translate(${dx}px,${dy}px)`;
+      });
+
+      // Close card on background click
+      el.addEventListener('click', e => {
+        if (!e.target.closest('.creation-node') && !e.target.closest('#starInfoCard')) hideStarInfoCard();
+      });
+
+      // Load existing creations
       let saved = [];
       try {
         const all = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
@@ -6267,22 +6497,127 @@ This could be:
     }
 
     function addCreationToConstellation(creation) {
-      const constellationView = document.getElementById('constellationView');
-
-      // Hide empty state as soon as first star is added
-      const emptyState = constellationView.querySelector('.constellation-empty-state');
+      const el = document.getElementById('constellationView');
+      const emptyState = el.querySelector('.constellation-empty-state');
       if (emptyState) emptyState.style.display = 'none';
+
+      const type = creation.type || 'idea';
+      const angle = (CLUSTER_ANGLES[type] || 0) * Math.PI / 180;
+      const clusterList = clusterNodes[type] || [];
+      const idx = clusterList.length;
+      // Spread within cluster: small angle offset per star
+      const spread = 0.25;
+      const spreadAngle = angle + (idx - (clusterList.length > 1 ? 1 : 0)) * spread * (idx % 2 === 0 ? 1 : -1);
+      // Distance from center — newer = closer
+      const minR = 0.15, maxR = 0.32;
+      const r = minR + (idx * 0.04 > maxR - minR ? maxR - minR : idx * 0.04);
+
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const cx = 50, cy = 50;
+      const px = cx + r * 100 * Math.cos(spreadAngle) * (vh / vw);
+      const py = cy + r * 100 * Math.sin(spreadAngle);
 
       const node = document.createElement('div');
       node.className = 'creation-node';
-      node.style.left = (30 + Math.random() * 40) + '%';
-      node.style.top = (30 + Math.random() * 40) + '%';
-      node.innerHTML = `
-        <div class="node-orb">${typeEmojis[creation.type] || '✨'}</div>
-        <span class="node-label">${creation.title}</span>
-      `;
-      node.onclick = () => showToast(`Opening: ${creation.title}`);
-      constellationView.appendChild(node);
+      node.style.cssText = `left:${Math.min(90,Math.max(10,px))}%;top:${Math.min(88,Math.max(12,py))}%`;
+      node.dataset.type = type;
+      node.dataset.id = String(creation.id || '');
+      node.innerHTML = `<div class="node-orb type-${type}">${typeEmojis[type] || '✨'}</div><span class="node-label">${creation.title}</span>`;
+      node.onclick = (e) => { e.stopPropagation(); showStarInfoCard(creation, node); };
+      el.appendChild(node);
+
+      // Track position for lines
+      if (clusterNodes[type]) clusterNodes[type].push({ node, px, py });
+      else clusterNodes[type] = [{ node, px, py }];
+
+      // Redraw cluster lines
+      drawClusterLines(type);
+    }
+
+    function drawClusterLines(type) {
+      const svg = document.getElementById('constLinesSvg');
+      if (!svg) return;
+      const color = TYPE_COLORS[type] || 'rgba(255,255,255,0.1)';
+      // Remove old lines for this type
+      svg.querySelectorAll(`line[data-type="${type}"]`).forEach(l => l.remove());
+      const nodes = clusterNodes[type] || [];
+      if (nodes.length < 2) return;
+
+      const vw = window.innerWidth, vh = window.innerHeight;
+      // Connect each node to the next
+      for (let i = 0; i < nodes.length - 1; i++) {
+        const a = nodes[i], b = nodes[i+1];
+        const x1 = (a.px / 100) * vw, y1 = (a.py / 100) * vh;
+        const x2 = (b.px / 100) * vw, y2 = (b.py / 100) * vh;
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+        line.setAttribute('stroke', color);
+        line.setAttribute('stroke-width', '0.5');
+        line.setAttribute('stroke-opacity', '0.25');
+        line.setAttribute('data-type', type);
+        svg.appendChild(line);
+      }
+      // Also draw a faint line from center (50%,50%) to first node
+      const first = nodes[0];
+      const cx = vw * 0.5, cy = vh * 0.5;
+      const nx = (first.px / 100) * vw, ny = (first.py / 100) * vh;
+      const l0 = document.createElementNS('http://www.w3.org/2000/svg','line');
+      l0.setAttribute('x1', cx); l0.setAttribute('y1', cy);
+      l0.setAttribute('x2', nx); l0.setAttribute('y2', ny);
+      l0.setAttribute('stroke', color);
+      l0.setAttribute('stroke-width', '0.5');
+      l0.setAttribute('stroke-opacity', '0.12');
+      l0.setAttribute('data-type', type);
+      svg.appendChild(l0);
+    }
+
+    function showStarInfoCard(creation, node) {
+      activeStarCreation = creation;
+      const card = document.getElementById('starInfoCard');
+      if (!card) return;
+      document.getElementById('starInfoType').textContent = (creation.type || 'idea').toUpperCase();
+      document.getElementById('starInfoTitle').textContent = creation.title;
+      document.getElementById('starInfoSnippet').textContent = creation.content || creation.description || 'No preview available.';
+      const del = document.getElementById('starInfoDelete');
+      if (del) del.onclick = () => deleteConstellationStar(creation.id, node);
+
+      // Position near the node
+      const rect = node.getBoundingClientRect();
+      let left = rect.right + 12;
+      let top = rect.top - 20;
+      if (left + 220 > window.innerWidth) left = rect.left - 232;
+      if (top + 160 > window.innerHeight) top = window.innerHeight - 170;
+      card.style.left = Math.max(8, left) + 'px';
+      card.style.top = Math.max(8, top) + 'px';
+      card.classList.add('visible');
+    }
+
+    function hideStarInfoCard() {
+      const card = document.getElementById('starInfoCard');
+      if (card) card.classList.remove('visible');
+      activeStarCreation = null;
+    }
+
+    function deleteConstellationStar(id, node) {
+      hideStarInfoCard();
+      if (node) node.remove();
+      try {
+        const saved = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+        localStorage.setItem('introvert_creations', JSON.stringify(saved.filter(c => String(c.id) !== String(id))));
+      } catch(e) {}
+      showToast('✦ Star removed from your constellation');
+    }
+
+    function filterConstellation(type, btn) {
+      document.querySelectorAll('.const-control-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      document.querySelectorAll('.creation-node').forEach(n => {
+        n.style.opacity = (!type || n.dataset.type === type) ? '1' : '0.1';
+      });
+      document.querySelectorAll('.const-lines-svg line').forEach(l => {
+        l.style.opacity = (!type || l.dataset.type === type) ? '1' : '0';
+      });
     }
 
     function addCreationToCanvas(creation) {
