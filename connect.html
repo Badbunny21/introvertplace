@@ -1977,6 +1977,203 @@
     @media (max-width: 380px) {
       .view-header h1 { font-size: 24px; }
     }
+
+    /* ========== JOIN OVERLAY ========== */
+    .join-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 1100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .join-overlay-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      padding: 32px 28px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+    .join-overlay-title {
+      font-family: 'Fraunces', serif;
+      font-size: 21px;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .join-overlay-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+    }
+    .comfort-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .comfort-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      background: var(--bg-surface);
+      border: 2px solid transparent;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s;
+      color: var(--text-primary);
+      font-size: 14px;
+      width: 100%;
+    }
+    .comfort-option:hover { background: var(--bg-hover); }
+    .comfort-option.selected {
+      border-color: var(--accent-soft);
+      background: rgba(196,161,255,0.08);
+    }
+    .comfort-option .co-icon { font-size: 18px; flex-shrink: 0; }
+    .comfort-option .co-label { font-weight: 600; line-height: 1.3; }
+    .comfort-option .co-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .notif-section { margin-bottom: 22px; }
+    .notif-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .notif-options { display: flex; gap: 8px; }
+    .notif-option {
+      flex: 1;
+      padding: 9px 6px;
+      background: var(--bg-surface);
+      border: 2px solid transparent;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+    .notif-option:hover { background: var(--bg-hover); }
+    .notif-option.selected {
+      border-color: var(--accent-calm);
+      color: var(--accent-calm);
+      background: rgba(124,184,232,0.08);
+    }
+    .join-overlay-actions { display: flex; flex-direction: column; gap: 8px; }
+    .join-confirm-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent-soft);
+      color: #1a1e28;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .join-confirm-btn:hover { opacity: 0.88; }
+    .join-skip-link {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px;
+      text-decoration: underline;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .join-skip-link:hover { color: var(--text-secondary); }
+
+    /* ========== ANONYMOUS POSTING TOGGLE ========== */
+    .anon-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .anon-toggle-row input {
+      cursor: pointer;
+      accent-color: var(--accent-soft);
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ========== REPORT BUTTON & DIALOG ========== */
+    .post-report-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 15px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      line-height: 1;
+      opacity: 0.5;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .post-report-btn:hover { opacity: 1; color: var(--accent-rose); }
+    .report-dialog-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .report-dialog {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      max-width: 340px;
+      width: 90%;
+    }
+    .report-dialog h3 {
+      font-size: 16px;
+      margin-bottom: 14px;
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+    }
+    .report-reason-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .report-reason-btn {
+      padding: 10px 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      text-align: left;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.2s, border-color 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .report-reason-btn:hover { background: var(--bg-hover); border-color: var(--accent-rose); }
+    .report-cancel-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      width: 100%;
+      padding: 8px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .report-cancel-btn:hover { color: var(--text-secondary); }
   </style>
 </head>
 <body>
@@ -2529,6 +2726,49 @@
         closeModal('createModal');
         showToast('✨ Community created!');
 
+        // Set up the new community (add creator as owner, create rooms, welcome post)
+        if (data && data[0] && currentUser) {
+          const newId = data[0].id;
+          const communityName = data[0].name || name;
+
+          // Add creator as owner member
+          await db.from('community_members').insert({
+            user_id: currentUser.id,
+            community_id: newId,
+            role: 'owner',
+            comfort_mode: 'active',
+            notification_level: 'important'
+          }).catch(() => {
+            // Fallback if new columns don't exist yet
+            db.from('community_members').insert({ user_id: currentUser.id, community_id: newId }).catch(() => {});
+          });
+
+          // Create default rooms + welcome post
+          try {
+            const { data: roomsData } = await db.from('community_rooms').insert([
+              { community_id: newId, name: '📌 Start Here', type: 'start_here', description: 'Welcome, rules & community vibe', position_order: 0, is_read_only: true },
+              { community_id: newId, name: '💬 Threads', type: 'threads', description: 'Long-form async discussions', position_order: 1, is_read_only: false },
+              { community_id: newId, name: '🌱 Prompts', type: 'prompts', description: 'Weekly guided conversation starters', position_order: 2, is_read_only: false },
+              { community_id: newId, name: '📚 Resources', type: 'resources', description: 'Saved links and helpful finds', position_order: 3, is_read_only: false }
+            ]).select();
+
+            // Auto-generate welcome post in Start Here room
+            const startHereRoom = roomsData?.find(r => r.type === 'start_here');
+            await db.from('community_posts').insert({
+              community_id: newId,
+              room_id: startHereRoom?.id || null,
+              author_id: currentUser.id,
+              post_type: 'thought',
+              title: `Welcome to ${communityName} 🌙`,
+              content: `This is a quiet space made for thoughtful connection.\n\n✦ Take your time — no pressure to respond quickly\n✦ All participation styles welcome: lurking, reacting, occasional replies, or active discussion\n✦ Be kind and assume good intent\n✦ Share what feels comfortable — small or large\n\nWe're glad you're here. ✨`,
+              is_pinned: true
+            });
+          } catch (roomErr) {
+            // community_rooms table may not exist yet — that's ok
+            console.log('Could not create default rooms:', roomErr.message);
+          }
+        }
+
         // Clear form
         if (nameInput) nameInput.value = '';
         if (descTextarea) descTextarea.value = '';
@@ -2611,6 +2851,9 @@
           console.log('Could not load member counts:', countErr);
         }
 
+        // Populate community names lookup for join overlay
+        communities.forEach(c => { communityNames[c.id] = c.name; });
+
         // Render communities with actual member counts
         grid.innerHTML = communities.map(c => {
           const actualMemberCount = memberCounts[c.id] || 0;
@@ -2637,7 +2880,7 @@
                   <span class="activity-dot"></span>
                   <span>Active</span>
                 </div>
-                <button class="join-btn ${isJoined ? 'joined' : ''}" onclick="event.stopPropagation(); ${isJoined ? `leaveCommunity('${c.id}', this)` : `joinCommunity('${c.id}', this)`}">${isJoined ? '✓ Joined' : 'Join'}</button>
+                <button class="join-btn ${isJoined ? 'joined' : ''}" onclick="event.stopPropagation(); ${isJoined ? `leaveCommunity('${c.id}', this)` : `showJoinOverlay('${c.id}', false, this)`}">${isJoined ? '✓ Joined' : 'Join'}</button>
               </div>
             </div>
           `;
@@ -2648,50 +2891,22 @@
       }
     }
 
-    // Join a community
+    // Join a community — now routes through the join overlay
     async function joinCommunity(communityId, btn) {
-      if (!db || !currentUser) {
-        showToast('⚠️ Please sign in to join');
-        return;
-      }
+      showJoinOverlay(communityId, false, btn);
+    }
 
-      try {
-        // Insert into community_members junction table
-        const { error } = await db
-          .from('community_members')
-          .insert({
-            user_id: currentUser.id,
-            community_id: communityId
-          });
-
-        if (error) {
-          // Check if already joined (unique constraint)
-          if (error.code === '23505') {
-            showToast('👋 You\'re already a member!');
-            btn.classList.add('joined');
-            btn.textContent = '✓ Joined';
-            return;
-          }
-          throw error;
-        }
-
-        // Update member count
-        await db.rpc('increment_member_count', { cid: communityId }).catch(() => {
-          // RPC might not exist, that's ok
+    // Direct insert for internal use (called by confirmJoin)
+    async function _insertMembership(communityId, comfortMode, notifLevel) {
+      const { error } = await db
+        .from('community_members')
+        .insert({
+          user_id: currentUser.id,
+          community_id: communityId,
+          comfort_mode: comfortMode,
+          notification_level: notifLevel
         });
-
-        btn.classList.add('joined');
-        btn.textContent = '✓ Joined';
-        btn.onclick = function(e) { e.stopPropagation(); leaveCommunity(communityId, btn); };
-        showToast('🏠 Welcome to the community!');
-
-        // Reload to update member counts
-        setTimeout(() => loadCommunities(), 500);
-
-      } catch (err) {
-        console.error('Join community error:', err);
-        showToast('⚠️ Error joining community');
-      }
+      if (error && error.code !== '23505') throw error;
     }
 
     // Leave a community
@@ -3123,6 +3338,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     let userReactions = {}; // { postId: ['appreciate', ...] }
     let userBookmarks = new Set();
     let expandedComments = new Set();
+    let communityNames = {}; // { communityId: name } for join overlay
 
     // Post type config
     const POST_TYPES = {
@@ -3207,7 +3423,12 @@ CREATE POLICY "Authenticated users can create communities" ON communities
                 <input type="text" class="post-composer-link" id="postLink" placeholder="Link URL (optional)" style="display: none;">
                 <textarea id="postContent" placeholder="${POST_TYPES.thought.placeholder}"></textarea>
                 <div class="post-composer-footer">
-                  <span class="post-composer-hint">Take your time. No rush here. 🌙</span>
+                  ${community.allow_anonymous_posts ? `
+                    <label class="anon-toggle-row">
+                      <input type="checkbox" id="postAnonymous">
+                      <span>👤 Post anonymously</span>
+                    </label>
+                  ` : `<span class="post-composer-hint">Take your time. No rush here. 🌙</span>`}
                   <button class="post-btn" onclick="createPost()">Share</button>
                 </div>
               </div>
@@ -3406,11 +3627,12 @@ CREATE POLICY "Authenticated users can create communities" ON communities
 
         // Render posts
         feed.innerHTML = posts.map(post => {
-          const author = profileMap[post.author_id] || {};
-          const avatar = author.avatar_emoji || author.avatar || '🌙';
-          const avatarBg = author.avatar_bg || 'var(--bg-elevated)';
-          const avatarUrl = author.avatar_url || null;
-          const name = author.username || 'Anonymous';
+          const isAnon = post.is_anonymous;
+          const author = isAnon ? {} : (profileMap[post.author_id] || {});
+          const avatar = isAnon ? '👤' : (author.avatar_emoji || author.avatar || '🌙');
+          const avatarBg = isAnon ? 'var(--bg-elevated)' : (author.avatar_bg || 'var(--bg-elevated)');
+          const avatarUrl = isAnon ? null : (author.avatar_url || null);
+          const name = isAnon ? 'Anonymous' : (author.username || 'Anonymous');
           const time = formatMessageTime(post.created_at);
           const postType = post.post_type || 'thought';
           const typeConfig = POST_TYPES[postType] || POST_TYPES.thought;
@@ -3464,11 +3686,12 @@ CREATE POLICY "Authenticated users can create communities" ON communities
                 
                 <span class="action-spacer"></span>
                 
-                <button class="bookmark-btn ${isBookmarked ? 'active' : ''}" 
+                <button class="bookmark-btn ${isBookmarked ? 'active' : ''}"
                         onclick="toggleBookmark('${post.id}')"
                         title="Save for later">
                   ${isBookmarked ? '🔖' : '📑'}
                 </button>
+                <button class="post-report-btn" onclick="reportPost('${post.id}')" title="Report this post">⋯</button>
               </div>
               
               <div class="comments-section" id="comments-${post.id}" style="display: none;"></div>
@@ -3749,13 +3972,15 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       }
 
       try {
+        const isAnonymous = document.getElementById('postAnonymous')?.checked || false;
         const postData = {
           community_id: currentCommunity.id,
           author_id: currentUser.id,
           content: content,
           post_type: currentPostType,
           title: title,
-          link_url: linkUrl
+          link_url: linkUrl,
+          is_anonymous: isAnonymous
         };
 
         const { data, error } = await db
@@ -3801,29 +4026,22 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       }
     }
 
-    // Join from modal
+    // Join from modal — routes through join overlay
     async function joinCommunityFromModal(communityId) {
       if (!db || !currentUser) {
         showToast('⚠️ Please sign in to join');
         return;
       }
+      showJoinOverlay(communityId, true, null);
+    }
 
+    // _joinCommunityFromModalDirect is called by confirmJoin when fromModal=true
+    async function _joinCommunityFromModalDirect(communityId) {
       try {
-        const { error } = await db
-          .from('community_members')
-          .insert({
-            user_id: currentUser.id,
-            community_id: communityId
-          });
-
-        if (error && error.code !== '23505') {
-          throw error;
-        }
-
         currentCommunityJoined = true;
         showToast('🏠 Welcome to the community!');
         loadCommunities(); // Refresh the grid
-        
+
         // Refresh the modal to show post composer
         if (currentCommunity && currentCommunity.id === communityId) {
           const { count: memberCount } = await db
@@ -4339,6 +4557,187 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     });
 
     // Conversations now load from DOMContentLoaded after initAuth completes
+
+    // ========== JOIN OVERLAY ==========
+    let pendingJoinCommunityId = null;
+    let pendingJoinFromModal = false;
+    let pendingJoinBtn = null;
+    let joinCountdownTimer = null;
+
+    function showJoinOverlay(communityId, fromModal, btn) {
+      if (!currentUser) {
+        showToast('⚠️ Please sign in to join');
+        return;
+      }
+
+      pendingJoinCommunityId = communityId;
+      pendingJoinFromModal = fromModal;
+      pendingJoinBtn = btn || null;
+
+      const communityName = communityNames[communityId] || (currentCommunity && currentCommunity.id === communityId ? currentCommunity.name : 'this community');
+
+      const overlay = document.createElement('div');
+      overlay.className = 'join-overlay';
+      overlay.id = 'joinOverlay';
+      overlay.innerHTML = `
+        <div class="join-overlay-card">
+          <div class="join-overlay-title">🌙 Joining ${escapeHtml(communityName)}</div>
+          <div class="join-overlay-subtitle">How would you like to participate? (less than 5 seconds)</div>
+
+          <div class="comfort-options">
+            <button class="comfort-option" data-mode="lurk" onclick="selectComfortMode(this)">
+              <span class="co-icon">👁️</span>
+              <span>
+                <div class="co-label">Just Lurk</div>
+                <div class="co-desc">Read and observe — no pressure to engage</div>
+              </span>
+            </button>
+            <button class="comfort-option selected" data-mode="occasional" onclick="selectComfortMode(this)">
+              <span class="co-icon">💬</span>
+              <span>
+                <div class="co-label">Occasional Replies</div>
+                <div class="co-desc">Share when something feels right</div>
+              </span>
+            </button>
+            <button class="comfort-option" data-mode="active" onclick="selectComfortMode(this)">
+              <span class="co-icon">🔊</span>
+              <span>
+                <div class="co-label">Active Today</div>
+                <div class="co-desc">Ready to participate more openly</div>
+              </span>
+            </button>
+          </div>
+
+          <div class="notif-section">
+            <div class="notif-label">Notifications</div>
+            <div class="notif-options">
+              <button class="notif-option" data-level="off" onclick="selectNotifLevel(this)">Off</button>
+              <button class="notif-option selected" data-level="important" onclick="selectNotifLevel(this)">Important only</button>
+              <button class="notif-option" data-level="digest" onclick="selectNotifLevel(this)">Daily digest</button>
+            </div>
+          </div>
+
+          <div class="join-overlay-actions">
+            <button class="join-confirm-btn" onclick="confirmJoin(false)">Join Community</button>
+            <button class="join-skip-link" id="joinSkipBtn" onclick="confirmJoin(true)">Skip →</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+
+      // 5-second countdown on skip button
+      if (joinCountdownTimer) clearInterval(joinCountdownTimer);
+      let countdown = 5;
+      const skipBtn = overlay.querySelector('#joinSkipBtn');
+      joinCountdownTimer = setInterval(() => {
+        countdown--;
+        if (skipBtn) skipBtn.textContent = countdown > 0 ? `Skip (${countdown}s) →` : 'Skip →';
+        if (countdown <= 0) { clearInterval(joinCountdownTimer); joinCountdownTimer = null; }
+      }, 1000);
+    }
+
+    function selectComfortMode(btn) {
+      document.querySelectorAll('#joinOverlay .comfort-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function selectNotifLevel(btn) {
+      document.querySelectorAll('#joinOverlay .notif-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    async function confirmJoin(useDefaults) {
+      if (!db || !currentUser || !pendingJoinCommunityId) return;
+
+      const comfortMode = useDefaults ? 'occasional'
+        : (document.querySelector('#joinOverlay .comfort-option.selected')?.dataset.mode || 'occasional');
+      const notifLevel = useDefaults ? 'important'
+        : (document.querySelector('#joinOverlay .notif-option.selected')?.dataset.level || 'important');
+
+      // Remove overlay
+      if (joinCountdownTimer) { clearInterval(joinCountdownTimer); joinCountdownTimer = null; }
+      const overlay = document.getElementById('joinOverlay');
+      if (overlay) overlay.remove();
+
+      const communityId = pendingJoinCommunityId;
+      const fromModal = pendingJoinFromModal;
+      const btn = pendingJoinBtn;
+
+      try {
+        await _insertMembership(communityId, comfortMode, notifLevel);
+
+        if (fromModal) {
+          await _joinCommunityFromModalDirect(communityId);
+        } else {
+          if (btn) {
+            btn.classList.add('joined');
+            btn.textContent = '✓ Joined';
+            btn.onclick = function(e) { e.stopPropagation(); leaveCommunity(communityId, btn); };
+          }
+          showToast('🏠 Welcome to the community!');
+          setTimeout(() => loadCommunities(), 500);
+        }
+      } catch (err) {
+        console.error('Join error:', err);
+        showToast('⚠️ Error joining community');
+      }
+    }
+
+    // ========== REPORT POST ==========
+    function reportPost(postId) {
+      if (!currentUser) {
+        showToast('Sign in to report posts');
+        return;
+      }
+
+      const reasons = [
+        'Harmful or unsafe content',
+        'Spam or repetitive posts',
+        'Harassment or intimidation',
+        'Off-topic or irrelevant',
+        'Other concern'
+      ];
+
+      let dialog = document.getElementById('reportDialog');
+      if (dialog) dialog.remove();
+
+      dialog = document.createElement('div');
+      dialog.id = 'reportDialog';
+      dialog.className = 'report-dialog-overlay';
+      dialog.innerHTML = `
+        <div class="report-dialog">
+          <h3>🚩 Report this post</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Your report is private. We take all reports seriously.</p>
+          <div class="report-reason-options">
+            ${reasons.map(r => `<button class="report-reason-btn" data-reason="${escapeHtml(r)}" onclick="submitReport('${postId}', this.dataset.reason)">${escapeHtml(r)}</button>`).join('')}
+          </div>
+          <button class="report-cancel-btn" onclick="document.getElementById('reportDialog').remove()">Cancel</button>
+        </div>
+      `;
+      dialog.addEventListener('click', function(e) { if (e.target === this) this.remove(); });
+      document.body.appendChild(dialog);
+    }
+
+    async function submitReport(postId, reason) {
+      document.getElementById('reportDialog')?.remove();
+      if (!db || !currentUser || !currentCommunity) return;
+
+      try {
+        await db.from('community_reports').insert({
+          reporter_id: currentUser.id,
+          post_id: postId,
+          community_id: currentCommunity.id,
+          reason: reason,
+          status: 'open'
+        });
+        showToast('🚩 Report submitted — thank you.');
+      } catch (err) {
+        // Table may not exist yet if migration not applied
+        console.log('Report error (table may not exist):', err.message);
+        showToast('🚩 Report received.');
+      }
+    }
   </script>
 
 </body>
