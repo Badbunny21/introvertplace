@@ -605,6 +605,130 @@
     .star-info-btn:hover { background: rgba(255,255,255,0.09); color: #f0eeeb; }
     .star-info-btn.danger:hover { background: rgba(255,70,70,0.08); border-color: rgba(255,70,70,0.25); color: #ff7070; }
     .star-info-close { position:absolute; top:9px; right:9px; background:none; border:none; color:rgba(255,255,255,0.25); cursor:pointer; font-size:15px; line-height:1; padding:2px; }
+    /* Distant galaxy (other users) */
+    .distant-galaxy {
+      position: absolute;
+      cursor: pointer;
+      z-index: 6;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    .distant-galaxy:hover { transform: translate(-50%, -50%) scale(1.12); }
+    .distant-galaxy-core {
+      position: relative;
+      width: 52px; height: 52px;
+      margin: 0 auto 6px;
+    }
+    .distant-galaxy-ring {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px dashed rgba(196,161,255,0.18);
+      animation: galaxyRingSpin 18s linear infinite;
+    }
+    @keyframes galaxyRingSpin { to { transform: rotate(360deg); } }
+    .distant-galaxy-mini-star {
+      position: absolute;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: miniStarTwinkle 3s ease-in-out infinite alternate;
+    }
+    @keyframes miniStarTwinkle {
+      from { opacity: 0.5; transform: translate(-50%,-50%) scale(1); }
+      to   { opacity: 1;   transform: translate(-50%,-50%) scale(1.2); }
+    }
+    .distant-galaxy-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(196,161,255,0.9), rgba(124,184,232,0.5));
+      box-shadow: 0 0 14px rgba(196,161,255,0.5), 0 0 28px rgba(196,161,255,0.18);
+    }
+    .distant-galaxy-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.42);
+      letter-spacing: 0.07em;
+      white-space: nowrap;
+      max-width: 90px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .distant-galaxy-count {
+      font-size: 9px;
+      color: rgba(196,161,255,0.45);
+      margin-top: 2px;
+    }
+    /* User galaxy modal */
+    .user-galaxy-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 600;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .user-galaxy-modal-overlay.visible { opacity: 1; pointer-events: all; }
+    .user-galaxy-modal {
+      position: relative;
+      width: min(90vw, 520px);
+      max-height: 70vh;
+      background: rgba(6,9,20,0.97);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 22px;
+      padding: 26px 22px 22px;
+      backdrop-filter: blur(30px);
+      box-shadow: 0 20px 80px rgba(0,0,0,0.8);
+      overflow-y: auto;
+      transform: translateY(16px) scale(0.97);
+      transition: transform 0.25s;
+    }
+    .user-galaxy-modal-overlay.visible .user-galaxy-modal { transform: translateY(0) scale(1); }
+    .user-galaxy-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .user-galaxy-modal-title {
+      font-size: 15px; color: #f0eeeb; font-weight: 600;
+    }
+    .user-galaxy-modal-subtitle {
+      font-size: 11px; color: rgba(196,161,255,0.6); margin-top: 2px;
+    }
+    .user-galaxy-modal-close {
+      background: none; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; color: rgba(255,255,255,0.35);
+      cursor: pointer; font-size: 14px; width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .user-galaxy-modal-close:hover { background: rgba(255,255,255,0.06); color: #f0eeeb; }
+    .user-galaxy-creation-list { display: flex; flex-direction: column; gap: 10px; }
+    .user-galaxy-creation-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+    .user-galaxy-creation-item:hover { background: rgba(255,255,255,0.05); }
+    .ugci-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+    }
+    .ugci-icon.type-writing { background: rgba(196,161,255,0.14); }
+    .ugci-icon.type-visual  { background: rgba(124,184,232,0.14); }
+    .ugci-icon.type-music   { background: rgba(124,232,168,0.14); }
+    .ugci-icon.type-idea    { background: rgba(232,200,124,0.14); }
+    .ugci-title { font-size: 13px; color: rgba(255,255,255,0.82); font-weight: 500; line-height: 1.3; }
+    .ugci-snippet { font-size: 11px; color: rgba(255,255,255,0.32); margin-top: 3px; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .ugci-type { font-size: 9px; color: rgba(255,255,255,0.22); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 4px; }
     /* Constellation controls */
     .const-controls {
       position: fixed;
@@ -4789,34 +4913,76 @@ This could be:
         if (!e.target.closest('.creation-node') && !e.target.closest('#starInfoCard')) hideStarInfoCard();
       });
 
-      // Load creations — Supabase first (all public), fallback to localStorage
+      // Load creations — own go into personal galaxy, others become distant galaxies
       async function loadConstellationCreations() {
-        let creations = [];
+        const myId = currentUser ? currentUser.id : null;
+        let ownCreations = [];
+        let othersByUser = {}; // { userId: { username, creations[] } }
+
         if (db) {
           try {
+            // Fetch all public/community creations (with profile username)
             const { data } = await db
               .from('creations')
               .select('id, type, title, content, description, mood, view_mode, user_id')
               .in('visibility', ['public', 'community'])
               .neq('view_mode', 'garden')
               .order('created_at', { ascending: false })
-              .limit(60);
-            if (data && data.length > 0) creations = data;
+              .limit(80);
+
+            if (data && data.length > 0) {
+              // Separate own from others
+              const otherUserIds = new Set();
+              data.forEach(c => {
+                if (myId && c.user_id === myId) {
+                  ownCreations.push(c);
+                } else if (c.user_id) {
+                  otherUserIds.add(c.user_id);
+                  if (!othersByUser[c.user_id]) othersByUser[c.user_id] = { username: null, creations: [] };
+                  othersByUser[c.user_id].creations.push(c);
+                } else {
+                  // No user_id (anonymous local) → own
+                  ownCreations.push(c);
+                }
+              });
+
+              // Fetch usernames for other users
+              if (otherUserIds.size > 0) {
+                try {
+                  const { data: profiles } = await db
+                    .from('profiles')
+                    .select('id, username')
+                    .in('id', Array.from(otherUserIds));
+                  if (profiles) {
+                    profiles.forEach(p => {
+                      if (othersByUser[p.id]) othersByUser[p.id].username = p.username || 'Anonymous';
+                    });
+                  }
+                } catch(e) {}
+              }
+            }
           } catch(e) {}
         }
-        // Also merge any local-only creations not yet synced
+
+        // Merge local-only creations (treat as own)
         try {
           const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-          const localFiltered = local.filter(c => c.view_mode !== 'garden');
-          localFiltered.forEach(lc => {
-            if (!creations.find(c => String(c.id) === String(lc.id))) creations.push(lc);
+          local.filter(c => c.view_mode !== 'garden').forEach(lc => {
+            if (!ownCreations.find(c => String(c.id) === String(lc.id))) ownCreations.push(lc);
           });
         } catch(e) {}
 
-        if (creations.length > 0) {
+        // Render own creations into personal galaxy
+        if (ownCreations.length > 0) {
           if (emptyState) emptyState.style.display = 'none';
-          creations.forEach(c => addCreationToConstellation(c));
+          ownCreations.forEach(c => addCreationToConstellation(c));
         }
+
+        // Render other users as distant galaxies
+        const otherEntries = Object.entries(othersByUser);
+        otherEntries.forEach(([userId, info], idx) => {
+          addDistantGalaxy(userId, info.username || 'Anonymous', info.creations, idx, otherEntries.length);
+        });
       }
       loadConstellationCreations();
     }
@@ -6710,6 +6876,117 @@ This could be:
       l0.setAttribute('stroke-opacity', '0.12');
       l0.setAttribute('data-type', type);
       svg.appendChild(l0);
+    }
+
+    function addDistantGalaxy(userId, username, creations, idx, total) {
+      const el = document.getElementById('constellationView');
+      if (!el) return;
+
+      // Distribute galaxies evenly around the outer ring (avoid the 4 cluster angles)
+      // Offset base angle by 22.5° to sit between cluster quadrants
+      const baseAngle = 22.5 + (idx / Math.max(total, 1)) * 360;
+      const angleDeg = baseAngle;
+      const angleRad = angleDeg * Math.PI / 180;
+
+      // Position far from center (65–80% radius)
+      const rMin = 0.62, rMax = 0.78;
+      const r = rMin + ((idx % 3) / 3) * (rMax - rMin);
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const cx = 50, cy = 50;
+      const px = cx + r * 100 * Math.cos(angleRad) * (vh / vw);
+      const py = cy + r * 100 * Math.sin(angleRad);
+
+      const galaxy = document.createElement('div');
+      galaxy.className = 'distant-galaxy';
+      galaxy.style.cssText = `left:${Math.min(92,Math.max(8,px))}%;top:${Math.min(90,Math.max(10,py))}%`;
+      galaxy.title = `${username}'s galaxy`;
+
+      // Determine mini-star colors from creation types
+      const typeColors = {
+        writing: '#c4a1ff', visual: '#7cb8e8', music: '#7ce8a8', idea: '#e8c87c'
+      };
+      const count = Math.min(creations.length, 6);
+      let miniStars = '';
+      // Place mini-stars around center of the galaxy core
+      for (let i = 0; i < count; i++) {
+        const a = (i / count) * 360;
+        const rad = a * Math.PI / 180;
+        const mr = 18 + (i % 2) * 6; // 18 or 24px from center
+        const mx = 50 + (mr / 52) * 100 * Math.cos(rad); // % of core width (52px)
+        const my = 50 + (mr / 52) * 100 * Math.sin(rad);
+        const c = creations[i];
+        const col = typeColors[c.type] || '#c4a1ff';
+        const sz = 3 + (i === 0 ? 2 : 0);
+        const delay = (i * 0.6).toFixed(1);
+        miniStars += `<div class="distant-galaxy-mini-star" style="width:${sz}px;height:${sz}px;background:${col};left:${mx}%;top:${my}%;box-shadow:0 0 6px ${col};animation-delay:${delay}s"></div>`;
+      }
+
+      galaxy.innerHTML = `
+        <div class="distant-galaxy-core">
+          <div class="distant-galaxy-ring"></div>
+          ${miniStars}
+          <div class="distant-galaxy-center"></div>
+        </div>
+        <div class="distant-galaxy-label">✦ ${username}</div>
+        <div class="distant-galaxy-count">${creations.length} creation${creations.length !== 1 ? 's' : ''}</div>
+      `;
+
+      galaxy.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showUserGalaxyModal(userId, username, creations);
+      });
+
+      el.appendChild(galaxy);
+    }
+
+    function showUserGalaxyModal(userId, username, creations) {
+      // Remove any existing modal
+      const existing = document.getElementById('userGalaxyModalOverlay');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'user-galaxy-modal-overlay';
+      overlay.id = 'userGalaxyModalOverlay';
+
+      const itemsHtml = creations.map(c => {
+        const icons = { writing: '✍️', visual: '🎨', music: '🎵', idea: '💡' };
+        const snippet = (c.content || c.description || '').slice(0, 120) || 'No preview.';
+        return `
+          <div class="user-galaxy-creation-item">
+            <div class="ugci-icon type-${c.type || 'idea'}">${icons[c.type] || '✨'}</div>
+            <div>
+              <div class="ugci-title">${c.title || 'Untitled'}</div>
+              <div class="ugci-snippet">${snippet}</div>
+              <div class="ugci-type">${(c.type || 'idea').toUpperCase()}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      overlay.innerHTML = `
+        <div class="user-galaxy-modal">
+          <div class="user-galaxy-modal-header">
+            <div>
+              <div class="user-galaxy-modal-title">✦ ${username}'s Galaxy</div>
+              <div class="user-galaxy-modal-subtitle">${creations.length} creation${creations.length !== 1 ? 's' : ''} in this constellation</div>
+            </div>
+            <button class="user-galaxy-modal-close" onclick="closeUserGalaxyModal()">×</button>
+          </div>
+          <div class="user-galaxy-creation-list">${itemsHtml}</div>
+        </div>`;
+
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeUserGalaxyModal();
+      });
+
+      document.body.appendChild(overlay);
+      requestAnimationFrame(() => overlay.classList.add('visible'));
+    }
+
+    function closeUserGalaxyModal() {
+      const overlay = document.getElementById('userGalaxyModalOverlay');
+      if (!overlay) return;
+      overlay.classList.remove('visible');
+      setTimeout(() => overlay.remove(), 260);
     }
 
     function showStarInfoCard(creation, node) {
