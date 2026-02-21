@@ -2906,7 +2906,19 @@
           comfort_mode: comfortMode,
           notification_level: notifLevel
         });
-      if (error && error.code !== '23505') throw error;
+
+      if (!error || error.code === '23505') return; // success or already a member
+
+      // Migration not yet applied — fall back to basic insert without new columns
+      if (error.code === 'PGRST204' || error.message?.includes('comfort_mode') || error.message?.includes('notification_level')) {
+        const { error: fallbackErr } = await db
+          .from('community_members')
+          .insert({ user_id: currentUser.id, community_id: communityId });
+        if (fallbackErr && fallbackErr.code !== '23505') throw fallbackErr;
+        return;
+      }
+
+      throw error;
     }
 
     // Leave a community
