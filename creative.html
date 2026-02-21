@@ -4795,16 +4795,31 @@ This could be:
       checkUserRoomCard();
     }
 
-    function checkUserRoomCard() {
+    async function checkUserRoomCard() {
       const savedMood = localStorage.getItem('gardenRoomMood');
       const config = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
-      let hasCreations = false;
-      try {
-        const local = JSON.parse(localStorage.getItem('creations') || '[]');
-        hasCreations = local.some(c => c.view_mode === 'garden');
-      } catch(e) {}
 
-      const hasRoom = savedMood || hasCreations || config.name;
+      // Count garden creations for growth calculation
+      let gardenCreations = [];
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data } = await supabase
+            .from('creations')
+            .select('id')
+            .eq('user_id', session.user.id)
+            .eq('view_mode', 'garden');
+          if (data) gardenCreations = data;
+        }
+      } catch(e) {}
+      if (gardenCreations.length === 0) {
+        try {
+          const local = JSON.parse(localStorage.getItem('creations') || '[]');
+          gardenCreations = local.filter(c => c.view_mode === 'garden');
+        } catch(e) {}
+      }
+
+      const hasRoom = savedMood || gardenCreations.length > 0 || config.name;
       const card = document.querySelector('.garden-room-card.your-room');
       if (!card) return;
 
@@ -4820,6 +4835,10 @@ This could be:
         const emoji = MOOD_EMOJI[mood] || '🌿';
         const roomName = config.name || 'Your Garden Room';
         const roomDesc = config.description || 'A sanctuary only you design. Plant creations, watch them grow.';
+
+        // Growth = 8% per creation, capped at 100
+        const growthLevel = Math.min(100, gardenCreations.length * 8);
+        const creationCount = gardenCreations.length;
 
         let previewBg = `background: ${MOOD_GRADIENTS[mood]};`;
         let previewImg = '';
@@ -4837,14 +4856,19 @@ This could be:
             <div class="garden-room-preview-emoji" style="position:absolute;bottom:12px;right:16px;z-index:2;font-size:40px;opacity:0.6;">${emoji}</div>
           </div>
           <div class="garden-growth-bar-wrap">
-            <div class="garden-growth-label"><span>Garden Growth</span><span id="myRoomGrowthPct">0%</span></div>
+            <div class="garden-growth-label"><span>Garden Growth</span><span id="myRoomGrowthPct">${growthLevel}%</span></div>
             <div class="garden-growth-bar-track">
-              <div class="garden-growth-bar-fill" style="width:0%" id="myRoomGrowthFill"></div>
+              <div class="garden-growth-bar-fill" style="width:0%" id="myRoomGrowthFill" data-target="${growthLevel}"></div>
             </div>
           </div>
           <div class="garden-room-info">
             <div class="garden-room-title">${emoji} ${roomName}</div>
             <div class="garden-room-description">${roomDesc}</div>
+            <div class="garden-room-meta">
+              <div class="garden-meta-item">🌱 ${creationCount} creation${creationCount !== 1 ? 's' : ''}</div>
+              <div class="garden-meta-item">🌿 0 appreciations</div>
+              <div class="garden-meta-item">👣 0 visits</div>
+            </div>
             <div class="garden-room-actions" style="display:flex;gap:8px;">
               <button class="garden-enter-btn" style="flex:1;" onclick="event.stopPropagation(); openMyRoom()">
                 <span>🏡</span> Enter Your Room
@@ -4855,6 +4879,14 @@ This could be:
             </div>
           </div>
         `;
+
+        // Animate growth bar
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            const fill = document.getElementById('myRoomGrowthFill');
+            if (fill) fill.style.width = growthLevel + '%';
+          }, 300);
+        });
       }
     }
 
@@ -5226,16 +5258,34 @@ This could be:
       openMyRoom();
     }
 
-    function openMyRoom() {
+    async function openMyRoom() {
       const savedMood = localStorage.getItem('gardenRoomMood') || gardenRoomMood || 'calm';
       const config = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
       gardenRoomMood = savedMood;
+
+      // Calculate growth from creation count
+      let gardenCreations = [];
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data } = await supabase.from('creations').select('id').eq('user_id', session.user.id).eq('view_mode', 'garden');
+          if (data) gardenCreations = data;
+        }
+      } catch(e) {}
+      if (gardenCreations.length === 0) {
+        try {
+          const local = JSON.parse(localStorage.getItem('creations') || '[]');
+          gardenCreations = local.filter(c => c.view_mode === 'garden');
+        } catch(e) {}
+      }
+      const growthLevel = Math.min(100, gardenCreations.length * 8);
+
       openRoomInterior({
         name: config.name || 'Your Garden Room',
         desc: config.description || 'A sanctuary only you design. Plant creations, watch them grow, and let visitors knock before they enter.',
         coverImage: config.coverImage || null,
         mood: savedMood,
-        growthLevel: 0,
+        growthLevel,
         appreciations: 0,
         visits: 0,
         isUserRoom: true
