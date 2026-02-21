@@ -4915,23 +4915,31 @@ This could be:
 
       // Load creations — own go into personal galaxy, others become distant galaxies
       async function loadConstellationCreations() {
-        const myId = currentUser ? currentUser.id : null;
+        // Always resolve auth fresh to avoid race condition where currentUser is still null
+        let myId = currentUser ? currentUser.id : null;
+        if (!myId && db) {
+          try {
+            const { data: { session } } = await db.auth.getSession();
+            if (session) myId = session.user.id;
+          } catch(e) {}
+        }
+
         let ownCreations = [];
         let othersByUser = {}; // { userId: { username, creations[] } }
 
         if (db) {
           try {
-            // Fetch all public/community creations (with profile username)
+            // Only fetch creations made in constellation mode — so distant galaxies
+            // only appear for users who actually chose this view
             const { data } = await db
               .from('creations')
               .select('id, type, title, content, description, mood, view_mode, user_id')
               .in('visibility', ['public', 'community'])
-              .neq('view_mode', 'garden')
+              .eq('view_mode', 'constellation')
               .order('created_at', { ascending: false })
               .limit(80);
 
             if (data && data.length > 0) {
-              // Separate own from others
               const otherUserIds = new Set();
               data.forEach(c => {
                 if (myId && c.user_id === myId) {
@@ -4940,10 +4948,8 @@ This could be:
                   otherUserIds.add(c.user_id);
                   if (!othersByUser[c.user_id]) othersByUser[c.user_id] = { username: null, creations: [] };
                   othersByUser[c.user_id].creations.push(c);
-                } else {
-                  // No user_id (anonymous local) → own
-                  ownCreations.push(c);
                 }
+                // If no user_id and not our session, skip (don't add to own)
               });
 
               // Fetch usernames for other users
@@ -4964,10 +4970,10 @@ This could be:
           } catch(e) {}
         }
 
-        // Merge local-only creations (treat as own)
+        // Merge local-only constellation creations (treat as own)
         try {
           const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-          local.filter(c => c.view_mode !== 'garden').forEach(lc => {
+          local.filter(c => c.view_mode === 'constellation').forEach(lc => {
             if (!ownCreations.find(c => String(c.id) === String(lc.id))) ownCreations.push(lc);
           });
         } catch(e) {}
