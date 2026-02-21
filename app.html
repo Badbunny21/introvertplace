@@ -254,6 +254,9 @@
       font-size: 22px;
       line-height: 1;
       opacity: 0.5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: opacity 0.2s ease, transform 0.2s ease;
     }
     .nav-item-label {
@@ -270,6 +273,11 @@
     .nav-item.active .nav-item-icon {
       opacity: 1;
       transform: scale(1.1);
+    }
+    .nav-item-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
     }
     .nav-item.active .nav-item-label {
       color: var(--accent-soft);
@@ -598,23 +606,23 @@
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav" id="bottomNav">
       <button class="nav-item active" data-page="sanctuary" onclick="loadPage('sanctuary', event)">
-        <span class="nav-item-icon">🧘</span>
+        <span class="nav-item-icon"><i data-lucide="sun"></i></span>
         <span class="nav-item-label">Sanctuary</span>
       </button>
       <button class="nav-item" data-page="wellness" onclick="loadPage('wellness', event)">
-        <span class="nav-item-icon">🌿</span>
+        <span class="nav-item-icon"><i data-lucide="hand-heart"></i></span>
         <span class="nav-item-label">Wellness</span>
       </button>
       <button class="nav-item" data-page="creative" onclick="loadPage('creative', event)">
-        <span class="nav-item-icon">✨</span>
+        <span class="nav-item-icon"><i data-lucide="brain"></i></span>
         <span class="nav-item-label">Creative</span>
       </button>
       <button class="nav-item" data-page="blog" onclick="loadPage('blog', event)">
-        <span class="nav-item-icon">📖</span>
+        <span class="nav-item-icon"><i data-lucide="library-big"></i></span>
         <span class="nav-item-label">Blog</span>
       </button>
       <button class="nav-item" data-page="connect" onclick="loadPage('connect', event, {view: 'communities'})">
-        <span class="nav-item-icon">🤝</span>
+        <span class="nav-item-icon"><i data-lucide="earth"></i></span>
         <span class="nav-item-label">Connect</span>
       </button>
       <button class="nav-item" data-page="profile" onclick="loadPage('profile', event)">
@@ -900,6 +908,8 @@
       </div>
     </div>
   </div>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>
 
