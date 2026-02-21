@@ -4951,13 +4951,13 @@ This could be:
             if (myData) ownCreations = myData;
           } catch(e) {}
 
-          // Query 2: Other users' creations with view_mode='constellation' (distant galaxies only)
+          // Query 2: Other users' public creations — shown as distant galaxies
+          // No view_mode filter so we never miss a user whose creation was saved with a different value
           try {
             const { data: othersData } = await db
               .from('creations')
               .select('id, type, title, content, description, mood, view_mode, user_id')
               .in('visibility', ['public', 'community'])
-              .eq('view_mode', 'constellation')
               .neq('user_id', myId)
               .order('created_at', { ascending: false })
               .limit(60);
