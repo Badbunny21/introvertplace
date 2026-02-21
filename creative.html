@@ -4924,6 +4924,18 @@ This could be:
           } catch(e) {}
         }
 
+        // Purge any cached creations that don't belong to the current user.
+        // Old code fetched all users' public creations into localStorage — remove them now.
+        if (myId) {
+          try {
+            const saved = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+            const clean = saved.filter(c => c.user_id === myId);
+            if (clean.length !== saved.length) {
+              localStorage.setItem('introvert_creations', JSON.stringify(clean));
+            }
+          } catch(e) {}
+        }
+
         let ownCreations = [];
         let othersByUser = {}; // { userId: { username, creations[] } }
 
