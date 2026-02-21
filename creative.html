@@ -4970,12 +4970,14 @@ This could be:
           } catch(e) {}
         }
 
-        // Merge local-only constellation creations (treat as own)
+        // Merge local-only constellation creations (own only — no user_id, or user_id matches mine)
         try {
           const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-          local.filter(c => c.view_mode === 'constellation').forEach(lc => {
-            if (!ownCreations.find(c => String(c.id) === String(lc.id))) ownCreations.push(lc);
-          });
+          local
+            .filter(c => c.view_mode === 'constellation' && (!c.user_id || c.user_id === myId))
+            .forEach(lc => {
+              if (!ownCreations.find(c => String(c.id) === String(lc.id))) ownCreations.push(lc);
+            });
         } catch(e) {}
 
         // Render own creations into personal galaxy
@@ -7022,13 +7024,20 @@ This could be:
       activeStarCreation = null;
     }
 
-    function deleteConstellationStar(id, node) {
+    async function deleteConstellationStar(id, node) {
       hideStarInfoCard();
       if (node) node.remove();
+      // Remove from localStorage
       try {
         const saved = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
         localStorage.setItem('introvert_creations', JSON.stringify(saved.filter(c => String(c.id) !== String(id))));
       } catch(e) {}
+      // Remove from Supabase so it doesn't come back on reload
+      if (db) {
+        try {
+          await db.from('creations').delete().eq('id', id);
+        } catch(e) {}
+      }
       showToast('✦ Star removed from your constellation');
     }
 
