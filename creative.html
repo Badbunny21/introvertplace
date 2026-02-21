@@ -4802,19 +4802,21 @@ This could be:
       // Count garden creations for growth calculation
       let gardenCreations = [];
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const { data } = await supabase
-            .from('creations')
-            .select('id')
-            .eq('user_id', session.user.id)
-            .eq('view_mode', 'garden');
-          if (data) gardenCreations = data;
+        if (db) {
+          const { data: { session } } = await db.auth.getSession();
+          if (session) {
+            const { data } = await db
+              .from('creations')
+              .select('id')
+              .eq('user_id', session.user.id)
+              .eq('view_mode', 'garden');
+            if (data) gardenCreations = data;
+          }
         }
       } catch(e) {}
       if (gardenCreations.length === 0) {
         try {
-          const local = JSON.parse(localStorage.getItem('creations') || '[]');
+          const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
           gardenCreations = local.filter(c => c.view_mode === 'garden');
         } catch(e) {}
       }
@@ -4880,13 +4882,13 @@ This could be:
           </div>
         `;
 
-        // Animate growth bar
-        requestAnimationFrame(() => {
+        // Animate growth bar — double rAF ensures browser paints 0% before transition
+        requestAnimationFrame(() => requestAnimationFrame(() => {
           setTimeout(() => {
             const fill = document.getElementById('myRoomGrowthFill');
             if (fill) fill.style.width = growthLevel + '%';
-          }, 300);
-        });
+          }, 100);
+        }));
       }
     }
 
@@ -5266,15 +5268,17 @@ This could be:
       // Calculate growth from creation count
       let gardenCreations = [];
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const { data } = await supabase.from('creations').select('id').eq('user_id', session.user.id).eq('view_mode', 'garden');
-          if (data) gardenCreations = data;
+        if (db) {
+          const { data: { session } } = await db.auth.getSession();
+          if (session) {
+            const { data } = await db.from('creations').select('id').eq('user_id', session.user.id).eq('view_mode', 'garden');
+            if (data) gardenCreations = data;
+          }
         }
       } catch(e) {}
       if (gardenCreations.length === 0) {
         try {
-          const local = JSON.parse(localStorage.getItem('creations') || '[]');
+          const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
           gardenCreations = local.filter(c => c.view_mode === 'garden');
         } catch(e) {}
       }
