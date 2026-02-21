@@ -4981,22 +4981,33 @@ This could be:
         try {
           const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
           local
-            .filter(c => !c.user_id || c.user_id === myId)
+            .filter(c => c.user_id === myId)
             .forEach(lc => {
               if (!ownCreations.find(c => String(c.id) === String(lc.id))) ownCreations.push(lc);
             });
         } catch(e) {}
 
-        // Render own creations into personal galaxy
-        if (ownCreations.length > 0) {
+        // Load dismissed IDs so deleted stars never come back
+        let dismissed = [];
+        try {
+          dismissed = JSON.parse(localStorage.getItem('dismissed_constellation_ids') || '[]');
+        } catch(e) {}
+        const isDismissed = id => dismissed.includes(String(id));
+
+        // Render own creations into personal galaxy (skip dismissed)
+        const visibleOwn = ownCreations.filter(c => !isDismissed(c.id));
+        if (visibleOwn.length > 0) {
           if (emptyState) emptyState.style.display = 'none';
-          ownCreations.forEach(c => addCreationToConstellation(c));
+          visibleOwn.forEach(c => addCreationToConstellation(c));
         }
 
-        // Render other users as distant galaxies
+        // Render other users as distant galaxies (filter out any dismissed creations within each galaxy)
         const otherEntries = Object.entries(othersByUser);
         otherEntries.forEach(([userId, info], idx) => {
-          addDistantGalaxy(userId, info.username || 'Anonymous', info.creations, idx, otherEntries.length);
+          const visibleCreations = info.creations.filter(c => !isDismissed(c.id));
+          if (visibleCreations.length > 0) {
+            addDistantGalaxy(userId, info.username || 'Anonymous', visibleCreations, idx, otherEntries.length);
+          }
         });
       }
       loadConstellationCreations();
@@ -7034,12 +7045,19 @@ This could be:
     async function deleteConstellationStar(id, node) {
       hideStarInfoCard();
       if (node) node.remove();
-      // Remove from localStorage
+      const sid = String(id);
+      // Always add to dismissed list first — this persists even if Supabase delete is blocked by RLS
+      try {
+        const dismissed = JSON.parse(localStorage.getItem('dismissed_constellation_ids') || '[]');
+        if (!dismissed.includes(sid)) dismissed.push(sid);
+        localStorage.setItem('dismissed_constellation_ids', JSON.stringify(dismissed));
+      } catch(e) {}
+      // Remove from own creations localStorage
       try {
         const saved = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-        localStorage.setItem('introvert_creations', JSON.stringify(saved.filter(c => String(c.id) !== String(id))));
+        localStorage.setItem('introvert_creations', JSON.stringify(saved.filter(c => String(c.id) !== sid)));
       } catch(e) {}
-      // Remove from Supabase so it doesn't come back on reload
+      // Try to delete from Supabase (will silently fail if not owner due to RLS — that's fine)
       if (db) {
         try {
           await db.from('creations').delete().eq('id', id);
