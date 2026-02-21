@@ -525,6 +525,17 @@
       .nav-item-icon { font-size: 24px; }
       .nav-item-icon svg { width: 24px; height: 24px; }
     }
+    /* Mobile performance & touch improvements */
+    .nav-item, .mood-option, button {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    body {
+      overscroll-behavior-y: contain;
+    }
+    @media (max-width: 768px) {
+      body { -webkit-overflow-scrolling: touch; }
+    }
   </style>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>

@@ -415,9 +415,10 @@
     .const-nebula {
       position: absolute;
       border-radius: 50%;
-      filter: blur(90px);
+      filter: blur(60px);
       pointer-events: none;
       z-index: 0;
+      will-change: transform;
     }
     /* SVG lines */
     .const-lines-svg {
@@ -437,6 +438,7 @@
       pointer-events: none;
       z-index: 1;
       transition: transform 0.15s ease-out;
+      will-change: transform;
     }
     /* Background stars */
     .star {
@@ -539,6 +541,8 @@
       z-index: 5;
       transform: translate(-50%, -50%);
       transition: transform 0.25s ease;
+      will-change: transform;
+      touch-action: manipulation;
     }
     .creation-node:hover { transform: translate(-50%, -50%) scale(1.18); }
     .node-orb {
@@ -783,6 +787,51 @@
     @media (max-width: 380px) {
       .wizard-header h1 { font-size: 26px; }
       .wizard-page { padding: 20px 12px; }
+    }
+
+    /* ==================== */
+    /* MOBILE PERFORMANCE   */
+    /* ==================== */
+    /* On mobile: cut heavy blur/backdrop effects to improve scrolling & frame rate */
+    @media (max-width: 768px) {
+      /* Reduce expensive backdrop-filter blurs */
+      .glass-card,
+      .star-info-card,
+      .const-controls,
+      .const-control-btn,
+      .user-galaxy-modal,
+      .cluster-label,
+      .creation-detail-content,
+      .garden-onboarding-modal,
+      .room-edit-modal {
+        backdrop-filter: blur(6px) !important;
+        -webkit-backdrop-filter: blur(6px) !important;
+      }
+      /* Kill expensive nebula blur on small screens */
+      .const-nebula { filter: blur(40px); }
+      /* Reduce ambient orb blur */
+      .garden-ambient-orb { filter: blur(40px); }
+      /* Reduce parallax background star count effect */
+      .const-parallax .star { animation: none; opacity: 0.4; }
+      /* Touch-friendly tap targets */
+      .creation-node { min-width: 48px; min-height: 48px; }
+      .distant-galaxy { min-width: 60px; min-height: 60px; }
+      /* Smooth momentum scroll on all scrollable containers */
+      .garden-view,
+      .seasonal-view,
+      .creation-detail-content,
+      .garden-room-interior,
+      .user-galaxy-modal {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+      }
+      /* Ensure the main page scrolls smoothly on mobile */
+      body { overscroll-behavior-y: contain; }
+    }
+    /* Tap highlight removal for interactive elements */
+    .creation-node, .distant-galaxy, .nav-item, button, .garden-room-card, .const-control-btn {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
     /* ==================== */
@@ -1771,9 +1820,10 @@
     .garden-ambient-orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.3;
+      filter: blur(60px);
+      opacity: 0.25;
       animation: garden-float-orb 20s ease-in-out infinite;
+      will-change: transform;
     }
 
     .garden-ambient-orb:nth-child(1) {
@@ -2631,11 +2681,15 @@
 
     /* Fireflies */
     .garden-firefly {
-      position: fixed;
+      position: absolute;
       border-radius: 50%;
       pointer-events: none;
       z-index: 1;
       animation: firefly-drift linear infinite;
+      will-change: transform, opacity;
+    }
+    @media (max-width: 768px) {
+      .garden-firefly { display: none; }
     }
     @keyframes firefly-drift {
       0%   { transform: translate(0, 0) scale(1);   opacity: 0; }
@@ -3333,6 +3387,7 @@
       position: absolute;
       border-radius: 50%;
       animation: seasonal-float-particle 20s ease-in-out infinite;
+      will-change: transform, opacity;
     }
 
     .seasonal-view.winter .seasonal-particle { background: rgba(161,196,232,0.3); }
@@ -4900,13 +4955,26 @@ This could be:
       }
       controls.classList.add('visible');
 
-      // Parallax on mouse move
-      el.addEventListener('mousemove', e => {
-        const dx = (e.clientX / window.innerWidth - 0.5) * 18;
-        const dy = (e.clientY / window.innerHeight - 0.5) * 18;
+      // Parallax on mouse move — throttled with RAF for smooth performance
+      let parallaxRAF = null;
+      const applyParallax = (cx, cy) => {
+        const dx = (cx / window.innerWidth - 0.5) * 14;
+        const dy = (cy / window.innerHeight - 0.5) * 14;
         const p = document.getElementById('constParallax');
         if (p) p.style.transform = `translate(${dx}px,${dy}px)`;
-      });
+        parallaxRAF = null;
+      };
+      el.addEventListener('mousemove', e => {
+        if (parallaxRAF) return;
+        const cx = e.clientX, cy = e.clientY;
+        parallaxRAF = requestAnimationFrame(() => applyParallax(cx, cy));
+      }, { passive: true });
+      // Touch parallax for mobile
+      el.addEventListener('touchmove', e => {
+        if (parallaxRAF || !e.touches[0]) return;
+        const cx = e.touches[0].clientX, cy = e.touches[0].clientY;
+        parallaxRAF = requestAnimationFrame(() => applyParallax(cx, cy));
+      }, { passive: true });
 
       // Close card on background click
       el.addEventListener('click', e => {
