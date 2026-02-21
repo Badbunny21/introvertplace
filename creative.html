@@ -841,7 +841,45 @@
       display: none;
       position: absolute;
       inset: 0;
-      background: var(--bg-black);
+      background: #06060e;
+    }
+    /* Vignette — darkens edges so center feels like a lit desk */
+    .canvas-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      background: radial-gradient(ellipse 80% 70% at 50% 50%,
+        transparent 0%,
+        rgba(4,4,12,0.35) 60%,
+        rgba(4,4,12,0.82) 100%
+      );
+    }
+    /* Workspace island — soft warm glow anchoring the center */
+    .canvas-island-glow {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center,
+        rgba(196,161,255,0.04) 0%,
+        rgba(124,184,232,0.025) 40%,
+        transparent 70%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+    /* Subtle desk border ring */
+    .canvas-island-ring {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 580px; height: 400px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.03);
+      pointer-events: none;
+      z-index: 1;
     }
 
     /* Only show canvas view when BOTH creative page AND canvas view are active */
@@ -951,6 +989,49 @@
     .canvas-empty-btn:hover {
       background: rgba(255,255,255,0.15);
       transform: translateY(-2px);
+    }
+    /* Hide old modal empty state — replaced by ghost placeholders */
+    .canvas-empty-state { display: none !important; }
+
+    /* Ghost placeholder cards — soft entry points on empty canvas */
+    .canvas-ghost-card {
+      position: absolute;
+      width: 200px;
+      padding: 24px 20px;
+      background: rgba(255,255,255,0.018);
+      border: 1px dashed rgba(255,255,255,0.09);
+      border-radius: 18px;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.25s, border-color 0.25s, transform 0.25s;
+      animation: ghost-breathe 5s ease-in-out infinite;
+      will-change: opacity;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .canvas-ghost-card:nth-child(2) { animation-delay: -1.2s; }
+    .canvas-ghost-card:nth-child(3) { animation-delay: -2.4s; }
+    .canvas-ghost-card:nth-child(4) { animation-delay: -3.6s; }
+    @keyframes ghost-breathe {
+      0%, 100% { opacity: 0.55; }
+      50%       { opacity: 0.85; }
+    }
+    .canvas-ghost-card:hover {
+      background: rgba(196,161,255,0.06);
+      border-color: rgba(196,161,255,0.22);
+      transform: translateY(-3px) scale(1.03);
+      animation: none; opacity: 1;
+    }
+    .ghost-icon { font-size: 28px; margin-bottom: 10px; }
+    .ghost-label {
+      font-size: 13px; color: rgba(255,255,255,0.42);
+      font-family: 'Cormorant Garamond', serif;
+      line-height: 1.3;
+    }
+    .ghost-hint {
+      margin-top: 6px; font-size: 10px;
+      color: rgba(255,255,255,0.2);
+      text-transform: uppercase; letter-spacing: 0.1em;
     }
 
     /* Creation cards on canvas */
@@ -1077,67 +1158,90 @@
     }
 
     /* Canvas Toolbar */
-    .canvas-toolbar {
+    /* Legacy toolbar hidden — replaced by bottom dock */
+    .canvas-toolbar { display: none !important; }
+
+    /* ---- BOTTOM DOCK ---- */
+    .canvas-dock-wrap {
       position: fixed;
-      top: 80px;
+      bottom: 22px;
       left: 50%;
       transform: translateX(-50%);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    /* Collapse handle */
+    .canvas-dock-handle {
+      width: 48px; height: 18px;
+      background: rgba(20,20,36,0.9);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: rgba(255,255,255,0.25);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+      user-select: none;
+    }
+    .canvas-dock-handle:hover { color: rgba(255,255,255,0.55); }
+    .canvas-dock-handle .dock-arrow { transition: transform 0.25s; }
+    .canvas-dock-wrap.collapsed .dock-arrow { transform: rotate(180deg); }
+    /* Dock bar */
+    .canvas-dock {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px;
-      background: rgba(31,41,55,0.9);
-      border: 1px solid var(--border-white-10);
-      border-radius: 12px;
-      backdrop-filter: blur(12px);
-      z-index: 101;
+      gap: 4px;
+      padding: 6px 10px;
+      background: rgba(12,12,22,0.94);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+      transition: opacity 0.25s, transform 0.25s;
+      transform-origin: bottom center;
     }
-
+    .canvas-dock-wrap.collapsed .canvas-dock {
+      opacity: 0;
+      transform: scaleY(0.7) translateY(8px);
+      pointer-events: none;
+    }
     .tool-btn {
-      width: 40px;
-      height: 40px;
+      width: 38px; height: 38px;
       background: transparent;
       border: none;
-      border-radius: 8px;
-      color: var(--text-gray-500);
-      font-size: 18px;
+      border-radius: 10px;
+      color: rgba(255,255,255,0.38);
+      font-size: 16px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      transition: all 0.18s ease;
+      display: flex; align-items: center; justify-content: center;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
-
-    .tool-btn:hover {
-      background: rgba(255,255,255,0.05);
-      color: var(--text-white);
+    .tool-btn:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+    .tool-btn.active { background: rgba(196,161,255,0.12); color: #c4a1ff; }
+    .dock-sep {
+      width: 1px; height: 22px;
+      background: rgba(255,255,255,0.07);
+      margin: 0 2px; flex-shrink: 0;
     }
-
-    .tool-btn.active {
-      background: rgba(255,255,255,0.1);
-      color: var(--text-white);
+    .dock-zoom-label {
+      min-width: 42px; text-align: center;
+      font-size: 11px; color: rgba(255,255,255,0.3);
+      font-variant-numeric: tabular-nums;
+      padding: 0 2px;
     }
-
-    .tool-separator {
-      width: 1px;
-      height: 24px;
-      background: var(--border-white-10);
-      margin: 0 4px;
-    }
+    .tool-separator { display: none; }
 
     /* Minimap */
-    .minimap {
-      position: fixed;
-      bottom: 24px;
-      left: 24px;
-      width: 200px;
-      height: 140px;
-      background: rgba(17,24,39,0.95);
-      border: 1px solid var(--border-white-10);
-      border-radius: 12px;
-      overflow: hidden;
-      z-index: 101;
-    }
+    /* Minimap hidden — navigation moved into bottom dock */
+    .minimap { display: none !important; }
 
     .minimap-header {
       padding: 8px 12px;
@@ -1172,78 +1276,9 @@
       transition: all 0.1s ease;
     }
 
-    /* Zoom controls */
-    .zoom-controls {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 101;
-    }
-
-    .zoom-btn {
-      width: 44px;
-      height: 44px;
-      background: rgba(17,24,39,0.95);
-      border: 1px solid var(--border-white-10);
-      border-radius: 12px;
-      color: var(--text-gray-400);
-      font-size: 20px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .zoom-btn:hover {
-      background: rgba(255,255,255,0.1);
-      color: var(--text-white);
-    }
-
-    .zoom-level {
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-gray-500);
-      padding: 8px;
-      background: rgba(17,24,39,0.95);
-      border: 1px solid var(--border-white-10);
-      border-radius: 8px;
-    }
-
-    /* Canvas hint */
-    .canvas-hint-bar {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      background: rgba(17,24,39,0.95);
-      border: 1px solid var(--border-white-10);
-      border-radius: 100px;
-      font-size: 13px;
-      color: var(--text-gray-500);
-      z-index: 101;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .hint-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .hint-key {
-      padding: 3px 8px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 500;
-    }
+    /* Zoom controls and hint bar hidden — merged into bottom dock */
+    .zoom-controls { display: none !important; }
+    .canvas-hint-bar { display: none !important; }
 
     /* Placement mode */
     .placement-mode {
@@ -4347,78 +4382,66 @@
 
           <!-- Infinite Canvas View -->
     <div class="canvas-view" id="canvasView">
+
+      <!-- Workspace island: soft frame anchoring the center -->
+      <div class="canvas-island-glow"></div>
+      <div class="canvas-island-ring"></div>
+      <!-- Vignette: darkens edges so you feel seated at a desk -->
+      <div class="canvas-vignette"></div>
+
       <div class="canvas-container">
         <div class="infinite-canvas" id="infiniteCanvas">
           <div class="canvas-grid"></div>
           <div class="center-marker"></div>
 
-          <!-- Canvas Empty State (centered) -->
-          <div class="canvas-empty-state" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">
-            <div class="canvas-empty-icon">🎨</div>
-            <h3>Your Infinite Canvas</h3>
-            <p>Create something and watch it appear here. Drag to explore, click to interact.</p>
-            <button class="canvas-empty-btn" onclick="openCreateModal()">
-              <span>✨</span> Add Your First Creation
-            </button>
+          <!-- Ghost placeholder grid — soft entry points when canvas is empty -->
+          <div id="canvasGhostCards">
+            <div class="canvas-ghost-card" style="left:3680px;top:3720px" onclick="openCreateModal('writing')">
+              <div class="ghost-icon">✍️</div>
+              <div class="ghost-label">Start a thought</div>
+              <div class="ghost-hint">Writing</div>
+            </div>
+            <div class="canvas-ghost-card" style="left:3920px;top:3720px" onclick="openCreateModal('visual')">
+              <div class="ghost-icon">🎨</div>
+              <div class="ghost-label">Drop an image</div>
+              <div class="ghost-hint">Visual</div>
+            </div>
+            <div class="canvas-ghost-card" style="left:3680px;top:3940px" onclick="openCreateModal('idea')">
+              <div class="ghost-icon">🕸️</div>
+              <div class="ghost-label">Mind map</div>
+              <div class="ghost-hint">Ideas</div>
+            </div>
+            <div class="canvas-ghost-card" style="left:3920px;top:3940px" onclick="openCreateModal('music')">
+              <div class="ghost-icon">🎵</div>
+              <div class="ghost-label">Free sketch</div>
+              <div class="ghost-hint">Music</div>
+            </div>
           </div>
 
           <!-- User Creations Container -->
-          <div id="canvasCreationsContainer">
-            <!-- User creations will be dynamically added here -->
-          </div>
+          <div id="canvasCreationsContainer"></div>
         </div>
       </div>
 
-      <!-- Canvas Toolbar -->
-      <div class="canvas-toolbar">
-        <button class="tool-btn active" data-tool="pan" onclick="setCanvasTool('pan')" title="Pan (Drag)">✋</button>
-        <button class="tool-btn" data-tool="select" onclick="setCanvasTool('select')" title="Select">👆</button>
-        <span class="tool-separator"></span>
-        <button class="tool-btn" onclick="goToCanvasCenter()" title="Go to Center">🏠</button>
-        <button class="tool-btn" onclick="goToRandomCreation()" title="Random Creation">🎲</button>
-      </div>
-
-      <!-- Minimap -->
-      <div class="minimap">
-        <div class="minimap-header">Navigator</div>
-        <div class="minimap-canvas" id="minimapCanvas" onclick="minimapClick(event)">
-          <div class="minimap-dot" style="left: 47%; top: 46%;"></div>
-          <div class="minimap-dot" style="left: 52%; top: 43%;"></div>
-          <div class="minimap-dot" style="left: 43%; top: 51%;"></div>
-          <div class="minimap-dot" style="left: 56%; top: 48%;"></div>
-          <div class="minimap-dot" style="left: 41%; top: 42%;"></div>
-          <div class="minimap-dot" style="left: 51%; top: 53%;"></div>
-          <div class="minimap-dot" style="left: 58%; top: 45%;"></div>
-          <div class="minimap-dot" style="left: 46%; top: 56%;"></div>
-          <div class="minimap-dot" style="left: 55%; top: 57%;"></div>
-          <div class="minimap-dot" style="left: 40%; top: 50%;"></div>
-          <div class="minimap-dot" style="left: 61%; top: 51%;"></div>
-          <div class="minimap-dot" style="left: 48%; top: 41%;"></div>
-          <div class="minimap-viewport" id="minimapViewport"></div>
+      <!-- Bottom Dock — all controls in one place -->
+      <div class="canvas-dock-wrap" id="canvasDockWrap">
+        <div class="canvas-dock-handle" onclick="toggleCanvasDock()" title="Collapse dock">
+          <span class="dock-arrow">▾</span>
         </div>
-      </div>
-
-      <!-- Zoom Controls -->
-      <div class="zoom-controls">
-        <button class="zoom-btn" onclick="canvasZoomIn()">+</button>
-        <div class="zoom-level" id="zoomLevel">100%</div>
-        <button class="zoom-btn" onclick="canvasZoomOut()">−</button>
-        <button class="zoom-btn" onclick="resetCanvasZoom()" title="Reset">↺</button>
-      </div>
-
-      <!-- Canvas Hints -->
-      <div class="canvas-hint-bar">
-        <div class="hint-item">
-          <span class="hint-key">Drag</span>
-          <span>Pan</span>
-        </div>
-        <div class="hint-item">
-          <span class="hint-key">Scroll</span>
-          <span>Zoom</span>
-        </div>
-        <div class="hint-item">
-          <span class="hint-key">Home</span>
-          <span>Center</span>
+        <div class="canvas-dock" id="canvasDock">
+          <!-- Tool group -->
+          <button class="tool-btn active" data-tool="pan" onclick="setCanvasTool('pan')" title="Pan">✋</button>
+          <button class="tool-btn" data-tool="select" onclick="setCanvasTool('select')" title="Select">👆</button>
+          <span class="dock-sep"></span>
+          <!-- Zoom group -->
+          <button class="tool-btn" onclick="canvasZoomOut()" title="Zoom out">−</button>
+          <span class="dock-zoom-label" id="zoomLevel">100%</span>
+          <button class="tool-btn" onclick="canvasZoomIn()" title="Zoom in">+</button>
+          <span class="dock-sep"></span>
+          <!-- Navigation group -->
+          <button class="tool-btn" onclick="goToCanvasCenter()" title="Center">🏠</button>
+          <button class="tool-btn" onclick="goToRandomCreation()" title="Random">🎲</button>
+          <button class="tool-btn" onclick="resetCanvasZoom()" title="Reset view">↺</button>
         </div>
       </div>
 
@@ -5248,15 +5271,27 @@ This could be:
 
     function setCanvasTool(tool) {
       currentCanvasTool = tool;
-      document.querySelectorAll('.canvas-toolbar .tool-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelector(`.canvas-toolbar [data-tool="${tool}"]`).classList.add('active');
+      // Update active state in the bottom dock
+      document.querySelectorAll('.canvas-dock .tool-btn[data-tool]').forEach(btn => btn.classList.remove('active'));
+      const active = document.querySelector(`.canvas-dock [data-tool="${tool}"]`);
+      if (active) active.classList.add('active');
 
       const container = document.querySelector('.canvas-view .canvas-container');
-      if (tool === 'pan') {
-        container.style.cursor = 'grab';
-      } else if (tool === 'select') {
-        container.style.cursor = 'default';
-      }
+      if (container) container.style.cursor = tool === 'pan' ? 'grab' : 'default';
+    }
+
+    function toggleCanvasDock() {
+      const wrap = document.getElementById('canvasDockWrap');
+      if (wrap) wrap.classList.toggle('collapsed');
+    }
+
+    function hideGhostCardsIfNeeded() {
+      const container = document.getElementById('canvasCreationsContainer');
+      const ghosts = document.getElementById('canvasGhostCards');
+      if (!ghosts) return;
+      const hasCreations = container && container.children.length > 0;
+      ghosts.style.opacity = hasCreations ? '0' : '';
+      ghosts.style.pointerEvents = hasCreations ? 'none' : '';
     }
 
     function startPlacement() {
@@ -7144,8 +7179,8 @@ This could be:
     }
 
     function addCreationToCanvas(creation) {
-      const canvas = document.querySelector('.infinite-canvas');
-      if (!canvas) return;
+      const container = document.getElementById('canvasCreationsContainer');
+      if (!container) return;
       const card = document.createElement('div');
       card.className = 'canvas-creation';
       card.style.left = (3500 + Math.random() * 1000) + 'px';
@@ -7161,7 +7196,8 @@ This could be:
           ${creation.mood ? `<div class="creation-meta"><span class="mood-tag">${creation.mood}</span></div>` : ''}
         </div>
       `;
-      canvas.appendChild(card);
+      container.appendChild(card);
+      hideGhostCardsIfNeeded();
     }
 
     function addCreationToSeasonal(creation) {
@@ -7353,6 +7389,8 @@ This could be:
           addCreationToCanvas(creation);
         }
       });
+      // Hide ghost placeholders if creations exist
+      if (canvasView && canvasView.classList.contains('active')) hideGhostCardsIfNeeded();
     }
 
     // Close modal on overlay click
