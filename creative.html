@@ -4927,29 +4927,36 @@ This could be:
         let ownCreations = [];
         let othersByUser = {}; // { userId: { username, creations[] } }
 
-        if (db) {
+        if (db && myId) {
+          // Query 1: ALL of the current user's own creations (no view_mode filter so nothing is lost)
           try {
-            // Only fetch creations made in constellation mode — so distant galaxies
-            // only appear for users who actually chose this view
-            const { data } = await db
+            const { data: myData } = await db
+              .from('creations')
+              .select('id, type, title, content, description, mood, view_mode, user_id')
+              .eq('user_id', myId)
+              .order('created_at', { ascending: false })
+              .limit(100);
+            if (myData) ownCreations = myData;
+          } catch(e) {}
+
+          // Query 2: Other users' creations with view_mode='constellation' (distant galaxies only)
+          try {
+            const { data: othersData } = await db
               .from('creations')
               .select('id, type, title, content, description, mood, view_mode, user_id')
               .in('visibility', ['public', 'community'])
               .eq('view_mode', 'constellation')
+              .neq('user_id', myId)
               .order('created_at', { ascending: false })
-              .limit(80);
+              .limit(60);
 
-            if (data && data.length > 0) {
+            if (othersData && othersData.length > 0) {
               const otherUserIds = new Set();
-              data.forEach(c => {
-                if (myId && c.user_id === myId) {
-                  ownCreations.push(c);
-                } else if (c.user_id) {
-                  otherUserIds.add(c.user_id);
-                  if (!othersByUser[c.user_id]) othersByUser[c.user_id] = { username: null, creations: [] };
-                  othersByUser[c.user_id].creations.push(c);
-                }
-                // If no user_id and not our session, skip (don't add to own)
+              othersData.forEach(c => {
+                if (!c.user_id) return;
+                otherUserIds.add(c.user_id);
+                if (!othersByUser[c.user_id]) othersByUser[c.user_id] = { username: null, creations: [] };
+                othersByUser[c.user_id].creations.push(c);
               });
 
               // Fetch usernames for other users
@@ -4970,11 +4977,11 @@ This could be:
           } catch(e) {}
         }
 
-        // Merge local-only constellation creations (own only — no user_id, or user_id matches mine)
+        // Merge local-only creations for own galaxy (no user_id = pre-login local, or matches myId)
         try {
           const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
           local
-            .filter(c => c.view_mode === 'constellation' && (!c.user_id || c.user_id === myId))
+            .filter(c => !c.user_id || c.user_id === myId)
             .forEach(lc => {
               if (!ownCreations.find(c => String(c.id) === String(lc.id))) ownCreations.push(lc);
             });
