@@ -251,36 +251,29 @@
       background: rgba(255,255,255,0.05);
     }
     .nav-item-icon {
-      font-size: 22px;
+      font-size: 26px;
       line-height: 1;
-      opacity: 0.5;
+      color: rgba(255,255,255,0.35);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.2s ease, transform 0.2s ease;
+      transition: color 0.2s ease, transform 0.2s ease;
     }
     .nav-item-label {
-      font-family: 'Inter', sans-serif;
-      font-size: 10px;
-      font-weight: 500;
-      color: var(--muted);
-      transition: color 0.2s ease;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
+      display: none;
     }
     .nav-item.active .nav-item-icon {
-      opacity: 1;
+      color: var(--accent-soft);
       transform: scale(1.1);
     }
     .nav-item-icon svg {
-      width: 22px;
-      height: 22px;
+      width: 26px;
+      height: 26px;
       stroke: currentColor;
+      stroke-width: 1.5;
     }
-    .nav-item.active .nav-item-label {
-      color: var(--accent-soft);
+    .nav-item:hover .nav-item-icon {
+      color: rgba(255,255,255,0.6);
     }
 
     /* Profile nav item avatar */
@@ -529,8 +522,8 @@
       .mood-grid { gap: 8px; }
       .mood-option { padding: 16px 12px; }
       .mood-emoji { font-size: 30px; }
-      .nav-item-label { font-size: 9px; }
-      .nav-item-icon { font-size: 20px; }
+      .nav-item-icon { font-size: 24px; }
+      .nav-item-icon svg { width: 24px; height: 24px; }
     }
   </style>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
