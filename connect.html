@@ -2174,6 +2174,123 @@
       font-family: 'DM Sans', sans-serif;
     }
     .report-cancel-btn:hover { color: var(--text-secondary); }
+
+    /* ========== ROOM NAVIGATION ========== */
+    .room-nav {
+      display: flex;
+      gap: 0;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      overflow-x: auto;
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+    .room-nav::-webkit-scrollbar { display: none; }
+    .room-tab {
+      padding: 12px 16px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.18s, border-color 0.18s;
+      margin-bottom: -1px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .room-tab:hover { color: var(--text-secondary); }
+    .room-tab.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--accent-soft);
+    }
+
+    /* ========== ROOM INFO BAR ========== */
+    .room-info-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      min-height: 36px;
+    }
+    .room-desc-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      flex: 1;
+    }
+    .room-readonly-badge {
+      font-size: 11px;
+      color: var(--accent-gold);
+      background: rgba(240,232,124,0.1);
+      border: 1px solid rgba(240,232,124,0.2);
+      border-radius: var(--radius-sm);
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
+
+    /* ========== CREATOR BAR ========== */
+    .creator-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 24px;
+      background: rgba(196,161,255,0.05);
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+    .creator-bar-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-right: 4px;
+    }
+    .creator-tool-btn {
+      padding: 4px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      color: var(--text-secondary);
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .creator-tool-btn:hover { background: var(--bg-hover); }
+    .creator-tool-btn.on {
+      background: rgba(124,232,168,0.1);
+      border-color: rgba(124,232,168,0.3);
+      color: var(--accent-green);
+    }
+
+    /* ========== PIN BUTTON ON POSTS ========== */
+    .pin-post-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 4px 6px;
+      opacity: 0.45;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .pin-post-btn:hover { opacity: 1; }
+    .pin-post-btn.pinned { opacity: 1; color: var(--accent-gold); }
+
+    /* ========== SLOW MODE INDICATOR ========== */
+    .slow-mode-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--accent-calm);
+      background: rgba(124,184,232,0.1);
+      border: 1px solid rgba(124,184,232,0.2);
+      border-radius: var(--radius-full);
+      padding: 2px 8px;
+      margin-left: 8px;
+    }
   </style>
 </head>
 <body>
@@ -3351,6 +3468,9 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     let userBookmarks = new Set();
     let expandedComments = new Set();
     let communityNames = {}; // { communityId: name } for join overlay
+    let currentRoom = null;   // Currently active room object
+    let communityRooms = [];  // All rooms for current community
+    let isCreator = false;    // Is current user the community creator?
 
     // Post type config
     const POST_TYPES = {
@@ -3372,12 +3492,15 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     // Open community detail modal with posts
     function openCommunityModal(community, memberCount, isJoined) {
       const memberText = memberCount === 1 ? '1 member' : `${memberCount} members`;
-      
+
       // Store for use in other functions
       currentCommunity = community;
       currentCommunityJoined = isJoined;
       currentPostType = 'thought';
       currentFilter = 'all';
+      currentRoom = null;
+      communityRooms = [];
+      isCreator = !!(currentUser && community.creator_id === currentUser.id);
 
       // Create modal if it doesn't exist
       let modal = document.getElementById('communityViewModal');
@@ -3416,40 +3539,45 @@ CREATE POLICY "Authenticated users can create communities" ON communities
             ${community.description ? `<p class="community-header-desc">${escapeHtml(community.description)}</p>` : ''}
           </div>
           
-          <div class="community-tabs">
-            <button class="community-tab active" data-filter="all" onclick="filterPosts('all')">🌟 All</button>
-            <button class="community-tab" data-filter="thought" onclick="filterPosts('thought')">💭 Thoughts</button>
-            <button class="community-tab" data-filter="resource" onclick="filterPosts('resource')">📚 Resources</button>
-            <button class="community-tab" data-filter="creation" onclick="filterPosts('creation')">✨ Creations</button>
-            <button class="community-tab" data-filter="lesson" onclick="filterPosts('lesson')">🎓 Lessons</button>
-            <button class="community-tab" data-filter="question" onclick="filterPosts('question')">❓ Questions</button>
+          <!-- Room navigation — populated dynamically by loadCommunityRooms() -->
+          <div class="room-nav" id="roomNav">
+            <div style="padding: 12px 16px; color: var(--text-muted); font-size: 13px;">Loading rooms…</div>
           </div>
-          
+
+          <!-- Creator tools bar — shown only for community creator -->
+          <div id="creatorBar" style="display: none;"></div>
+
+          <!-- Room info bar — shows room description + read-only indicator -->
+          <div id="roomInfoBar"></div>
+
           <div class="community-body">
-            ${isJoined ? `
-              <div class="post-composer">
-                <div class="post-type-selector">
-                  ${postTypeButtons}
+            <!-- Composer section — hidden in read-only rooms -->
+            <div id="composerSection">
+              ${isJoined ? `
+                <div class="post-composer">
+                  <div class="post-type-selector">
+                    ${postTypeButtons}
+                  </div>
+                  <input type="text" class="post-composer-title" id="postTitle" placeholder="Title (optional)" style="display: none;">
+                  <input type="text" class="post-composer-link" id="postLink" placeholder="Link URL (optional)" style="display: none;">
+                  <textarea id="postContent" placeholder="${POST_TYPES.thought.placeholder}"></textarea>
+                  <div class="post-composer-footer">
+                    ${community.allow_anonymous_posts ? `
+                      <label class="anon-toggle-row">
+                        <input type="checkbox" id="postAnonymous">
+                        <span>👤 Post anonymously</span>
+                      </label>
+                    ` : `<span class="post-composer-hint">Take your time. No rush here. 🌙</span>`}
+                    <button class="post-btn" onclick="createPost()">Share</button>
+                  </div>
                 </div>
-                <input type="text" class="post-composer-title" id="postTitle" placeholder="Title (optional)" style="display: none;">
-                <input type="text" class="post-composer-link" id="postLink" placeholder="Link URL (optional)" style="display: none;">
-                <textarea id="postContent" placeholder="${POST_TYPES.thought.placeholder}"></textarea>
-                <div class="post-composer-footer">
-                  ${community.allow_anonymous_posts ? `
-                    <label class="anon-toggle-row">
-                      <input type="checkbox" id="postAnonymous">
-                      <span>👤 Post anonymously</span>
-                    </label>
-                  ` : `<span class="post-composer-hint">Take your time. No rush here. 🌙</span>`}
-                  <button class="post-btn" onclick="createPost()">Share</button>
+              ` : `
+                <div class="lurk-mode-hint">
+                  👁️ Browsing quietly — join to share
                 </div>
-              </div>
-            ` : `
-              <div class="lurk-mode-hint">
-                👁️ Browsing mode — Join to share and interact
-              </div>
-            `}
-            
+              `}
+            </div>
+
             <div class="posts-feed" id="postsFeed">
               <div class="posts-empty">
                 <div class="icon">💭</div>
@@ -3461,11 +3589,9 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       `;
 
       modal.classList.add('active');
-      
-      // Load user's reactions and bookmarks, then posts
-      loadUserInteractions(community.id).then(() => {
-        loadCommunityPosts(community.id);
-      });
+
+      // Load rooms first (which loads interactions + posts after)
+      loadCommunityRooms(community.id);
     }
 
     // Select post type
@@ -3557,7 +3683,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
       if (!feed) return;
 
       try {
-        // Build query with optional filter
+        // Build query — filter by room type when a room is active
         let query = db
           .from('community_posts')
           .select('*')
@@ -3565,11 +3691,33 @@ CREATE POLICY "Authenticated users can create communities" ON communities
           .order('is_pinned', { ascending: false })
           .order('created_at', { ascending: false })
           .limit(50);
-        
-        if (currentFilter !== 'all') {
+
+        // Room-based filtering
+        if (currentRoom) {
+          switch (currentRoom.type) {
+            case 'start_here':
+              query = query.eq('is_pinned', true);
+              break;
+            case 'resources':
+              query = query.eq('post_type', 'resource');
+              break;
+            case 'prompts':
+              query = query.in('post_type', ['thought', 'question']);
+              break;
+            case 'threads':
+            default:
+              // All posts — no extra filter
+              break;
+          }
+          // If room has a real UUID, also try room_id (posts created after migration)
+          if (currentRoom.id && currentRoom.id.length === 36) {
+            // We intentionally don't filter by room_id yet so older posts still appear
+          }
+        } else if (currentFilter !== 'all') {
+          // Legacy post-type filter fallback
           query = query.eq('post_type', currentFilter);
         }
-        
+
         const { data: posts, error } = await query;
 
         if (error) {
@@ -3703,6 +3851,11 @@ CREATE POLICY "Authenticated users can create communities" ON communities
                         title="Save for later">
                   ${isBookmarked ? '🔖' : '📑'}
                 </button>
+                ${isCreator ? `
+                  <button class="pin-post-btn ${post.is_pinned ? 'pinned' : ''}"
+                          onclick="pinPost('${post.id}', ${post.is_pinned})"
+                          title="${post.is_pinned ? 'Unpin post' : 'Pin post'}">📌</button>
+                ` : ''}
                 <button class="post-report-btn" onclick="reportPost('${post.id}')" title="Report this post">⋯</button>
               </div>
               
@@ -3985,6 +4138,8 @@ CREATE POLICY "Authenticated users can create communities" ON communities
 
       try {
         const isAnonymous = document.getElementById('postAnonymous')?.checked || false;
+        // Include room_id if current room has a real UUID (DB-backed room)
+        const roomId = (currentRoom?.id && currentRoom.id.length === 36) ? currentRoom.id : null;
         const postData = {
           community_id: currentCommunity.id,
           author_id: currentUser.id,
@@ -3992,7 +4147,8 @@ CREATE POLICY "Authenticated users can create communities" ON communities
           post_type: currentPostType,
           title: title,
           link_url: linkUrl,
-          is_anonymous: isAnonymous
+          is_anonymous: isAnonymous,
+          ...(roomId ? { room_id: roomId } : {})
         };
 
         const { data, error } = await db
@@ -4569,6 +4725,152 @@ CREATE POLICY "Authenticated users can create communities" ON communities
     });
 
     // Conversations now load from DOMContentLoaded after initAuth completes
+
+    // ========== ROOMS SYSTEM ==========
+
+    const DEFAULT_ROOMS = [
+      { id: 'start_here', name: '📌 Start Here', type: 'start_here', is_read_only: true,  description: 'Welcome, rules & community vibe' },
+      { id: 'threads',    name: '💬 Threads',    type: 'threads',    is_read_only: false, description: 'Long-form async discussions' },
+      { id: 'prompts',    name: '🌱 Prompts',    type: 'prompts',    is_read_only: false, description: 'Weekly guided conversations' },
+      { id: 'resources',  name: '📚 Resources',  type: 'resources',  is_read_only: false, description: 'Saved links & helpful finds' }
+    ];
+
+    async function loadCommunityRooms(communityId) {
+      try {
+        if (db) {
+          const { data: rooms } = await db
+            .from('community_rooms')
+            .select('*')
+            .eq('community_id', communityId)
+            .order('position_order', { ascending: true });
+          communityRooms = (rooms && rooms.length > 0) ? rooms : DEFAULT_ROOMS;
+        } else {
+          communityRooms = DEFAULT_ROOMS;
+        }
+      } catch (err) {
+        communityRooms = DEFAULT_ROOMS;
+      }
+
+      // Default landing room is always 'threads'
+      currentRoom = communityRooms.find(r => r.type === 'threads') || communityRooms[0];
+
+      renderRoomTabs();
+      renderCreatorBar();
+      renderRoomInfoBar();
+      updateComposerForRoom(currentRoom);
+
+      // Now load interactions + posts
+      await loadUserInteractions(communityId);
+      loadCommunityPosts(communityId);
+    }
+
+    function renderRoomTabs() {
+      const nav = document.getElementById('roomNav');
+      if (!nav) return;
+      nav.innerHTML = communityRooms.map(room => `
+        <button class="room-tab ${currentRoom?.id === room.id ? 'active' : ''}"
+                onclick="switchRoomById('${room.id}')">
+          ${escapeHtml(room.name)}
+        </button>
+      `).join('');
+    }
+
+    function switchRoomById(roomId) {
+      const room = communityRooms.find(r => r.id === roomId);
+      if (!room || room.id === currentRoom?.id) return;
+      currentRoom = room;
+      renderRoomTabs();
+      renderRoomInfoBar();
+      updateComposerForRoom(room);
+      if (currentCommunity) loadCommunityPosts(currentCommunity.id);
+    }
+
+    function renderRoomInfoBar() {
+      const bar = document.getElementById('roomInfoBar');
+      if (!bar) return;
+      if (!currentRoom) { bar.innerHTML = ''; return; }
+      bar.innerHTML = `
+        <div class="room-info-bar">
+          <span class="room-desc-text">${escapeHtml(currentRoom.description || '')}</span>
+          ${currentRoom.is_read_only ? '<span class="room-readonly-badge">🔒 Read only</span>' : ''}
+        </div>
+      `;
+    }
+
+    function updateComposerForRoom(room) {
+      const section = document.getElementById('composerSection');
+      if (!section) return;
+      // Hide composer in read-only rooms
+      section.style.display = room?.is_read_only ? 'none' : '';
+    }
+
+    function renderCreatorBar() {
+      const bar = document.getElementById('creatorBar');
+      if (!bar) return;
+      if (!isCreator || !currentCommunity) { bar.style.display = 'none'; return; }
+
+      const slowOn = currentCommunity.slow_mode;
+      const anonOn = currentCommunity.allow_anonymous_posts;
+
+      bar.style.display = 'flex';
+      bar.className = 'creator-bar';
+      bar.innerHTML = `
+        <span class="creator-bar-label">⚙️ Your tools</span>
+        <button class="creator-tool-btn ${slowOn ? 'on' : ''}"
+                onclick="toggleSlowMode('${currentCommunity.id}')">
+          🐢 Slow mode ${slowOn ? 'ON' : 'off'}
+        </button>
+        <button class="creator-tool-btn ${anonOn ? 'on' : ''}"
+                onclick="toggleAnonPosts('${currentCommunity.id}')">
+          👤 Anon posts ${anonOn ? 'ON' : 'off'}
+        </button>
+      `;
+    }
+
+    // Pin / unpin a post (creator only)
+    async function pinPost(postId, currentlyPinned) {
+      if (!db || !currentUser || !isCreator) return;
+      try {
+        await db.from('community_posts')
+          .update({ is_pinned: !currentlyPinned })
+          .eq('id', postId);
+        showToast(currentlyPinned ? 'Post unpinned' : '📌 Post pinned');
+        loadCommunityPosts(currentCommunity.id);
+      } catch (err) {
+        console.error('Pin error:', err);
+        showToast('⚠️ Could not update pin');
+      }
+    }
+
+    // Toggle slow mode (creator only)
+    async function toggleSlowMode(communityId) {
+      if (!db || !currentUser || !isCreator || !currentCommunity) return;
+      const newVal = !currentCommunity.slow_mode;
+      try {
+        await db.from('communities').update({ slow_mode: newVal }).eq('id', communityId);
+        currentCommunity.slow_mode = newVal;
+        renderCreatorBar();
+        showToast(newVal ? '🐢 Slow mode enabled' : 'Slow mode disabled');
+      } catch (err) {
+        console.error('Slow mode error:', err);
+        showToast('⚠️ Column not available yet — run migration first');
+      }
+    }
+
+    // Toggle anonymous posting (creator only)
+    async function toggleAnonPosts(communityId) {
+      if (!db || !currentUser || !isCreator || !currentCommunity) return;
+      const newVal = !currentCommunity.allow_anonymous_posts;
+      try {
+        await db.from('communities').update({ allow_anonymous_posts: newVal }).eq('id', communityId);
+        currentCommunity.allow_anonymous_posts = newVal;
+        renderCreatorBar();
+        showToast(newVal ? '👤 Anonymous posting enabled' : 'Anonymous posting disabled');
+      } catch (err) {
+        console.error('Anon posts error:', err);
+        showToast('⚠️ Column not available yet — run migration first');
+      }
+    }
 
     // ========== JOIN OVERLAY ==========
     let pendingJoinCommunityId = null;
