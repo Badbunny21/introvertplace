@@ -4789,17 +4789,36 @@ This could be:
         if (!e.target.closest('.creation-node') && !e.target.closest('#starInfoCard')) hideStarInfoCard();
       });
 
-      // Load existing creations
-      let saved = [];
-      try {
-        const all = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-        saved = all.filter(c => c.view_mode !== 'garden');
-      } catch(e) {}
+      // Load creations — Supabase first (all public), fallback to localStorage
+      async function loadConstellationCreations() {
+        let creations = [];
+        if (db) {
+          try {
+            const { data } = await db
+              .from('creations')
+              .select('id, type, title, content, description, mood, view_mode, user_id')
+              .in('visibility', ['public', 'community'])
+              .neq('view_mode', 'garden')
+              .order('created_at', { ascending: false })
+              .limit(60);
+            if (data && data.length > 0) creations = data;
+          } catch(e) {}
+        }
+        // Also merge any local-only creations not yet synced
+        try {
+          const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
+          const localFiltered = local.filter(c => c.view_mode !== 'garden');
+          localFiltered.forEach(lc => {
+            if (!creations.find(c => String(c.id) === String(lc.id))) creations.push(lc);
+          });
+        } catch(e) {}
 
-      if (saved.length > 0) {
-        if (emptyState) emptyState.style.display = 'none';
-        saved.forEach(c => addCreationToConstellation(c));
+        if (creations.length > 0) {
+          if (emptyState) emptyState.style.display = 'none';
+          creations.forEach(c => addCreationToConstellation(c));
+        }
       }
+      loadConstellationCreations();
     }
 
     // ==================== INFINITE CANVAS ====================
@@ -5075,15 +5094,82 @@ This could be:
       }
     ];
 
-    function loadFeaturedRooms() {
+    async function loadFeaturedRooms() {
       const grid = document.getElementById('gardenRoomsGrid');
       const ghosts = document.getElementById('gardenGhostRooms');
       if (!grid) return;
 
-      // Animate ghosts out then show rooms
+      // Fetch real user rooms from Supabase
+      let userRooms = [];
+      if (db) {
+        try {
+          const { data: { session } } = await db.auth.getSession();
+          const { data } = await db
+            .from('garden_rooms')
+            .select('id, user_id, name, description, mood, emoji, cover_image_url, growth_level, visit_count, appreciation_count')
+            .eq('is_system_room', false)
+            .order('created_at', { ascending: false })
+            .limit(20);
+          if (data) {
+            // Exclude the current user's own room (already shown in "Your Rooms")
+            userRooms = session
+              ? data.filter(r => r.user_id !== session.user.id)
+              : data;
+          }
+        } catch(e) {}
+      }
+
       setTimeout(() => {
         if (ghosts) ghosts.style.display = 'none';
-        grid.innerHTML = FEATURED_GARDEN_ROOMS.map(room => {
+
+        const MOOD_GRADIENTS = {
+          calm:       'linear-gradient(135deg, rgba(124,232,168,0.3) 0%, rgba(124,184,232,0.2) 100%)',
+          dreamy:     'linear-gradient(135deg, rgba(196,161,255,0.3) 0%, rgba(124,184,232,0.2) 100%)',
+          energetic:  'linear-gradient(135deg, rgba(232,168,124,0.3) 0%, rgba(232,210,124,0.2) 100%)',
+          reflective: 'linear-gradient(135deg, rgba(124,184,232,0.3) 0%, rgba(196,161,255,0.2) 100%)'
+        };
+        const MOOD_EMOJI_MAP = { calm: '🌿', dreamy: '🌙', energetic: '🌅', reflective: '🪷' };
+
+        // Render real user rooms first
+        const userRoomHtml = userRooms.map(room => {
+          const emoji = room.emoji || MOOD_EMOJI_MAP[room.mood] || '🌿';
+          const gradient = MOOD_GRADIENTS[room.mood] || MOOD_GRADIENTS.calm;
+          const coverHtml = room.cover_image_url
+            ? `<img src="${room.cover_image_url}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.7;">`
+            : '';
+          const safeName = (room.name || '').replace(/'/g, "\\'");
+          return `
+            <div class="garden-room-card" onclick="openGardenKnockModal('${safeName}', 'member')">
+              <div class="garden-room-preview" style="background:${gradient};position:relative;">
+                ${coverHtml}
+                <div class="garden-room-status open" style="position:absolute;top:12px;left:12px;z-index:2;"><span class="garden-status-dot"></span> Open</div>
+                <div class="garden-room-preview-emoji" style="position:absolute;bottom:12px;right:16px;font-size:40px;opacity:0.6;">${emoji}</div>
+              </div>
+              <div class="garden-growth-bar-wrap">
+                <div class="garden-growth-label"><span>Garden Growth</span><span>${room.growth_level || 0}%</span></div>
+                <div class="garden-growth-bar-track">
+                  <div class="garden-growth-bar-fill" style="width:0%" data-target="${room.growth_level || 0}"></div>
+                </div>
+              </div>
+              <div class="garden-room-info">
+                <div class="garden-room-title">${emoji} ${room.name}</div>
+                <div class="garden-room-description">${room.description || 'A creative sanctuary.'}</div>
+                <div class="garden-room-meta">
+                  <div class="garden-meta-item">🌿 ${room.appreciation_count || 0} appreciations</div>
+                  <div class="garden-meta-item">👣 ${room.visit_count || 0} visits</div>
+                </div>
+                <div class="garden-room-actions">
+                  <button class="garden-knock-btn" onclick="event.stopPropagation(); openGardenKnockModal('${safeName}', 'member')">
+                    <span>🚪</span> Knock to Enter
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Then render featured/system rooms
+        const featuredHtml = FEATURED_GARDEN_ROOMS.map(room => {
           const statusLabel = room.status === 'open'
             ? '<span class="garden-status-dot"></span> Open'
             : room.status === 'quiet'
@@ -5119,7 +5205,8 @@ This could be:
           `;
         }).join('');
 
-        // Animate growth bars after render
+        grid.innerHTML = userRoomHtml + featuredHtml;
+
         requestAnimationFrame(() => {
           document.querySelectorAll('.garden-growth-bar-fill[data-target]').forEach(bar => {
             setTimeout(() => { bar.style.width = bar.dataset.target + '%'; }, 200);
@@ -5417,21 +5504,18 @@ This could be:
       if (fileInput.files[0]) {
         const file = fileInput.files[0];
         try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            const ext = file.name.split('.').pop();
-            const path = `garden-covers/${session.user.id}.${ext}`;
-            await supabase.storage.from('images').upload(path, file, { upsert: true });
-            const { data: urlData } = supabase.storage.from('images').getPublicUrl(path);
-            coverImage = urlData.publicUrl;
-          } else {
-            coverImage = await new Promise(resolve => {
-              const reader = new FileReader();
-              reader.onload = e => resolve(e.target.result);
-              reader.readAsDataURL(file);
-            });
+          if (db) {
+            const { data: { session } } = await db.auth.getSession();
+            if (session) {
+              const ext = file.name.split('.').pop();
+              const path = `garden-covers/${session.user.id}.${ext}`;
+              await db.storage.from('images').upload(path, file, { upsert: true });
+              const { data: urlData } = db.storage.from('images').getPublicUrl(path);
+              coverImage = urlData.publicUrl;
+            }
           }
-        } catch(e) {
+        } catch(e) {}
+        if (!coverImage) {
           coverImage = await new Promise(resolve => {
             const reader = new FileReader();
             reader.onload = e => resolve(e.target.result);
@@ -5440,7 +5524,30 @@ This could be:
         }
       }
 
+      const mood = localStorage.getItem('gardenRoomMood') || 'calm';
       localStorage.setItem('gardenRoomConfig', JSON.stringify({ name, description: desc, coverImage }));
+
+      // Save to Supabase so other users can see this room
+      if (db && currentUser) {
+        try {
+          const existingId = localStorage.getItem('gardenRoomDbId');
+          const roomData = {
+            user_id: currentUser.id,
+            name,
+            description: desc,
+            mood,
+            cover_image_url: coverImage && !coverImage.startsWith('data:') ? coverImage : null,
+            is_system_room: false
+          };
+          if (existingId) {
+            await db.from('garden_rooms').update(roomData).eq('id', existingId).eq('user_id', currentUser.id);
+          } else {
+            const { data: inserted } = await db.from('garden_rooms').insert(roomData).select('id').single();
+            if (inserted) localStorage.setItem('gardenRoomDbId', inserted.id);
+          }
+        } catch(e) {}
+      }
+
       fileInput.value = '';
       closeRoomEditModal();
       gardenInitialized = false;
@@ -5516,8 +5623,23 @@ This could be:
         }
       }
 
+      let dbId = null;
+      if (db && currentUser) {
+        try {
+          const { data: inserted } = await db.from('garden_rooms').insert({
+            user_id: currentUser.id,
+            name,
+            description: desc,
+            mood: createRoomSelectedMood,
+            cover_image_url: coverImage && !coverImage.startsWith('data:') ? coverImage : null,
+            is_system_room: false
+          }).select('id').single();
+          if (inserted) dbId = inserted.id;
+        } catch(e) {}
+      }
+
       const newRoom = {
-        id: Date.now(),
+        id: dbId || Date.now(),
         name,
         description: desc,
         mood: createRoomSelectedMood,
@@ -5823,10 +5945,28 @@ This could be:
       document.getElementById('creativePage').classList.remove('interior-open');
     }
 
-    function completeGardenOnboarding() {
+    async function completeGardenOnboarding() {
       closeGardenOnboarding();
       gardenRoomMood = selectedOnboardingMood;
       localStorage.setItem('gardenRoomMood', selectedOnboardingMood);
+
+      // Create room in Supabase so others can discover it
+      if (db && currentUser) {
+        try {
+          const existingId = localStorage.getItem('gardenRoomDbId');
+          if (!existingId) {
+            const config = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
+            const { data: inserted } = await db.from('garden_rooms').insert({
+              user_id: currentUser.id,
+              name: config.name || 'Garden Room',
+              description: config.description || null,
+              mood: selectedOnboardingMood,
+              is_system_room: false
+            }).select('id').single();
+            if (inserted) localStorage.setItem('gardenRoomDbId', inserted.id);
+          }
+        } catch(e) {}
+      }
       openMyRoom();
     }
 
