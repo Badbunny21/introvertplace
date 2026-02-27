@@ -1932,11 +1932,23 @@
       group.querySelectorAll('.radio-option').forEach(opt => opt.classList.remove('selected'));
       el.classList.add('selected');
       showToast('✓ Saved');
+      if (el.closest('#pref-discovery')) {
+        const opts = Array.from(group.querySelectorAll('.radio-option'));
+        const modes = ['open', 'selective', 'invitation', 'quiet'];
+        const mode = modes[opts.indexOf(el)] || 'selective';
+        savePrefsToDb({ discovery_mode: mode });
+      }
     }
 
     function toggleCheckbox(el) {
       el.classList.toggle('checked');
       showToast('✓ Saved');
+      if (el.closest('#pref-responses')) {
+        const checked = Array.from(
+          el.closest('#pref-responses').querySelectorAll('.checkbox-option.checked .checkbox-label')
+        ).map(l => l.textContent.trim());
+        savePrefsToDb({ welcome_responses: checked });
+      }
     }
 
 
@@ -2407,6 +2419,7 @@
 
       if (save) {
         localStorage.setItem('theme', theme);
+        savePrefsToDb({ theme });
         showToast('Theme updated');
       }
     }
@@ -2417,6 +2430,7 @@
       const isReduced = toggle.classList.contains('active');
       document.body.classList.toggle('reduce-motion', isReduced);
       localStorage.setItem('reduceAnimations', isReduced);
+      savePrefsToDb({ reduce_animations: isReduced });
       showToast(isReduced ? 'Animations reduced' : 'Animations enabled');
     }
 
@@ -2430,6 +2444,7 @@
 
       if (save) {
         localStorage.setItem('fontSize', size);
+        savePrefsToDb({ font_size: size });
         showToast('Font size updated');
       }
     }
@@ -2456,6 +2471,7 @@
       const isEnabled = toggle.classList.contains('active');
       document.getElementById('quietHoursConfig').style.display = isEnabled ? 'block' : 'none';
       localStorage.setItem('quietHoursEnabled', isEnabled);
+      savePrefsToDb({ quiet_hours_enabled: isEnabled });
       showToast(isEnabled ? 'Quiet hours enabled' : 'Quiet hours disabled');
     }
 
@@ -2465,6 +2481,17 @@
       localStorage.setItem('quietStart', start);
       localStorage.setItem('quietEnd', end);
       updateQuietSummary();
+      const quietEnabled = document.getElementById('quietToggle').classList.contains('active');
+      savePrefsToDb({ quiet_hours_start: start, quiet_hours_end: end, quiet_hours_enabled: quietEnabled });
+    }
+
+    async function savePrefsToDb(fields) {
+      if (!currentUser || !db) return;
+      try {
+        await db.from('profiles').upsert({ id: currentUser.id, ...fields, updated_at: new Date().toISOString() });
+      } catch (err) {
+        console.error('Save prefs error:', err);
+      }
     }
 
     function updateQuietSummary() {

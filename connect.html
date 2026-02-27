@@ -2654,10 +2654,21 @@
     });
 
     // Wave button
-    function sendWave(btn) {
+    async function sendWave(btn) {
+      const recipientId = btn.dataset.userId;
       btn.classList.add('waved');
       btn.innerHTML = '<span>✓</span> Wave sent!';
       showToast('👋 Quiet wave sent!');
+      if (!db || !currentUser || !recipientId) return;
+      try {
+        await db.from('messages').insert({
+          sender_id: currentUser.id,
+          recipient_id: recipientId,
+          content: '👋 *quiet wave*'
+        });
+      } catch (err) {
+        console.error('Wave send error:', err);
+      }
     }
 
     // Type option click handler
@@ -3068,7 +3079,7 @@ CREATE POLICY "Authenticated users can create communities" ON communities
                   ${interests.map(i => `<span class="interest">${escapeHtml(i)}</span>`).join('')}
                 </div>
               ` : ''}
-              ${!isMe ? `<button class="wave-btn" onclick="event.stopPropagation(); sendWave(this)">👋 Send a quiet wave</button>` : ''}
+              ${!isMe ? `<button class="wave-btn" data-user-id="${profile.id}" onclick="event.stopPropagation(); sendWave(this)">👋 Send a quiet wave</button>` : ''}
             </div>
           `;
         }).join('');

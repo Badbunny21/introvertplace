@@ -966,10 +966,10 @@
       <div class="quiet-reactions">
         <p>How did this resonate?</p>
         <div class="reactions-row">
-          <button class="reaction-btn" onclick="selectReaction(this)">🌿</button>
-          <button class="reaction-btn" onclick="selectReaction(this)">💜</button>
-          <button class="reaction-btn" onclick="selectReaction(this)">✨</button>
-          <button class="reaction-btn" onclick="selectReaction(this)">🙏</button>
+          <button class="reaction-btn" data-reaction="appreciate" onclick="selectReaction(this)">🌿</button>
+          <button class="reaction-btn" data-reaction="support" onclick="selectReaction(this)">💜</button>
+          <button class="reaction-btn" data-reaction="thoughtful" onclick="selectReaction(this)">✨</button>
+          <button class="reaction-btn" data-reaction="helpful" onclick="selectReaction(this)">🙏</button>
         </div>
       </div>
     </div>
@@ -1307,10 +1307,22 @@
       document.body.style.overflow = '';
     }
 
-    function selectReaction(btn) {
+    async function selectReaction(btn) {
       document.querySelectorAll('.reaction-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       showToast('💜 Thank you for your reaction');
+      if (!db || !currentUser || !currentPostId) return;
+      const reaction = btn.dataset.reaction;
+      if (!reaction) return;
+      try {
+        await db.from('post_reactions').upsert({
+          post_id: currentPostId,
+          user_id: currentUser.id,
+          reaction: reaction
+        }, { onConflict: 'post_id,user_id,reaction' });
+      } catch (err) {
+        console.error('Reaction save error:', err);
+      }
     }
 
     function showToast(msg) {
