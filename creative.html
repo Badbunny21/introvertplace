@@ -758,6 +758,63 @@
     .const-control-btn:hover, .const-control-btn.active {
       background: rgba(196,161,255,0.1); border-color: rgba(196,161,255,0.3); color: #c4a1ff;
     }
+    .const-controls-divider {
+      width: 100%; height: 1px;
+      background: rgba(255,255,255,0.07);
+      margin: 2px 0;
+    }
+
+    /* Galaxy info card — small ambient card on click */
+    .galaxy-info-card {
+      position: fixed; z-index: 200;
+      width: 236px;
+      background: rgba(10,12,20,0.88);
+      border: 1px solid rgba(196,161,255,0.18);
+      border-radius: 14px;
+      padding: 16px 16px 14px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(196,161,255,0.06);
+      opacity: 0; transform: scale(0.94) translateY(4px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+    }
+    .galaxy-info-card.visible { opacity: 1; transform: scale(1) translateY(0); pointer-events: all; }
+    .galaxy-info-close { position:absolute; top:9px; right:10px; background:none; border:none; color:rgba(255,255,255,0.25); cursor:pointer; font-size:15px; line-height:1; padding:2px; }
+    .galaxy-info-close:hover { color: rgba(255,255,255,0.6); }
+    .galaxy-info-username { font-size: 14px; font-weight: 600; color: #f0eeeb; margin-bottom: 4px; }
+    .galaxy-info-tagline { font-size: 11px; color: rgba(196,161,255,0.7); font-style: italic; margin-bottom: 8px; line-height: 1.4; }
+    .galaxy-info-snippet { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.5; margin-bottom: 6px; max-height: 46px; overflow: hidden; }
+    .galaxy-info-count { font-size: 10px; color: rgba(255,255,255,0.22); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+    .galaxy-info-actions { display: flex; gap: 7px; }
+    .galaxy-info-btn {
+      flex: 1; padding: 8px 10px; border-radius: 8px; font-size: 12px; cursor: pointer;
+      background: rgba(196,161,255,0.12); border: 1px solid rgba(196,161,255,0.22);
+      color: #c4a1ff; font-family: inherit; transition: all 0.2s;
+    }
+    .galaxy-info-btn:hover { background: rgba(196,161,255,0.22); }
+    .galaxy-info-btn.secondary {
+      background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5);
+    }
+    .galaxy-info-btn.secondary:hover { background: rgba(255,255,255,0.1); color: #f0eeeb; }
+
+    /* Active pulse on recently active galaxy */
+    .galaxy-active-pulse {
+      position: absolute; inset: -6px; border-radius: 50%;
+      border: 1px solid rgba(124,232,168,0.3);
+      animation: galaxyPulse 3s ease-in-out infinite;
+    }
+    @keyframes galaxyPulse { 0%,100%{opacity:0.4;transform:scale(1)} 50%{opacity:0.9;transform:scale(1.08)} }
+
+    /* Private orbit badge */
+    .private-orbit-badge {
+      position: fixed; top: 72px; left: 50%; transform: translateX(-50%);
+      padding: 8px 18px; background: rgba(10,12,20,0.82);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+      font-size: 12px; color: rgba(255,255,255,0.4); backdrop-filter: blur(10px);
+      opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 60;
+    }
+    .private-orbit-badge.visible { opacity: 1; }
 
     .hint {
       position: fixed;
@@ -4679,6 +4736,31 @@ This could be:
     // Initialize auth on load
     initAuth();
 
+    // Keep currentUser in sync and reload data when auth state changes
+    if (db) {
+      db.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          currentUser = session.user;
+          loadCreativePosts();
+        } else {
+          currentUser = null;
+        }
+      });
+    }
+
+    // Calls the correct load function for whatever view is active
+    function loadCreativePosts() {
+      const constellationView = document.getElementById('constellationView');
+      const gardenView = document.getElementById('gardenView');
+      if (constellationView && constellationView.classList.contains('active')) {
+        loadConstellationCreations();
+      } else if (gardenView && gardenView.classList.contains('active')) {
+        loadRoomCreations();
+      } else {
+        loadSavedCreations();
+      }
+    }
+
     // ==================== WIZARD ====================
     let step = 1;
     const totalSteps = 5;
@@ -4940,7 +5022,8 @@ This could be:
       center.className = 'user-center-star';
       center.id = 'userCenterStar';
       center.style.cssText = 'left:50%;top:50%';
-      center.innerHTML = `<div class="user-star-core"><div class="user-star-ring"></div><div class="user-star-ring-2"></div>✨</div><div class="user-star-label">You</div>`;
+      const centerLabel = currentUser?.user_metadata?.username || currentUser?.email?.split('@')[0] || 'You';
+      center.innerHTML = `<div class="user-star-core"><div class="user-star-ring"></div><div class="user-star-ring-2"></div>✨</div><div class="user-star-label">${centerLabel}</div>`;
       el.appendChild(center);
 
       // Cluster labels
@@ -4973,7 +5056,15 @@ This could be:
         controls = document.createElement('div');
         controls.className = 'const-controls';
         controls.id = 'constControls';
-        controls.innerHTML = `<button class="const-control-btn active" id="filterAll" title="All" onclick="filterConstellation(null,this)">✦</button><button class="const-control-btn" title="Writing" onclick="filterConstellation('writing',this)">✍️</button><button class="const-control-btn" title="Visual" onclick="filterConstellation('visual',this)">🎨</button><button class="const-control-btn" title="Music" onclick="filterConstellation('music',this)">🎵</button><button class="const-control-btn" title="Ideas" onclick="filterConstellation('idea',this)">💡</button>`;
+        controls.innerHTML = `
+          <button class="const-control-btn active" id="filterAll" title="All creations" onclick="filterConstellation(null,this)">✦</button>
+          <button class="const-control-btn" title="Writing" onclick="filterConstellation('writing',this)">✍️</button>
+          <button class="const-control-btn" title="Visual art" onclick="filterConstellation('visual',this)">🎨</button>
+          <button class="const-control-btn" title="Music" onclick="filterConstellation('music',this)">🎵</button>
+          <button class="const-control-btn" title="Ideas" onclick="filterConstellation('idea',this)">💡</button>
+          <div class="const-controls-divider"></div>
+          <button class="const-control-btn" id="constActiveOnly" title="Show recently active only" onclick="toggleConstellationActiveOnly(this)">🌱</button>
+          <button class="const-control-btn" id="constPrivateOrbit" title="Private orbit — hide yourself" onclick="togglePrivateOrbit(this)">👁️</button>`;
         document.body.appendChild(controls);
       }
       controls.classList.add('visible');
@@ -5015,18 +5106,6 @@ This could be:
           } catch(e) {}
         }
 
-        // Purge any cached creations that don't belong to the current user.
-        // Old code fetched all users' public creations into localStorage — remove them now.
-        if (myId) {
-          try {
-            const saved = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-            const clean = saved.filter(c => c.user_id === myId);
-            if (clean.length !== saved.length) {
-              localStorage.setItem('introvert_creations', JSON.stringify(clean));
-            }
-          } catch(e) {}
-        }
-
         let ownCreations = [];
         let othersByUser = {}; // { userId: { username, creations[] } }
 
@@ -5062,16 +5141,20 @@ This could be:
                 othersByUser[c.user_id].creations.push(c);
               });
 
-              // Fetch usernames for other users
+              // Fetch usernames + bios + activity for other users
               if (otherUserIds.size > 0) {
                 try {
                   const { data: profiles } = await db
                     .from('profiles')
-                    .select('id, username')
+                    .select('id, username, tagline, updated_at')
                     .in('id', Array.from(otherUserIds));
                   if (profiles) {
                     profiles.forEach(p => {
-                      if (othersByUser[p.id]) othersByUser[p.id].username = p.username || 'Anonymous';
+                      if (othersByUser[p.id]) {
+                        othersByUser[p.id].username = p.username || 'Anonymous';
+                        othersByUser[p.id].tagline = p.tagline || '';
+                        othersByUser[p.id].updatedAt = p.updated_at || null;
+                      }
                     });
                   }
                 } catch(e) {}
@@ -5079,16 +5162,6 @@ This could be:
             }
           } catch(e) {}
         }
-
-        // Merge local-only creations for own galaxy (no user_id = pre-login local, or matches myId)
-        try {
-          const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-          local
-            .filter(c => c.user_id === myId)
-            .forEach(lc => {
-              if (!ownCreations.find(c => String(c.id) === String(lc.id))) ownCreations.push(lc);
-            });
-        } catch(e) {}
 
         // Also clear any stale dismissed list from previous buggy code
         localStorage.removeItem('dismissed_constellation_ids');
@@ -5099,10 +5172,14 @@ This could be:
           ownCreations.forEach(c => addCreationToConstellation(c));
         }
 
-        // Render other users as distant galaxies
-        const otherEntries = Object.entries(othersByUser);
+        // Render other users as distant galaxies — sort by recent activity (closest = most active)
+        const otherEntries = Object.entries(othersByUser).sort(([,a],[,b]) => {
+          const ta = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+          const tb = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+          return tb - ta; // most recently active first = placed closest
+        });
         otherEntries.forEach(([userId, info], idx) => {
-          addDistantGalaxy(userId, info.username || 'Anonymous', info.creations, idx, otherEntries.length);
+          addDistantGalaxy(userId, info.username || 'Anonymous', info.creations, idx, otherEntries.length, info.tagline || '', info.updatedAt);
         });
       }
       loadConstellationCreations();
@@ -5574,12 +5651,6 @@ This could be:
           }
         }
       } catch(e) {}
-      if (gardenCreations.length === 0) {
-        try {
-          const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-          gardenCreations = local.filter(c => c.view_mode === 'garden');
-        } catch(e) {}
-      }
 
       const hasRoom = savedMood || gardenCreations.length > 0 || config.name;
       const card = document.querySelector('.garden-room-card.your-room');
@@ -6140,12 +6211,6 @@ This could be:
         }
       }
 
-      // Also check localStorage for offline creations
-      if (creations.length === 0) {
-        const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-        creations = local.filter(c => c.view_mode === 'garden');
-      }
-
       if (creations.length === 0) return; // keep the empty "plant" state
 
       // Clear ghost slots and plant slot, then render saved creations
@@ -6230,8 +6295,7 @@ This could be:
           if (error) { showToast('⚠️ Could not delete: ' + error.message); return; }
         } catch (e) { showToast('⚠️ Error deleting'); return; }
       } else {
-        const saved = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-        localStorage.setItem('introvert_creations', JSON.stringify(saved.filter(c => String(c.id) !== String(creationId))));
+        // No DB session — nothing to delete from Supabase
       }
 
       // Remove the card from the grid
@@ -6285,12 +6349,6 @@ This could be:
           }
         }
       } catch(e) {}
-      if (gardenCreations.length === 0) {
-        try {
-          const local = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-          gardenCreations = local.filter(c => c.view_mode === 'garden');
-        } catch(e) {}
-      }
       const growthLevel = Math.min(100, gardenCreations.length * 8);
 
       openRoomInterior({
@@ -6877,20 +6935,8 @@ This could be:
           return;
         }
       } else {
-        // Not logged in — save locally and prompt to log in
-        newCreation.id = Date.now();
-        const creations = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-        creations.push(newCreation);
-        localStorage.setItem('introvert_creations', JSON.stringify(creations));
-        showToast('⚠️ You\'re not logged in — saved locally only. Log in to keep your work.');
-        closeCreateModal();
-        if (gardenCreateContext) {
-          gardenCreateContext = false;
-          document.getElementById('createSubmitBtn').textContent = 'Create & Share ✨';
-          addCreationToRoom(newCreation);
-        } else {
-          addCreationToView(newCreation);
-        }
+        // Not logged in — do not save
+        showToast('⚠️ You must be logged in to save creations.');
         return;
       }
 
@@ -7011,18 +7057,22 @@ This could be:
       svg.appendChild(l0);
     }
 
-    function addDistantGalaxy(userId, username, creations, idx, total) {
+    function addDistantGalaxy(userId, username, creations, idx, total, tagline, updatedAt) {
       const el = document.getElementById('constellationView');
       if (!el) return;
 
       // Distribute galaxies evenly around the outer ring (avoid the 4 cluster angles)
-      // Offset base angle by 22.5° to sit between cluster quadrants
       const baseAngle = 22.5 + (idx / Math.max(total, 1)) * 360;
       const angleDeg = baseAngle;
       const angleRad = angleDeg * Math.PI / 180;
 
-      // Position far from center (65–80% radius)
-      const rMin = 0.62, rMax = 0.78;
+      // Distance from center reflects activity: recently active = closer (40–55%), dormant = outer (62–78%)
+      const now = Date.now();
+      const lastActive = updatedAt ? new Date(updatedAt).getTime() : 0;
+      const daysSince = lastActive > 0 ? (now - lastActive) / (1000 * 60 * 60 * 24) : 999;
+      const activityFraction = Math.min(1, daysSince / 30); // 0 = active today, 1 = 30+ days ago
+      const rMin = 0.40 + activityFraction * 0.22; // 0.40 (active) to 0.62 (dormant)
+      const rMax = rMin + 0.16;
       const r = rMin + ((idx % 3) / 3) * (rMax - rMin);
       const vw = window.innerWidth, vh = window.innerHeight;
       const cx = 50, cy = 50;
@@ -7054,11 +7104,17 @@ This could be:
         miniStars += `<div class="distant-galaxy-mini-star" style="width:${sz}px;height:${sz}px;background:${col};left:${mx}%;top:${my}%;box-shadow:0 0 6px ${col};animation-delay:${delay}s"></div>`;
       }
 
+      // Activity indicator
+      const isActive = daysSince < 7;
+      galaxy.dataset.active = isActive ? 'true' : 'false';
+      galaxy.dataset.userId = userId;
+
       galaxy.innerHTML = `
         <div class="distant-galaxy-core">
           <div class="distant-galaxy-ring"></div>
           ${miniStars}
           <div class="distant-galaxy-center"></div>
+          ${isActive ? '<div class="galaxy-active-pulse"></div>' : ''}
         </div>
         <div class="distant-galaxy-label">✦ ${username}</div>
         <div class="distant-galaxy-count">${creations.length} creation${creations.length !== 1 ? 's' : ''}</div>
@@ -7066,10 +7122,96 @@ This could be:
 
       galaxy.addEventListener('click', (e) => {
         e.stopPropagation();
-        showUserGalaxyModal(userId, username, creations);
+        showGalaxyInfoCard(galaxy, userId, username, tagline || '', creations);
       });
 
       el.appendChild(galaxy);
+    }
+
+    // Show a small ambient info card when clicking another user's galaxy
+    function showGalaxyInfoCard(node, userId, username, tagline, creations) {
+      // Remove existing galaxy info card
+      const existing = document.getElementById('galaxyInfoCard');
+      if (existing) existing.remove();
+
+      const firstCreation = creations[0];
+      const snippet = firstCreation ? ((firstCreation.content || firstCreation.description || '').slice(0, 90) || firstCreation.title || '') : 'No creations yet.';
+      const typeIcons = { writing: '✍️', visual: '🎨', music: '🎵', idea: '💡' };
+      const icon = firstCreation ? (typeIcons[firstCreation.type] || '✨') : '✨';
+
+      const card = document.createElement('div');
+      card.className = 'galaxy-info-card';
+      card.id = 'galaxyInfoCard';
+      card.innerHTML = `
+        <button class="galaxy-info-close" onclick="document.getElementById('galaxyInfoCard')?.remove()">×</button>
+        <div class="galaxy-info-username">✦ ${username}</div>
+        ${tagline ? `<div class="galaxy-info-tagline">${tagline}</div>` : ''}
+        <div class="galaxy-info-snippet">${icon} ${snippet}</div>
+        <div class="galaxy-info-count">${creations.length} creation${creations.length !== 1 ? 's' : ''} in this constellation</div>
+        <div class="galaxy-info-actions">
+          <button class="galaxy-info-btn" onclick="showUserGalaxyModal('${userId}','${username.replace(/'/g,"\\'")}', window._galaxyCreations_${userId.replace(/-/g,'')}); document.getElementById('galaxyInfoCard')?.remove()">Observe ✦</button>
+          <button class="galaxy-info-btn secondary" onclick="window.location.href='connect.html?view=messages&to=${userId}'">Leave a Note</button>
+        </div>`;
+
+      // Store creations reference for observe button
+      window[`_galaxyCreations_${userId.replace(/-/g,'')}`] = creations;
+
+      // Position near the galaxy node
+      const rect = node.getBoundingClientRect();
+      let left = rect.right + 14;
+      let top = rect.top - 10;
+      if (left + 240 > window.innerWidth) left = rect.left - 254;
+      if (top + 200 > window.innerHeight) top = window.innerHeight - 210;
+      card.style.left = Math.max(8, left) + 'px';
+      card.style.top = Math.max(8, top) + 'px';
+
+      document.body.appendChild(card);
+      requestAnimationFrame(() => card.classList.add('visible'));
+
+      // Close on background click
+      setTimeout(() => {
+        document.addEventListener('click', function closeGIC(e) {
+          if (!e.target.closest('#galaxyInfoCard') && !e.target.closest('.distant-galaxy')) {
+            document.getElementById('galaxyInfoCard')?.remove();
+            document.removeEventListener('click', closeGIC);
+          }
+        });
+      }, 100);
+    }
+
+    let constellationActiveOnly = false;
+    let constellationPrivateOrbit = false;
+
+    function toggleConstellationActiveOnly(btn) {
+      constellationActiveOnly = !constellationActiveOnly;
+      btn.classList.toggle('active', constellationActiveOnly);
+      const el = document.getElementById('constellationView');
+      if (!el) return;
+      el.querySelectorAll('.distant-galaxy').forEach(g => {
+        g.style.opacity = constellationActiveOnly && g.dataset.active !== 'true' ? '0.2' : '';
+        g.style.pointerEvents = constellationActiveOnly && g.dataset.active !== 'true' ? 'none' : '';
+      });
+    }
+
+    function togglePrivateOrbit(btn) {
+      constellationPrivateOrbit = !constellationPrivateOrbit;
+      btn.classList.toggle('active', constellationPrivateOrbit);
+      const center = document.getElementById('userCenterStar');
+      if (center) center.style.opacity = constellationPrivateOrbit ? '0.15' : '1';
+      // Show badge
+      let badge = document.getElementById('privateOrbitBadge');
+      if (constellationPrivateOrbit) {
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.id = 'privateOrbitBadge';
+          badge.className = 'private-orbit-badge';
+          badge.textContent = '👁️ Private orbit — you\'re hidden';
+          document.getElementById('constellationView').appendChild(badge);
+        }
+        badge.classList.add('visible');
+      } else {
+        if (badge) badge.classList.remove('visible');
+      }
     }
 
     function showUserGalaxyModal(userId, username, creations) {
@@ -7153,11 +7295,6 @@ This could be:
       hideStarInfoCard();
       if (node) node.remove();
       const sid = String(id);
-      // Remove from own creations localStorage
-      try {
-        const saved = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-        localStorage.setItem('introvert_creations', JSON.stringify(saved.filter(c => String(c.id) !== sid)));
-      } catch(e) {}
       // Delete from Supabase (RLS ensures only own rows are deleted)
       if (db) {
         try {
@@ -7307,9 +7444,7 @@ This could be:
           showToast('⚠️ Error deleting creation'); return;
         }
       } else {
-        // Remove from localStorage
-        const saved = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
-        localStorage.setItem('introvert_creations', JSON.stringify(saved.filter(c => c.id !== creation.id)));
+        // No DB session — nothing to delete
       }
 
       // Remove card from grid
@@ -7367,11 +7502,6 @@ This could be:
         } catch (err) {
           console.error('Load creations error:', err);
         }
-      }
-
-      // Fallback to localStorage if no DB creations
-      if (creations.length === 0) {
-        creations = JSON.parse(localStorage.getItem('introvert_creations') || '[]');
       }
 
       if (creations.length === 0) return;
