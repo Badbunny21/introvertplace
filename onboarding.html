@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome — Introvert Place</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080a0f;
+      --surface: #0f1219;
+      --elevated: #161b26;
+      --border: rgba(255,255,255,0.07);
+      --accent: #c4a1ff;
+      --accent-dim: rgba(196,161,255,0.12);
+      --accent-glow: rgba(196,161,255,0.06);
+      --text: #f0eeeb;
+      --text-secondary: #8b92a5;
+      --text-muted: #4a5168;
+      --success: #7ce8a8;
+      --error: #e87c9a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    /* Ambient background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -30%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(196,161,255,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      animation: breathe 6s ease-in-out infinite;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(124,184,232,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+      50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+    }
+
+    /* Stars */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--d, 3s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+      opacity: var(--o, 0.3);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--o, 0.3); }
+      50% { opacity: 0.05; }
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      z-index: 10;
+    }
+
+    /* Steps */
+    .step {
+      display: none;
+      animation: fadeUp 0.5s ease forwards;
+    }
+    .step.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Logo */
+    .logo {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .logo-mark {
+      font-size: 36px;
+      display: block;
+      margin-bottom: 8px;
+      animation: float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .logo-text {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px 40px 36px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 32px 64px rgba(0,0,0,0.4);
+    }
+
+    .step-indicator {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 32px;
+      justify-content: center;
+    }
+    .step-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: all 0.3s;
+    }
+    .step-dot.active {
+      background: var(--accent);
+      width: 20px;
+      border-radius: 3px;
+    }
+    .step-dot.done {
+      background: var(--success);
+    }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    /* Input styles */
+    .input-wrap {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 16px;
+      pointer-events: none;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"] {
+      padding: 16px 16px 16px 36px;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    input[type="text"]::placeholder, textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    textarea {
+      padding: 16px;
+      min-height: 120px;
+      resize: none;
+      line-height: 1.6;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .hint span {
+      color: var(--accent);
+    }
+
+    /* Username availability */
+    .username-status {
+      font-size: 13px;
+      margin-top: 6px;
+      margin-bottom: 16px;
+      min-height: 18px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .username-status.available { color: var(--success); }
+    .username-status.taken { color: var(--error); }
+    .username-status.checking { color: var(--text-muted); }
+
+    /* Buttons */
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #0a0c10;
+      border: none;
+      border-radius: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .btn-primary:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(196,161,255,0.25);
+    }
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-skip {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-radius: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: color 0.2s;
+      margin-top: 4px;
+    }
+    .btn-skip:hover { color: var(--text-secondary); }
+
+    /* Welcome step */
+    .welcome-icon {
+      font-size: 64px;
+      text-align: center;
+      display: block;
+      margin-bottom: 24px;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .welcome-list {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+    .welcome-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .welcome-list li:last-child { border-bottom: none; }
+    .welcome-list li span:first-child {
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Success step */
+    .success-icon {
+      font-size: 72px;
+      text-align: center;
+      display: block;
+      margin-bottom: 24px;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .preview-card {
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .preview-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #c4a1ff, #7cb8e8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .preview-info { flex: 1; min-width: 0; }
+    .preview-name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    .preview-tagline {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 560px) {
+      .card { padding: 28px 24px 24px; }
+      h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Stars -->
+  <div class="stars" id="stars"></div>
+
+  <div class="container">
+    <div class="logo">
+      <span class="logo-mark">🌙</span>
+      <span class="logo-text">Introvert Place</span>
+    </div>
+
+    <!-- Step 0: Welcome -->
+    <div class="step active" id="step-0">
+      <div class="card">
+        <div class="step-indicator">
+          <div class="step-dot active" id="dot-0"></div>
+          <div class="step-dot" id="dot-1"></div>
+          <div class="step-dot" id="dot-2"></div>
+        </div>
+        <span class="welcome-icon">✨</span>
+        <h1>You found your <em>quiet corner</em></h1>
+        <p class="subtitle">Before you settle in, just two small things. No pressure — you can always change them later.</p>
+        <ul class="welcome-list">
+          <li><span>🏷️</span><span>Choose a name others will see you by</span></li>
+          <li><span>💬</span><span>Write one sentence about yourself — or don't, that's okay too</span></li>
+        </ul>
+        <button class="btn-primary" onclick="goToStep(1)">Let's begin →</button>
+      </div>
+    </div>
+
+    <!-- Step 1: Username -->
+    <div class="step" id="step-1">
+      <div class="card">
+        <div class="step-indicator">
+          <div class="step-dot done" id="dot-0b"></div>
+          <div class="step-dot active" id="dot-1b"></div>
+          <div class="step-dot" id="dot-2b"></div>
+        </div>
+        <h1>What should we <em>call you?</em></h1>
+        <p class="subtitle">This is the name other souls will see. It can be your real name, a nickname, or something entirely your own.</p>
+
+        <div class="input-wrap">
+          <span class="input-prefix">@</span>
+          <input
+            type="text"
+            id="usernameInput"
+            placeholder="quiet_wanderer"
+            maxlength="30"
+            autocomplete="off"
+            oninput="handleUsernameInput(this.value)"
+          />
+        </div>
+        <div class="username-status" id="usernameStatus"></div>
+
+        <p class="hint">Only letters, numbers, and underscores. <span>No spaces.</span></p>
+
+        <button class="btn-primary" id="usernameBtn" onclick="saveUsername()" disabled>Continue →</button>
+        <button class="btn-skip" onclick="skipUsername()">Skip for now</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Tagline/Bio -->
+    <div class="step" id="step-2">
+      <div class="card">
+        <div class="step-indicator">
+          <div class="step-dot done"></div>
+          <div class="step-dot done"></div>
+          <div class="step-dot active"></div>
+        </div>
+        <h1>A little about <em>you</em></h1>
+        <p class="subtitle">One sentence. That's all. What would you want a fellow introvert to know about you?</p>
+
+        <textarea
+          id="bioInput"
+          placeholder="Powered by tea, long walks, and the quiet hours after midnight..."
+          maxlength="150"
+          oninput="updateBioCount()"
+        ></textarea>
+        <div class="char-count"><span id="bioCount">0</span>/150</div>
+
+        <p class="hint" style="margin-top: 12px;">This shows on your profile under <span>"A Little About Me"</span> and as your tagline on Find Souls.</p>
+
+        <button class="btn-primary" onclick="saveBio()">Almost there →</button>
+        <button class="btn-skip" onclick="skipBio()">Skip, I'll add it later</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Done -->
+    <div class="step" id="step-3">
+      <div class="card" style="text-align: center;">
+        <div class="step-indicator">
+          <div class="step-dot done"></div>
+          <div class="step-dot done"></div>
+          <div class="step-dot done"></div>
+        </div>
+        <span class="success-icon">🌙</span>
+        <h1>Your sanctuary <em>awaits</em></h1>
+        <p class="subtitle" style="margin-bottom: 24px;">Here's how you'll appear to other souls:</p>
+
+        <div class="preview-card">
+          <div class="preview-avatar">🌙</div>
+          <div class="preview-info">
+            <div class="preview-name" id="previewName">quiet_wanderer</div>
+            <div class="preview-tagline" id="previewTagline">A quiet soul</div>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="enterApp()">Enter your sanctuary →</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // ─── Supabase ───
+    const SUPABASE_URL = 'https://dlgntsscabbhdqlxqpwd.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsZ250c3NjYWJiaGRxbHhxcHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3MDAyMzYsImV4cCI6MjA3MDI3NjIzNn0.FIyWgqehDBMMQCN3nl-dPfkDAPjv_-dFBvmGHgABEBA';
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+    let chosenUsername = '';
+    let chosenBio = '';
+    let usernameCheckTimer = null;
+    let usernameAvailable = false;
+
+    // ─── Auth check ───
+    db.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        window.location.href = 'index.html';
+        return;
+      }
+      currentUser = session.user;
+      checkIfAlreadyOnboarded();
+    });
+
+    async function checkIfAlreadyOnboarded() {
+      if (!currentUser) return;
+      const { data } = await db
+        .from('profiles')
+        .select('username, bio')
+        .eq('id', currentUser.id)
+        .single();
+
+      // If they already have a username, skip to app
+      if (data?.username && data.username !== currentUser.email?.split('@')[0]) {
+        window.location.href = 'app.html';
+      }
+    }
+
+    // ─── Stars ───
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 60; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      s.style.cssText = `
+        left: ${Math.random() * 100}%;
+        top: ${Math.random() * 100}%;
+        --d: ${2 + Math.random() * 4}s;
+        --delay: ${Math.random() * 4}s;
+        --o: ${0.1 + Math.random() * 0.4};
+      `;
+      starsEl.appendChild(s);
+    }
+
+    // ─── Step navigation ───
+    function goToStep(n) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(`step-${n}`).classList.add('active');
+    }
+
+    // ─── Username ───
+    function handleUsernameInput(val) {
+      const clean = val.replace(/[^a-zA-Z0-9_]/g, '');
+      document.getElementById('usernameInput').value = clean;
+
+      const btn = document.getElementById('usernameBtn');
+      const status = document.getElementById('usernameStatus');
+
+      if (clean.length < 3) {
+        status.textContent = clean.length > 0 ? 'Too short — at least 3 characters' : '';
+        status.className = 'username-status taken';
+        btn.disabled = true;
+        usernameAvailable = false;
+        return;
+      }
+
+      status.textContent = 'Checking...';
+      status.className = 'username-status checking';
+      btn.disabled = true;
+      usernameAvailable = false;
+
+      clearTimeout(usernameCheckTimer);
+      usernameCheckTimer = setTimeout(() => checkUsername(clean), 500);
+    }
+
+    async function checkUsername(username) {
+      const status = document.getElementById('usernameStatus');
+      const btn = document.getElementById('usernameBtn');
+
+      try {
+        const { data } = await db
+          .from('profiles')
+          .select('id')
+          .eq('username', username)
+          .neq('id', currentUser?.id || '')
+          .maybeSingle();
+
+        if (data) {
+          status.innerHTML = '✗ Already taken — try another';
+          status.className = 'username-status taken';
+          btn.disabled = true;
+          usernameAvailable = false;
+        } else {
+          status.innerHTML = '✓ Available!';
+          status.className = 'username-status available';
+          btn.disabled = false;
+          usernameAvailable = true;
+          chosenUsername = username;
+        }
+      } catch (e) {
+        status.textContent = '';
+        btn.disabled = false;
+        usernameAvailable = true;
+        chosenUsername = username;
+      }
+    }
+
+    async function saveUsername() {
+      if (!usernameAvailable || !chosenUsername) return;
+      const btn = document.getElementById('usernameBtn');
+      btn.textContent = 'Saving...';
+      btn.disabled = true;
+
+      if (currentUser) {
+        await db.from('profiles').upsert({
+          id: currentUser.id,
+          username: chosenUsername,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+      }
+
+      goToStep(2);
+    }
+
+    function skipUsername() {
+      chosenUsername = '';
+      goToStep(2);
+    }
+
+    // ─── Bio ───
+    function updateBioCount() {
+      const val = document.getElementById('bioInput').value;
+      document.getElementById('bioCount').textContent = val.length;
+    }
+
+    async function saveBio() {
+      const bio = document.getElementById('bioInput').value.trim();
+      chosenBio = bio;
+
+      if (currentUser && bio) {
+        await db.from('profiles').upsert({
+          id: currentUser.id,
+          bio: bio,
+          tagline: bio,  // also saves as tagline so it shows on soul cards
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+      }
+
+      showSuccess();
+    }
+
+    function skipBio() {
+      chosenBio = '';
+      showSuccess();
+    }
+
+    // ─── Success ───
+    function showSuccess() {
+      document.getElementById('previewName').textContent = chosenUsername || currentUser?.email?.split('@')[0] || 'quiet_soul';
+      document.getElementById('previewTagline').textContent = chosenBio || 'A quiet soul';
+      goToStep(3);
+    }
+
+    function enterApp() {
+      window.location.href = 'app.html';
+    }
+  </script>
+</body>
+</html>
