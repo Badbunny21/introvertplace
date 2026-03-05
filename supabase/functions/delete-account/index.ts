@@ -47,19 +47,43 @@ serve(async (req) => {
     // Create admin client to delete user data and auth record
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Delete all user data from all tables
-    const tables = ['journal_entries', 'mood_entries', 'reflections', 'profiles'];
+    // Delete all user data — order matters (child records before parent)
 
-    for (const table of tables) {
-      const { error } = await supabaseAdmin
-        .from(table)
-        .delete()
-        .eq(table === 'profiles' ? 'id' : 'user_id', userId);
+    // Tables with user_id column
+    const userIdTables = [
+      'notifications',
+      'beta_feedback',
+      'personal_goals',
+      'garden_visits',
+      'battery_activities',
+      'mood_entries',
+      'journal_entries',
+      'reflections',
+      'blog_posts',
+      'community_members',
+      'creations',
+      'garden_rooms',
+      'subscriptions',
+    ];
 
-      if (error) {
-        console.error(`Error deleting from ${table}:`, error);
-      }
+    for (const table of userIdTables) {
+      const { error } = await supabaseAdmin.from(table).delete().eq('user_id', userId);
+      if (error) console.error(`Error deleting from ${table}:`, error);
     }
+
+    // Waves: user can be sender or recipient
+    await supabaseAdmin.from('waves').delete().eq('from_user_id', userId);
+    await supabaseAdmin.from('waves').delete().eq('to_user_id', userId);
+
+    // Messages: user can be sender or recipient
+    await supabaseAdmin.from('messages').delete().eq('sender_id', userId);
+    await supabaseAdmin.from('messages').delete().eq('recipient_id', userId);
+
+    // Communities created by user
+    await supabaseAdmin.from('communities').delete().eq('creator_id', userId);
+
+    // Profile last (other tables may reference it)
+    await supabaseAdmin.from('profiles').delete().eq('id', userId);
 
     // Delete the user from auth
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
