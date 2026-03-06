@@ -691,6 +691,13 @@
       .room-topbar-meta { display: none; }
       .reading-mode-toggle { display: none; }
     }
+
+    /* ── Mobile: prevent iOS zoom on input focus ── */
+    input, textarea, select { font-size: 16px !important; }
+    html { -webkit-text-size-adjust: 100%; }
+    * { -webkit-tap-highlight-color: transparent; }
+    button, a, [onclick] { touch-action: manipulation; }
+    body { -webkit-overflow-scrolling: touch; }
   </style>
 </head>
 <body>
@@ -1705,7 +1712,47 @@
       } catch(err) { console.error(err); }
     }
 
-    function sendWave(btn) { btn.classList.add('waved'); btn.innerHTML = '<span>✓</span> Wave sent!'; showToast('👋 Quiet wave sent!'); }
+    function sendWave(btn) {
+  btn.classList.add('waved');
+  btn.innerHTML = '<span>✓</span> Wave sent!';
+  btn.onclick = null;
+
+  const card = btn.closest('.soul-card');
+  const username = card.querySelector('.soul-name')?.textContent?.replace(' (You)', '').trim();
+  if (username) saveWaveToSupabase(username);
+}
+
+async function saveWaveToSupabase(toUsername) {
+  if (!db || !currentUser) {
+    showToast('Please sign in to send waves 🌙');
+    return;
+  }
+  try {
+    const { data: recipient } = await db
+      .from('profiles')
+      .select('id')
+      .eq('username', toUsername)
+      .single();
+
+    if (!recipient) return;
+
+    await db.from('waves').upsert({
+      from_user_id: currentUser.id,
+      to_user_id: recipient.id
+    });
+
+    await db.from('notifications').insert({
+      user_id: recipient.id,
+      type: 'wave',
+      message: '👋 Someone sent you a quiet wave',
+      seen: false
+    });
+
+    showToast('🌙 Quiet wave sent!');
+  } catch(e) {
+    console.log('Wave error:', e);
+  }
+}
 
     // ===== PROFILE MODAL =====
     let pendingMessageProfile = null;

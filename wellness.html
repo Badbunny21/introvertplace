@@ -766,6 +766,13 @@
       outline: none;
       border-color: var(--accent-warm);
     }
+
+    /* ── Mobile: prevent iOS zoom on input focus ── */
+    input, textarea, select { font-size: 16px !important; }
+    html { -webkit-text-size-adjust: 100%; }
+    * { -webkit-tap-highlight-color: transparent; }
+    button, a, [onclick] { touch-action: manipulation; }
+    body { -webkit-overflow-scrolling: touch; }
   </style>
 
   <div class="breathing-modal" id="breathingModal">

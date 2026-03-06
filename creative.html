@@ -3914,6 +3914,13 @@
       .seasonal-mood-filters { gap: 8px; }
       .seasonal-mood-filter { padding: 8px 14px; font-size: 13px; }
     }
+
+    /* ── Mobile: prevent iOS zoom on input focus ── */
+    input, textarea, select { font-size: 16px !important; }
+    html { -webkit-text-size-adjust: 100%; }
+    * { -webkit-tap-highlight-color: transparent; }
+    button, a, [onclick] { touch-action: manipulation; }
+    body { -webkit-overflow-scrolling: touch; }
   </style>
 </head>
 <body>
@@ -7544,21 +7551,22 @@ This could be:
       localStorage.setItem('introvert_creative_mode', mode);
     };
 
-    // On page load, check for saved mode and restore it
     (function restoreModeFromStorage() {
       const mode = localStorage.getItem('introvert_creative_mode');
       if (mode && ['constellation', 'canvas', 'garden', 'seasonal'].includes(mode)) {
+        // User has a saved mode — skip wizard and restore it
         selectedMode = mode;
-        // Skip wizard and go directly to the creative space with saved mode
         document.getElementById('wizardPage').classList.remove('active');
         document.getElementById('creativePage').classList.add('active');
         showViewByName(mode);
-        // Initialize the view
         if (mode === 'canvas') initInfiniteCanvas();
         else if (mode === 'constellation') initConstellation();
         else if (mode === 'seasonal') initSeasonalParticles();
-        // Load saved creations
         setTimeout(loadSavedCreations, 100);
+      } else {
+        // No saved mode — show the wizard so user can pick their mode
+        document.getElementById('wizardPage').classList.add('active');
+        document.getElementById('creativePage').classList.remove('active');
       }
     })();
   </script>

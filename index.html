@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Introvert Place — Your Quiet Corner of the Internet</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -2093,6 +2093,13 @@
       .footer-content { grid-template-columns: 1fr; }
       .footer-bottom { flex-direction: column; gap: 16px; }
     }
+
+    /* ── Mobile: prevent iOS zoom on input focus ── */
+    input, textarea, select { font-size: 16px !important; }
+    html { -webkit-text-size-adjust: 100%; }
+    * { -webkit-tap-highlight-color: transparent; }
+    button, a, [onclick] { touch-action: manipulation; }
+    body { -webkit-overflow-scrolling: touch; }
   </style>
 </head>
 <body>
@@ -3807,7 +3814,7 @@
           closeModal('signup');
           showToast('Welcome to your sanctuary!');
           setTimeout(() => {
-            window.location.href = 'app.html';
+            window.location.href = 'onboarding.html';
           }, 500);
         } else {
           closeModal('signup');

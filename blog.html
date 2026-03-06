@@ -844,6 +844,13 @@
       .page-header h1 { font-size: 26px; }
       .reading-content h1 { font-size: 24px; }
     }
+
+    /* ── Mobile: prevent iOS zoom on input focus ── */
+    input, textarea, select { font-size: 16px !important; }
+    html { -webkit-text-size-adjust: 100%; }
+    * { -webkit-tap-highlight-color: transparent; }
+    button, a, [onclick] { touch-action: manipulation; }
+    body { -webkit-overflow-scrolling: touch; }
   </style>
 </head>
 <body>

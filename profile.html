@@ -3124,6 +3124,13 @@
     .creation-icon { font-size: 32px; }
     .creation-info h4 { font-size: 15px; margin-bottom: 4px; }
     .creation-info p { font-size: 13px; color: var(--text-gray-500); }
+
+    /* ── Mobile: prevent iOS zoom on input focus ── */
+    input, textarea, select { font-size: 16px !important; }
+    html { -webkit-text-size-adjust: 100%; }
+    * { -webkit-tap-highlight-color: transparent; }
+    button, a, [onclick] { touch-action: manipulation; }
+    body { -webkit-overflow-scrolling: touch; }
   </style>
 </body>
 </html>
