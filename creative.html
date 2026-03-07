@@ -5030,7 +5030,15 @@ This could be:
       center.id = 'userCenterStar';
       center.style.cssText = 'left:50%;top:50%';
       const centerLabel = currentUser?.user_metadata?.username || currentUser?.email?.split('@')[0] || 'You';
-      center.innerHTML = `<div class="user-star-core"><div class="user-star-ring"></div><div class="user-star-ring-2"></div>✨</div><div class="user-star-label">${centerLabel}</div>`;
+      // Use DOM API to prevent XSS from user-controlled username
+      const coreDiv = document.createElement('div');
+      coreDiv.className = 'user-star-core';
+      coreDiv.innerHTML = '<div class="user-star-ring"></div><div class="user-star-ring-2"></div>✨';
+      const labelDiv = document.createElement('div');
+      labelDiv.className = 'user-star-label';
+      labelDiv.textContent = centerLabel;
+      center.appendChild(coreDiv);
+      center.appendChild(labelDiv);
       el.appendChild(center);
 
       // Cluster labels
@@ -5641,7 +5649,7 @@ This could be:
 
     async function checkUserRoomCard() {
       const savedMood = localStorage.getItem('gardenRoomMood');
-      const config = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
+      const config = (() => { try { return JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}'); } catch(e) { localStorage.removeItem('gardenRoomConfig'); return {}; } })();
 
       // Count garden creations for growth calculation
       let gardenCreations = [];
@@ -5753,7 +5761,7 @@ This could be:
         }));
 
         // Render additional rooms from gardenUserRooms
-        const extraRooms = JSON.parse(localStorage.getItem('gardenUserRooms') || '[]');
+        const extraRooms = (() => { try { return JSON.parse(localStorage.getItem('gardenUserRooms') || '[]'); } catch(e) { localStorage.removeItem('gardenUserRooms'); return []; } })();
         const grid = document.getElementById('userRoomsGrid');
         if (grid && extraRooms.length > 0) {
           // Remove any previously rendered extra rooms
@@ -5812,7 +5820,7 @@ This could be:
     }
 
     function openExtraRoom(roomId) {
-      const rooms = JSON.parse(localStorage.getItem('gardenUserRooms') || '[]');
+      const rooms = (() => { try { return JSON.parse(localStorage.getItem('gardenUserRooms') || '[]'); } catch(e) { localStorage.removeItem('gardenUserRooms'); return []; } })();
       const room = rooms.find(r => r.id === roomId);
       if (!room) return;
       gardenRoomMood = room.mood;
@@ -5830,7 +5838,7 @@ This could be:
 
     function deleteUserRoom(roomId) {
       if (!confirm('Delete this room?')) return;
-      const rooms = JSON.parse(localStorage.getItem('gardenUserRooms') || '[]');
+      const rooms = (() => { try { return JSON.parse(localStorage.getItem('gardenUserRooms') || '[]'); } catch(e) { localStorage.removeItem('gardenUserRooms'); return []; } })();
       localStorage.setItem('gardenUserRooms', JSON.stringify(rooms.filter(r => r.id !== roomId)));
       checkUserRoomCard();
       showToast('🗑 Room deleted');
@@ -5838,7 +5846,7 @@ This could be:
 
     // Room edit modal
     function openRoomEditModal() {
-      const config = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
+      const config = (() => { try { return JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}'); } catch(e) { localStorage.removeItem('gardenRoomConfig'); return {}; } })();
       document.getElementById('roomEditName').value = config.name || '';
       document.getElementById('roomEditDesc').value = config.description || '';
       const preview = document.getElementById('roomCoverPreview');
@@ -5875,7 +5883,7 @@ This could be:
       const name = document.getElementById('roomEditName').value.trim() || 'Your Garden Room';
       const desc = document.getElementById('roomEditDesc').value.trim();
       const fileInput = document.getElementById('roomCoverInput');
-      const existing = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
+      const existing = (() => { try { return JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}'); } catch(e) { localStorage.removeItem('gardenRoomConfig'); return {}; } })();
       let coverImage = existing.coverImage || null;
 
       if (fileInput.files[0]) {
@@ -6024,7 +6032,7 @@ This could be:
         createdAt: new Date().toISOString()
       };
 
-      const rooms = JSON.parse(localStorage.getItem('gardenUserRooms') || '[]');
+      const rooms = (() => { try { return JSON.parse(localStorage.getItem('gardenUserRooms') || '[]'); } catch(e) { localStorage.removeItem('gardenUserRooms'); return []; } })();
       rooms.push(newRoom);
       localStorage.setItem('gardenUserRooms', JSON.stringify(rooms));
 
@@ -6325,7 +6333,7 @@ This could be:
         try {
           const existingId = localStorage.getItem('gardenRoomDbId');
           if (!existingId) {
-            const config = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
+            const config = (() => { try { return JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}'); } catch(e) { localStorage.removeItem('gardenRoomConfig'); return {}; } })();
             const { data: inserted } = await db.from('garden_rooms').insert({
               user_id: currentUser.id,
               name: config.name || 'Garden Room',
@@ -6342,7 +6350,7 @@ This could be:
 
     async function openMyRoom() {
       const savedMood = localStorage.getItem('gardenRoomMood') || gardenRoomMood || 'calm';
-      const config = JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}');
+      const config = (() => { try { return JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}'); } catch(e) { localStorage.removeItem('gardenRoomConfig'); return {}; } })();
       gardenRoomMood = savedMood;
 
       // Calculate growth from creation count

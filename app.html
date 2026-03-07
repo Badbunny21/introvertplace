@@ -695,7 +695,8 @@
         // Check if mood already completed this session
         // sessionStorage persists across refreshes but clears on tab/browser close
         const moodDoneThisSession = sessionStorage.getItem('moodCompleted');
-        const savedMood = JSON.parse(localStorage.getItem('currentMood') || '{}');
+        let savedMood = {};
+        try { savedMood = JSON.parse(localStorage.getItem('currentMood') || '{}'); } catch (e) { localStorage.removeItem('currentMood'); }
 
         if (moodDoneThisSession) {
           // Already shown mood this session — skip overlay
@@ -735,7 +736,8 @@
         connect: 'connect.html',
         profile: 'profile.html',
       };
-      const mood = JSON.parse(localStorage.getItem('currentMood') || '{}');
+      let mood = {};
+      try { mood = JSON.parse(localStorage.getItem('currentMood') || '{}'); } catch (e) { localStorage.removeItem('currentMood'); }
       let url = map[page] || 'sanctuary.html';
       // Build query string
       const queryParams = new URLSearchParams();
@@ -762,11 +764,13 @@
       setActiveNav(page);
     }
 
-    // Logout
+    // Logout — clear all app-specific storage to prevent data leaking to next user
     async function logout() {
       await db.auth.signOut();
-      localStorage.removeItem('currentMood');
-      sessionStorage.removeItem('moodCompleted');
+      // Clear all app-specific localStorage keys
+      const appKeys = ['currentMood', 'introvert_profile', 'gardenRoomConfig', 'gardenUserRooms', 'gardenRoomMood'];
+      appKeys.forEach(k => localStorage.removeItem(k));
+      sessionStorage.clear();
       window.location.href = 'index.html';
     }
 
@@ -789,40 +793,54 @@
     });
 
     // Load saved profile from localStorage
+    // Safe avatar setter — uses DOM API instead of innerHTML to prevent XSS
+    function setNavAvatar(avatarUrl, avatarEmoji) {
+      const navAvatar = document.getElementById('navUserAvatar');
+      if (!navAvatar) return;
+      // Clear existing content
+      while (navAvatar.firstChild) navAvatar.removeChild(navAvatar.firstChild);
+      if (avatarUrl) {
+        const img = document.createElement('img');
+        img.src = avatarUrl;
+        img.alt = '';
+        img.onerror = function() {
+          navAvatar.removeChild(img);
+          navAvatar.textContent = avatarEmoji || '🌙';
+        };
+        navAvatar.appendChild(img);
+      } else {
+        navAvatar.textContent = avatarEmoji || '🌙';
+      }
+    }
+
     function loadSavedProfile() {
-      const savedProfile = localStorage.getItem('introvert_profile');
-      if (savedProfile) {
-        const profile = JSON.parse(savedProfile);
+      const savedProfileRaw = localStorage.getItem('introvert_profile');
+      if (!savedProfileRaw) return;
+      let profile;
+      try {
+        profile = JSON.parse(savedProfileRaw);
+      } catch (e) {
+        console.warn('Corrupt profile in localStorage, clearing.', e);
+        localStorage.removeItem('introvert_profile');
+        return;
+      }
 
-        // Update avatar in bottom nav (supports image or emoji)
-        const navAvatar = document.getElementById('navUserAvatar');
-        if (profile.avatar_url) {
-          navAvatar.innerHTML = '<img src="' + profile.avatar_url + '" alt="" onerror="this.parentElement.textContent=\'' + (profile.avatar || '🌙').replace(/'/g, "\\'") + '\'">';
-        } else if (profile.avatar) {
-          navAvatar.textContent = profile.avatar;
-        }
+      // Update avatar in bottom nav (supports image or emoji)
+      setNavAvatar(profile.avatar_url || null, profile.avatar || '🌙');
 
-        // Update username in mood screen
-        if (profile.username) {
-          document.getElementById('userName').textContent = profile.username;
-        }
+      // Update username in mood screen
+      if (profile.username) {
+        document.getElementById('userName').textContent = profile.username;
       }
     }
 
     // Listen for profile updates from iframe (profile page)
     window.addEventListener('message', function(event) {
       if (event.data && event.data.type === 'profileUpdate') {
-        const navAvatar = document.getElementById('navUserAvatar');
-        if (event.data.avatar_url) {
-          navAvatar.innerHTML = '<img src="' + event.data.avatar_url + '" alt="" onerror="this.parentElement.textContent=\'' + (event.data.avatar || '🌙').replace(/'/g, "\\'") + '\'">';
-        } else if (event.data.avatar_url === null) {
-          // Switched back to emoji
-          navAvatar.innerHTML = '';
-          navAvatar.textContent = event.data.avatar || '🌙';
-        } else if (event.data.avatar) {
-          navAvatar.innerHTML = '';
-          navAvatar.textContent = event.data.avatar;
-        }
+        setNavAvatar(
+          event.data.avatar_url !== undefined ? event.data.avatar_url : null,
+          event.data.avatar || '🌙'
+        );
       }
     });
 

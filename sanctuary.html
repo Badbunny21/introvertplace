@@ -646,7 +646,15 @@
         // Update username display
         const username = currentUser.user_metadata?.username || 'friend';
         document.querySelectorAll('.greeting-name span').forEach(el => el.textContent = username);
-        document.getElementById('sanctuaryGreeting').innerHTML = `${getGreeting()}, <span>${username}</span>`;
+        // Use DOM API to avoid XSS — username comes from user_metadata and must be treated as untrusted
+        const greetingEl = document.getElementById('sanctuaryGreeting');
+        if (greetingEl) {
+          greetingEl.textContent = '';
+          greetingEl.appendChild(document.createTextNode(`${getGreeting()}, `));
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = username;
+          greetingEl.appendChild(nameSpan);
+        }
 
         // Load user data
         loadRecentMoments();
