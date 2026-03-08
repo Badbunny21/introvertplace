@@ -186,6 +186,12 @@
     .join-btn { padding: 10px 24px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 14px; cursor: pointer; transition: all 0.2s ease; }
     .join-btn:hover { background: var(--accent-soft); color: var(--bg-deep); border-color: var(--accent-soft); }
     .join-btn.joined { background: rgba(124,232,168,0.15); border-color: rgba(124,232,168,0.3); color: var(--accent-green); }
+    .owner-badge { font-size: 12px; color: var(--accent-soft); background: rgba(196,161,255,0.12); border: 1px solid rgba(196,161,255,0.25); border-radius: 20px; padding: 4px 10px; font-weight: 500; }
+    .join-btn.edit-btn { background: rgba(196,161,255,0.1); border-color: rgba(196,161,255,0.3); color: var(--accent-soft); }
+    .join-btn.edit-btn:hover { background: rgba(196,161,255,0.2); }
+    .room-edit-btn { padding: 8px 16px; background: rgba(196,161,255,0.1); border: 1px solid rgba(196,161,255,0.3); border-radius: var(--radius-md); color: var(--accent-soft); font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .room-edit-btn:hover { background: rgba(196,161,255,0.2); }
+    .owner-join-badge { padding: 8px 16px; background: rgba(196,161,255,0.12); border: 1px solid rgba(196,161,255,0.25); border-radius: var(--radius-md); color: var(--accent-soft); font-size: 13px; font-weight: 500; }
 
     /* Find Souls */
     .souls-intro { text-align: center; padding: 40px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); margin-bottom: 32px; }
@@ -1065,22 +1071,23 @@
         if (error || !community) { showToast('Community not found'); return; }
 
         const { count: memberCount } = await db.from('community_members').select('*', { count: 'exact', head: true }).eq('community_id', id);
-        let isJoined = false;
+        let isJoined = false, isOwner = false;
         let comfortMode = 'occasional';
         if (currentUser) {
-          const { data: membership } = await db.from('community_members').select('id, comfort_mode').eq('community_id', id).eq('user_id', currentUser.id).single();
+          const { data: membership } = await db.from('community_members').select('id, comfort_mode, role').eq('community_id', id).eq('user_id', currentUser.id).single();
           isJoined = !!membership;
+          isOwner = membership?.role === 'owner';
           if (membership?.comfort_mode) comfortMode = membership.comfort_mode;
         }
 
-        openCommunityRoom(community, memberCount || 0, isJoined, comfortMode);
+        openCommunityRoom(community, memberCount || 0, isJoined, comfortMode, isOwner);
       } catch(err) {
         console.error('viewCommunity error:', err);
         showToast('Error loading community');
       }
     }
 
-    function openCommunityRoom(community, memberCount, isJoined, comfortMode) {
+    function openCommunityRoom(community, memberCount, isJoined, comfortMode, isOwner) {
       currentCommunity = community;
       currentCommunityJoined = isJoined;
       currentComfortMode = comfortMode || 'occasional';
@@ -1102,10 +1109,21 @@
       // Mode badge
       updateModeBadge(comfortMode, isJoined);
 
-      // Join/Leave button
+      // Join/Leave button — owners see Edit instead
       const joinBtn = document.getElementById('roomJoinBtn');
-      if (isJoined) { joinBtn.textContent = '✓ Joined'; joinBtn.classList.add('leave'); }
-      else { joinBtn.textContent = 'Join'; joinBtn.classList.remove('leave'); }
+      if (isOwner) {
+        joinBtn.textContent = '✏️ Edit';
+        joinBtn.className = 'room-edit-btn';
+        joinBtn.onclick = () => openEditCommunity(community.id);
+      } else if (isJoined) {
+        joinBtn.textContent = '✓ Joined';
+        joinBtn.className = 'room-join-btn leave';
+        joinBtn.onclick = () => handleRoomJoinBtn();
+      } else {
+        joinBtn.textContent = 'Join';
+        joinBtn.className = 'room-join-btn';
+        joinBtn.onclick = () => handleRoomJoinBtn();
+      }
 
       // Composer visibility
       const composer = document.getElementById('roomComposer');
@@ -1477,19 +1495,20 @@
           grid.innerHTML = `<div style="grid-column:1/-1;padding:60px 24px;text-align:center;"><span style="font-size:48px">🌿</span><h3 style="margin-top:16px">No communities yet</h3><p style="color:var(--text-muted);margin-top:8px">Be one of the first to create a space!</p></div>`;
           return;
         }
-        const memberCounts = {}, userMemberships = new Set();
+        const memberCounts = {}, userMemberships = new Set(), userOwnerships = new Set();
         try {
           const { data: countData } = await db.from('community_members').select('community_id');
           if (countData) countData.forEach(r => { memberCounts[r.community_id] = (memberCounts[r.community_id]||0)+1; });
           if (currentUser) {
-            const { data: userJoined } = await db.from('community_members').select('community_id').eq('user_id', currentUser.id);
-            if (userJoined) userJoined.forEach(r => userMemberships.add(r.community_id));
+            const { data: userJoined } = await db.from('community_members').select('community_id, role').eq('user_id', currentUser.id);
+            if (userJoined) userJoined.forEach(r => { userMemberships.add(r.community_id); if (r.role === 'owner') userOwnerships.add(r.community_id); });
           }
         } catch(e) {}
         communities.forEach(c => { communityNames[c.id] = c.name; });
         grid.innerHTML = communities.map(c => {
           const mc = memberCounts[c.id] || 0;
           const isJoined = userMemberships.has(c.id);
+          const isOwner = userOwnerships.has(c.id);
           return `
             <div class="community-card" onclick="viewCommunity('${c.id}')">
               <div class="community-top">
@@ -1503,7 +1522,10 @@
               <div class="community-tags"><span class="tag">${escapeHtml(c.category||'General')}</span></div>
               <div class="community-footer">
                 <div class="activity"><span class="activity-dot"></span><span>Active</span></div>
-                <button class="join-btn ${isJoined?'joined':''}" onclick="event.stopPropagation(); ${isJoined?`leaveCommunityFromCard('${c.id}',this)`:`showJoinOverlay('${c.id}','card',this)`}">${isJoined?'✓ Joined':'Join'}</button>
+                ${isOwner
+                  ? `<span class="owner-badge">👑 Owner</span><button class="join-btn edit-btn" onclick="event.stopPropagation(); openEditCommunity('${c.id}')">Edit</button>`
+                  : `<button class="join-btn ${isJoined?'joined':''}" onclick="event.stopPropagation(); ${isJoined?`leaveCommunityFromCard('${c.id}',this)`:`showJoinOverlay('${c.id}','card',this)`}">${isJoined?'✓ Joined':'Join'}</button>`
+                }
               </div>
             </div>`;
         }).join('');
@@ -1518,6 +1540,64 @@
         btn.onclick = function(e) { e.stopPropagation(); showJoinOverlay(communityId, 'card', btn); };
         showToast('👋 Left community'); setTimeout(() => loadCommunities(), 500);
       } catch(err) { console.error(err); }
+    }
+
+    // ===== EDIT COMMUNITY =====
+    function openEditCommunity(communityId) {
+      const c = currentCommunity?.id === communityId ? currentCommunity : null;
+      if (!c) return;
+      let modal = document.getElementById('editCommunityModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'editCommunityModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px';
+        modal.innerHTML = `
+          <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:20px;padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto">
+            <h3 style="font-family:'Fraunces',serif;font-size:22px;margin-bottom:24px">Edit Community</h3>
+            <div style="margin-bottom:16px">
+              <label style="font-size:13px;color:var(--text-muted);display:block;margin-bottom:8px">Name</label>
+              <input id="editCommName" type="text" maxlength="60" style="width:100%;padding:12px 16px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:12px;color:var(--text-primary);font-size:16px;font-family:inherit">
+            </div>
+            <div style="margin-bottom:16px">
+              <label style="font-size:13px;color:var(--text-muted);display:block;margin-bottom:8px">Description</label>
+              <textarea id="editCommDesc" maxlength="300" rows="3" style="width:100%;padding:12px 16px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:12px;color:var(--text-primary);font-size:16px;font-family:inherit;resize:none"></textarea>
+            </div>
+            <div style="margin-bottom:24px">
+              <label style="font-size:13px;color:var(--text-muted);display:block;margin-bottom:8px">Icon</label>
+              <input id="editCommIcon" type="text" maxlength="4" style="width:80px;padding:12px 16px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:12px;color:var(--text-primary);font-size:20px;text-align:center">
+            </div>
+            <div style="display:flex;gap:12px">
+              <button onclick="saveEditCommunity()" style="flex:1;padding:14px;background:var(--accent-soft);color:#0a0c10;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">Save Changes</button>
+              <button onclick="document.getElementById('editCommunityModal').remove()" style="padding:14px 20px;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border-subtle);border-radius:12px;font-size:15px;cursor:pointer">Cancel</button>
+            </div>
+          </div>`;
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+        document.body.appendChild(modal);
+      }
+      document.getElementById('editCommName').value = c.name || '';
+      document.getElementById('editCommDesc').value = c.description || '';
+      document.getElementById('editCommIcon').value = c.icon || '🏠';
+    }
+
+    async function saveEditCommunity() {
+      if (!db || !currentUser || !currentCommunity) return;
+      const name = document.getElementById('editCommName').value.trim();
+      const description = document.getElementById('editCommDesc').value.trim();
+      const icon = document.getElementById('editCommIcon').value.trim() || '🏠';
+      if (!name) { showToast('⚠️ Name is required'); return; }
+      try {
+        const { error } = await db.from('communities').update({ name, description, icon }).eq('id', currentCommunity.id).eq('creator_id', currentUser.id);
+        if (error) throw error;
+        currentCommunity = { ...currentCommunity, name, description, icon };
+        document.getElementById('roomTopbarIcon').textContent = icon;
+        document.getElementById('roomTopbarTitle').textContent = name;
+        document.getElementById('roomDescriptionBox').textContent = description || 'A quiet space to connect.';
+        document.getElementById('editCommunityModal').remove();
+        showToast('✨ Community updated!');
+        loadCommunities();
+      } catch(e) {
+        showToast('⚠️ Could not save changes');
+      }
     }
 
     // ===== CREATE COMMUNITY =====
