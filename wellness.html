@@ -477,10 +477,18 @@
       .breath-step-number { width: 44px; height: 44px; font-size: 22px; }
       .modal-content { padding: 40px 20px; }
       .breath-visualization { width: 220px; height: 220px; margin-bottom: 24px; }
+      /* Convert tabs to a 2×2 grid on small phones */
+      .wellness-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .wellness-tab { min-width: 0; padding: 14px 12px; }
     }
     @media (max-width: 380px) {
       .wellness-header h1 { font-size: 26px; }
       .content-wrapper { padding: 16px 12px; }
+      .wellness-tab { padding: 12px 8px; }
+      .wellness-tab .tab-icon { font-size: 24px; }
+      .wellness-tab .tab-label { font-size: 11px; }
+      /* Stack activity options on very small phones */
+      .activity-options { grid-template-columns: 1fr; }
     }
 
     /* Theme Variations */

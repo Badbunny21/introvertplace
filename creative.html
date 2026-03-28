@@ -840,10 +840,17 @@
     }
     @media (max-width: 600px) {
       .wizard-page { padding: 24px 16px; }
+      /* 4-col mood grid → 2 cols on phones */
+      .create-room-mood-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      /* 3-col visibility → 1 col on phones */
+      .visibility-options { grid-template-columns: 1fr; }
+      /* 2-col create type grid is fine, keep as-is */
     }
     @media (max-width: 380px) {
       .wizard-header h1 { font-size: 26px; }
       .wizard-page { padding: 20px 12px; }
+      .create-room-mood-grid { gap: 8px; }
+      .create-type-grid { grid-template-columns: 1fr; }
     }
 
     /* ==================== */
@@ -3249,6 +3256,12 @@
       .interior-room-name { font-size: 30px; }
       .interior-body { padding: 32px 24px 60px; }
       .interior-creations-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .interior-creations-grid { grid-template-columns: 1fr; }
+      .interior-hero { padding: 20px 16px 28px; }
+      .interior-body { padding: 24px 16px 60px; }
+      .interior-room-name { font-size: 26px; }
     }
 
     /* ==================== */

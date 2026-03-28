@@ -686,10 +686,15 @@
       .view-nav-item { padding: 10px 16px; }
       .view-nav { max-width: 280px; }
       .room-topbar-title { font-size: 17px; }
+      /* Force single-column grids on mobile */
+      .communities-grid,
+      .souls-grid { grid-template-columns: 1fr; gap: 12px; }
     }
     @media (max-width: 480px) {
       .room-topbar-meta { display: none; }
       .reading-mode-toggle { display: none; }
+      .communities-grid,
+      .souls-grid { gap: 10px; }
     }
 
     /* ── Mobile: prevent iOS zoom on input focus ── */
