@@ -4741,12 +4741,79 @@ This could be:
       console.error('Supabase init error:', err);
     }
 
+    // ── DB-based mode persistence ───────────────────────────────────────
+    const VALID_MODES = ['constellation', 'canvas', 'garden', 'seasonal'];
+
+    async function saveCreativeMode(mode) {
+      localStorage.setItem('introvert_creative_mode', mode);
+      if (!db || !currentUser) return;
+      try {
+        const { error } = await db.from('profiles').update({ display_mode: mode }).eq('id', currentUser.id);
+        if (error) console.error('Save creative mode error:', error);
+      } catch(e) { console.error('Save creative mode exception:', e); }
+    }
+
+    async function syncModeFromDB() {
+      if (!db || !currentUser) return;
+      try {
+        const { data, error } = await db.from('profiles').select('display_mode').eq('id', currentUser.id).single();
+        if (error) { console.error('Sync mode error:', error); return; }
+        if (data?.display_mode) {
+          // DB is source of truth — override localStorage if different
+          if (data.display_mode !== selectedMode || !document.getElementById('creativePage').classList.contains('active')) {
+            selectedMode = data.display_mode;
+            localStorage.setItem('introvert_creative_mode', selectedMode);
+            document.getElementById('wizardPage').classList.remove('active');
+            document.getElementById('creativePage').classList.add('active');
+            showViewByName(selectedMode);
+            if (selectedMode === 'canvas') initInfiniteCanvas();
+            else if (selectedMode === 'constellation') setTimeout(initConstellation, 50);
+            else if (selectedMode === 'seasonal') initSeasonalParticles();
+            setTimeout(loadSavedCreations, 100);
+          }
+        } else if (!localStorage.getItem('introvert_creative_mode')) {
+          // No mode in DB or localStorage → show wizard
+          document.getElementById('wizardPage').classList.add('active');
+          document.getElementById('creativePage').classList.remove('active');
+        } else {
+          // Mode in localStorage but not yet in DB → save it up
+          await saveCreativeMode(selectedMode);
+        }
+      } catch(e) { console.error('Sync mode exception:', e); }
+    }
+
+    // ── Subscription check (cached per session) ─────────────────────────
+    let _cachedIsPremium = null;
+    async function checkIsPremium() {
+      if (_cachedIsPremium !== null) return _cachedIsPremium;
+      if (!db || !currentUser) { _cachedIsPremium = false; return false; }
+      try {
+        const { data } = await db
+          .from('subscriptions')
+          .select('plan, status')
+          .eq('user_id', currentUser.id)
+          .single();
+        _cachedIsPremium = !!(data && data.plan === 'quiet_soul' && ['active', 'trialing'].includes(data.status));
+      } catch(e) { _cachedIsPremium = false; }
+      return _cachedIsPremium;
+    }
+
+    // ── Real-world season helper ─────────────────────────────────────────
+    function getCurrentSeason() {
+      const m = new Date().getMonth(); // 0 = Jan
+      if (m >= 2 && m <= 4) return { name: 'Spring', emoji: '🌸' };
+      if (m >= 5 && m <= 7) return { name: 'Summer', emoji: '☀️' };
+      if (m >= 8 && m <= 10) return { name: 'Autumn', emoji: '🍂' };
+      return { name: 'Winter', emoji: '❄️' };
+    }
+
     async function initAuth() {
       if (!db) return;
       try {
         const { data: { session } } = await db.auth.getSession();
         if (session) {
           currentUser = session.user;
+          await syncModeFromDB();
         }
       } catch (err) {
         console.error('Auth error:', err);
@@ -4761,9 +4828,11 @@ This could be:
       db.auth.onAuthStateChange((event, session) => {
         if (session) {
           currentUser = session.user;
+          _cachedIsPremium = null; // reset on auth change
           loadCreativePosts();
         } else {
           currentUser = null;
+          _cachedIsPremium = null;
         }
       });
     }
@@ -4857,11 +4926,12 @@ This could be:
       }
     }
 
-    function enterSpace() {
+    async function enterSpace() {
       document.getElementById('wizardPage').classList.remove('active');
       document.getElementById('creativePage').classList.add('active');
+      // Persist choice to DB (once per account, follows across devices)
+      await saveCreativeMode(selectedMode);
 
-      // Show the correct view based on selected mode
       if (selectedMode === 'canvas') {
         showViewByName('canvas');
         initInfiniteCanvas();
@@ -4929,13 +4999,33 @@ This could be:
       document.getElementById('wizardPage').classList.add('active');
     }
 
-    // Mode cards selection
+    // Mode cards selection — with lock for free users who already have a chosen mode
     document.querySelectorAll('.mode-card').forEach(card => {
-      card.onclick = function() {
+      card.onclick = async function() {
+        const newMode = this.dataset.mode;
+        const savedMode = localStorage.getItem('introvert_creative_mode');
+
+        // If switching away from an already-chosen mode, check subscription
+        if (savedMode && savedMode !== newMode) {
+          const isPremium = await checkIsPremium();
+          if (!isPremium) {
+            const modeNames = {
+              constellation: 'Constellation ✨',
+              garden: 'Garden 🌿',
+              canvas: 'Infinite Canvas 🎨',
+              seasonal: 'Seasonal Flow 🌙'
+            };
+            showToast(
+              '🌙 ' + (modeNames[newMode] || newMode) + ' has its own quiet rhythm. ' +
+              'Wandering freely between all four spaces is part of the Quiet Soul experience.'
+            );
+            return;
+          }
+        }
+
         document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
         this.classList.add('selected');
-        // Track the selected mode
-        selectedMode = this.dataset.mode;
+        selectedMode = newMode;
       };
     });
 
@@ -4955,35 +5045,12 @@ This could be:
     });
 
     // ==================== VIEWS ====================
+    // showView: safe programmatic version (no event.target dependency)
     function showView(view) {
-      document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
-
-      document.getElementById('constellationView').classList.toggle('active', view === 'constellation');
-      document.getElementById('gardenView').classList.toggle('active', view === 'garden');
-      document.getElementById('canvasView').classList.toggle('active', view === 'canvas');
-      document.getElementById('seasonalView').classList.toggle('active', view === 'seasonal');
-
-      // Show/hide appropriate hints
-      const mainHint = document.getElementById('mainHint');
-      if (mainHint) {
-        mainHint.style.display = (view === 'canvas' || view === 'garden' || view === 'seasonal') ? 'none' : 'block';
-      }
-
-      // Initialize canvas when switching to canvas view
-      if (view === 'canvas') {
-        initInfiniteCanvas();
-      }
-
-      // Initialize seasonal when switching to seasonal view
-      if (view === 'seasonal') {
-        initSeasonalParticles();
-      }
-
-      // Initialize garden world when switching to garden view
-      if (view === 'garden') {
-        initGardenWorld();
-      }
+      document.querySelectorAll('.mode-tab').forEach(t => {
+        t.classList.toggle('active', (t.dataset.view || '') === view);
+      });
+      showViewByName(view);
     }
 
     // ==================== CONSTELLATION ====================
@@ -5138,16 +5205,17 @@ This could be:
         let othersByUser = {}; // { userId: { username, creations[] } }
 
         if (db && myId) {
-          // Query 1: ALL of the current user's own creations (no view_mode filter so nothing is lost)
+          // Query 1: Only this user's constellation creations
           try {
             const { data: myData } = await db
               .from('creations')
               .select('id, type, title, content, description, mood, view_mode, user_id')
               .eq('user_id', myId)
+              .eq('view_mode', 'constellation')
               .order('created_at', { ascending: false })
               .limit(100);
             if (myData) ownCreations = myData;
-          } catch(e) {}
+          } catch(e) { console.error('Load own constellation creations error:', e); }
 
           // Query 2: Other users' public creations — shown as distant galaxies
           // No view_mode filter so we never miss a user whose creation was saved with a different value
@@ -5512,6 +5580,7 @@ This could be:
             .from('garden_rooms')
             .select('id, user_id, name, description, mood, emoji, cover_image_url, growth_level, visit_count, appreciation_count')
             .eq('is_system_room', false)
+            .eq('is_public', true)
             .order('created_at', { ascending: false })
             .limit(20);
           if (data) {
@@ -5929,21 +5998,29 @@ This could be:
       if (db && currentUser) {
         try {
           const existingId = localStorage.getItem('gardenRoomDbId');
+          const existingPublic = localStorage.getItem('gardenRoomIsPublic') === 'true';
           const roomData = {
             user_id: currentUser.id,
             name,
             description: desc,
             mood,
             cover_image_url: coverImage && !coverImage.startsWith('data:') ? coverImage : null,
-            is_system_room: false
+            is_system_room: false,
+            is_public: existingPublic
           };
           if (existingId) {
-            await db.from('garden_rooms').update(roomData).eq('id', existingId).eq('user_id', currentUser.id);
+            const { error } = await db.from('garden_rooms').update(roomData).eq('id', existingId).eq('user_id', currentUser.id);
+            if (error) { console.error('Update room error:', error); showToast('⚠️ Room could not be saved. Please check your connection.'); return; }
           } else {
-            const { data: inserted } = await db.from('garden_rooms').insert(roomData).select('id').single();
+            const { data: inserted, error } = await db.from('garden_rooms').insert(roomData).select('id').single();
+            if (error) { console.error('Insert room error:', error); showToast('⚠️ Room could not be saved. Please check your connection.'); return; }
             if (inserted) localStorage.setItem('gardenRoomDbId', inserted.id);
           }
-        } catch(e) {}
+        } catch(e) {
+          console.error('Save room settings exception:', e);
+          showToast('⚠️ Room could not be saved. Please check your connection.');
+          return;
+        }
       }
 
       fileInput.value = '';
@@ -6024,16 +6101,25 @@ This could be:
       let dbId = null;
       if (db && currentUser) {
         try {
-          const { data: inserted } = await db.from('garden_rooms').insert({
+          const { data: inserted, error } = await db.from('garden_rooms').insert({
             user_id: currentUser.id,
             name,
             description: desc,
             mood: createRoomSelectedMood,
             cover_image_url: coverImage && !coverImage.startsWith('data:') ? coverImage : null,
-            is_system_room: false
+            is_system_room: false,
+            is_public: false
           }).select('id').single();
-          if (inserted) dbId = inserted.id;
-        } catch(e) {}
+          if (error) {
+            console.error('Create room DB error:', error);
+            showToast('⚠️ Room saved locally but could not sync to the cloud — it may not appear on other devices.');
+          } else if (inserted) {
+            dbId = inserted.id;
+          }
+        } catch(e) {
+          console.error('Create room exception:', e);
+          showToast('⚠️ Room saved locally but could not sync to the cloud.');
+        }
       }
 
       const newRoom = {
@@ -6347,16 +6433,18 @@ This could be:
           const existingId = localStorage.getItem('gardenRoomDbId');
           if (!existingId) {
             const config = (() => { try { return JSON.parse(localStorage.getItem('gardenRoomConfig') || '{}'); } catch(e) { localStorage.removeItem('gardenRoomConfig'); return {}; } })();
-            const { data: inserted } = await db.from('garden_rooms').insert({
+            const { data: inserted, error } = await db.from('garden_rooms').insert({
               user_id: currentUser.id,
               name: config.name || 'Garden Room',
               description: config.description || null,
               mood: selectedOnboardingMood,
-              is_system_room: false
+              is_system_room: false,
+              is_public: false
             }).select('id').single();
-            if (inserted) localStorage.setItem('gardenRoomDbId', inserted.id);
+            if (error) { console.error('Garden onboarding room create error:', error); }
+            else if (inserted) { localStorage.setItem('gardenRoomDbId', inserted.id); }
           }
-        } catch(e) {}
+        } catch(e) { console.error('Garden onboarding save exception:', e); }
       }
       openMyRoom();
     }
@@ -6467,6 +6555,13 @@ This could be:
       if (seasonalParticlesInitialized) return;
       seasonalParticlesInitialized = true;
       createSeasonalParticles();
+      // Auto-select the real-world current season
+      const season = getCurrentSeason();
+      const seasonKey = season.name.toLowerCase(); // 'spring','summer','autumn','winter'
+      selectSeason(seasonKey);
+      // Update header icon to match real season
+      const iconEl = document.getElementById('seasonIcon');
+      if (iconEl) iconEl.textContent = season.emoji;
     }
 
     // Create particles
@@ -7558,37 +7653,24 @@ This could be:
       }
     });
 
-    // ========== MODE PERSISTENCE VIA LOCALSTORAGE ==========
-    // Save mode to localStorage when entering a space
-    const originalEnterSpace = enterSpace;
-    enterSpace = function() {
-      originalEnterSpace();
-      localStorage.setItem('introvert_creative_mode', selectedMode);
-    };
-
-    const originalSelectModeAndEnter = selectModeAndEnter;
-    selectModeAndEnter = function(mode) {
-      originalSelectModeAndEnter(mode);
-      localStorage.setItem('introvert_creative_mode', mode);
-    };
-
-    (function restoreModeFromStorage() {
+    // ========== MODE RESTORE ==========
+    // Fast-path: instantly show last known mode from localStorage so there's
+    // no blank flash while auth resolves. initAuth() → syncModeFromDB() will
+    // run shortly after and override with the DB value if they differ.
+    (function fastRestoreMode() {
       const mode = localStorage.getItem('introvert_creative_mode');
-      if (mode && ['constellation', 'canvas', 'garden', 'seasonal'].includes(mode)) {
-        // User has a saved mode — skip wizard and restore it
+      if (mode && VALID_MODES.includes(mode)) {
         selectedMode = mode;
         document.getElementById('wizardPage').classList.remove('active');
         document.getElementById('creativePage').classList.add('active');
         showViewByName(mode);
         if (mode === 'canvas') initInfiniteCanvas();
-        else if (mode === 'constellation') initConstellation();
+        else if (mode === 'constellation') setTimeout(initConstellation, 50);
         else if (mode === 'seasonal') initSeasonalParticles();
         setTimeout(loadSavedCreations, 100);
-      } else {
-        // No saved mode — show the wizard so user can pick their mode
-        document.getElementById('wizardPage').classList.add('active');
-        document.getElementById('creativePage').classList.remove('active');
       }
+      // No localStorage → wizard stays visible. DB sync in initAuth() will
+      // also check and show the wizard if the account has no mode saved.
     })();
   </script>
 
