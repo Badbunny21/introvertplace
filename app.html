@@ -358,7 +358,7 @@
     /* ============ FEEDBACK BUTTON & MODAL ============ */
     .feedback-btn {
       position: fixed;
-      bottom: 80px;
+      bottom: calc(80px + env(safe-area-inset-bottom, 0px));
       right: 16px;
       width: 48px;
       height: 48px;
@@ -844,8 +844,60 @@
       }
     });
 
+    // Handle Stripe payment redirect (success/canceled)
+    function handlePaymentRedirect() {
+      const params = new URLSearchParams(window.location.search);
+      const payment = params.get('payment');
+      if (!payment) return;
+
+      // Clean the URL so refreshing doesn't re-show the message
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+
+      if (payment === 'success') {
+        // Small delay so page is fully loaded before showing toast
+        setTimeout(() => {
+          showPaymentToast('🎉 Welcome to Quiet Soul! Your subscription is now active.', 'success');
+        }, 800);
+      } else if (payment === 'canceled') {
+        setTimeout(() => {
+          showPaymentToast('No worries — you can upgrade anytime from your profile.', 'info');
+        }, 800);
+      }
+    }
+
+    function showPaymentToast(message, type) {
+      const toast = document.createElement('div');
+      toast.textContent = message;
+      Object.assign(toast.style, {
+        position: 'fixed',
+        top: '24px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: type === 'success' ? 'rgba(124,232,168,0.15)' : 'rgba(196,161,255,0.15)',
+        border: '1px solid ' + (type === 'success' ? 'rgba(124,232,168,0.4)' : 'rgba(196,161,255,0.4)'),
+        color: type === 'success' ? '#7ce8a8' : '#c4a1ff',
+        padding: '14px 24px',
+        borderRadius: '12px',
+        fontSize: '15px',
+        fontFamily: 'Inter, sans-serif',
+        backdropFilter: 'blur(12px)',
+        zIndex: '99999',
+        maxWidth: '90vw',
+        textAlign: 'center',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+        transition: 'opacity 0.4s ease',
+      });
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+      }, 5000);
+    }
+
     // Initialize
     init();
+    handlePaymentRedirect();
 
     // ============ FEEDBACK FUNCTIONALITY ============
     let selectedFeedbackType = 'general';
