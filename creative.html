@@ -5608,7 +5608,7 @@ This could be:
           const emoji = room.emoji || MOOD_EMOJI_MAP[room.mood] || '🌿';
           const gradient = MOOD_GRADIENTS[room.mood] || MOOD_GRADIENTS.calm;
           const coverHtml = room.cover_image_url
-            ? `<img src="${room.cover_image_url}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.7;">`
+            ? `<img src="${escapeHtml(room.cover_image_url)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.7;">`
             : '';
           const safeName = (room.name || '').replace(/'/g, "\\'");
           return `
@@ -5625,8 +5625,8 @@ This could be:
                 </div>
               </div>
               <div class="garden-room-info">
-                <div class="garden-room-title">${emoji} ${room.name}</div>
-                <div class="garden-room-description">${room.description || 'A creative sanctuary.'}</div>
+                <div class="garden-room-title">${emoji} ${escapeHtml(room.name)}</div>
+                <div class="garden-room-description">${escapeHtml(room.description || 'A creative sanctuary.')}</div>
                 <div class="garden-room-meta">
                   <div class="garden-meta-item">🌿 ${room.appreciation_count || 0} appreciations</div>
                   <div class="garden-meta-item">👣 ${room.visit_count || 0} visits</div>
@@ -5662,8 +5662,8 @@ This could be:
               </div>
               <div class="garden-room-info">
                 <div class="garden-featured-label">✨ Featured Garden</div>
-                <div class="garden-room-title">${room.emoji} ${room.name}</div>
-                <div class="garden-room-description">${room.description}</div>
+                <div class="garden-room-title">${room.emoji} ${escapeHtml(room.name)}</div>
+                <div class="garden-room-description">${escapeHtml(room.description)}</div>
                 <div class="garden-room-meta">
                   <div class="garden-meta-item">🌿 ${room.appreciations} appreciations</div>
                   <div class="garden-meta-item">👣 ${room.visits} visits</div>
@@ -5810,8 +5810,8 @@ This could be:
             </div>
           </div>
           <div class="garden-room-info">
-            <div class="garden-room-title">${emoji} ${roomName}</div>
-            <div class="garden-room-description">${roomDesc}</div>
+            <div class="garden-room-title">${emoji} ${escapeHtml(roomName)}</div>
+            <div class="garden-room-description">${escapeHtml(roomDesc)}</div>
             <div class="garden-room-meta">
               <div class="garden-meta-item">🌱 ${creationCount} creation${creationCount !== 1 ? 's' : ''}</div>
               <div class="garden-meta-item">🌿 0 appreciations</div>
@@ -5826,7 +5826,7 @@ This could be:
                   ✏️
                 </button>
               ` : `
-                <button class="garden-knock-btn" style="flex:1;" onclick="event.stopPropagation(); openGardenKnockModal('${roomName}', '${ownerLabel}')">
+                <button class="garden-knock-btn" style="flex:1;" onclick="event.stopPropagation(); openGardenKnockModal('${roomName.replace(/'/g,"\\'")}', '${ownerLabel.replace(/'/g,"\\'")}')">
                   <span>🚪</span> Knock to Enter
                 </button>
               `}
@@ -5861,7 +5861,7 @@ This could be:
             const emoji = MOOD_EMOJI[room.mood] || '🌿';
             const gradient = MOOD_GRADIENTS[room.mood];
             const coverHtml = room.coverImage
-              ? `<img src="${room.coverImage}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.7;">`
+              ? `<img src="${escapeHtml(room.coverImage)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.7;">`
               : '';
             const el = document.createElement('div');
             el.className = 'garden-room-card extra-room-card';
@@ -5879,8 +5879,8 @@ This could be:
                 </div>
               </div>
               <div class="garden-room-info">
-                <div class="garden-room-title">${emoji} ${room.name}</div>
-                <div class="garden-room-description">${room.description || 'Your creative sanctuary.'}</div>
+                <div class="garden-room-title">${emoji} ${escapeHtml(room.name)}</div>
+                <div class="garden-room-description">${escapeHtml(room.description || 'Your creative sanctuary.')}</div>
                 <div class="garden-room-meta">
                   <div class="garden-meta-item">🌱 0 creations</div>
                   <div class="garden-meta-item">🌿 0 appreciations</div>
@@ -6423,6 +6423,7 @@ This could be:
     }
 
     async function completeGardenOnboarding() {
+      if (!selectedOnboardingMood) { showToast('Please choose a mood for your room 🌿'); return; }
       closeGardenOnboarding();
       gardenRoomMood = selectedOnboardingMood;
       localStorage.setItem('gardenRoomMood', selectedOnboardingMood);
@@ -6521,7 +6522,8 @@ This could be:
     }
 
     function sendGardenKnock() {
-      const message = document.getElementById('gardenKnockMessage').value;
+      const message = document.getElementById('gardenKnockMessage').value.trim();
+      if (!message) { showToast('Please write a short note before knocking 🌿'); return; }
       closeGardenKnockModal();
       showToast(`🚪 Knock sent to ${currentKnockRoom}! You'll be notified when they respond.`);
     }
@@ -6809,8 +6811,9 @@ This could be:
     }
 
     function switchMusicOption(option) {
-      document.querySelectorAll('.music-option-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+      document.querySelectorAll('.music-option-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + option + "'"));
+      });
 
       if (option === 'upload') {
         document.getElementById('musicUploadArea').style.display = 'block';
@@ -7045,6 +7048,7 @@ This could be:
           if (error) {
             console.error('Save creation error:', error);
             showToast('⚠️ Could not save: ' + error.message);
+            gardenCreateContext = false;
             return;
           }
 
@@ -7055,6 +7059,7 @@ This could be:
         } catch (err) {
           console.error('Save creation exception:', err);
           showToast('⚠️ Could not reach the server. Please check your connection.');
+          gardenCreateContext = false;
           return;
         }
       } else {
