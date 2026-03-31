@@ -206,6 +206,9 @@
     .soul-tagline { font-size: 14px; color: var(--text-muted); font-style: italic; margin-bottom: 16px; }
     .interests { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; }
     .interest { padding: 6px 12px; background: var(--bg-elevated); border-radius: var(--radius-full); font-size: 12px; color: var(--text-secondary); }
+    .interest.shared { background: rgba(196,161,255,0.15); border: 1px solid rgba(196,161,255,0.3); color: var(--accent-soft); }
+    .soul-match-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(196,161,255,0.12); border: 1px solid rgba(196,161,255,0.25); border-radius: var(--radius-full); font-size: 12px; color: var(--accent-soft); margin-bottom: 16px; }
+    .soul-card.top-match { border-color: rgba(196,161,255,0.3); box-shadow: 0 0 0 1px rgba(196,161,255,0.1); }
     .wave-btn { width: 100%; padding: 12px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 14px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .wave-btn:hover { background: var(--accent-soft); color: var(--bg-deep); border-color: var(--accent-soft); }
     .wave-btn.waved { background: rgba(196,161,255,0.15); border-color: rgba(196,161,255,0.3); color: var(--accent-soft); pointer-events: none; }
@@ -1000,7 +1003,7 @@
       document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
       document.getElementById('view-' + viewName)?.classList.add('active');
       const url = new URL(window.location); url.searchParams.set('view', viewName); history.replaceState(null, '', url);
-      if (viewName === 'souls' && !soulsLoaded) { soulsLoaded = true; loadSouls(); }
+      if (viewName === 'souls') { loadSouls(); }
       if (viewName === 'messages' && !conversationsLoaded) { conversationsLoaded = true; loadConversations(); }
       if (viewName !== 'messages') stopMessagePolling();
     }
@@ -1833,59 +1836,86 @@
     async function loadSouls() {
       if (!db) return;
       const grid = document.getElementById('soulsGrid'); if (!grid) return;
+      grid.innerHTML = `<div style="grid-column:1/-1;padding:60px;text-align:center"><span style="font-size:40px">✨</span><p style="color:var(--text-muted);margin-top:12px">Finding your kind of souls...</p></div>`;
+
       try {
-        const { data: profiles } = await db.from('profiles').select('*').order('created_at', { ascending: false }).limit(20);
-        if (!profiles || !profiles.length) { grid.innerHTML = `<div style="grid-column:1/-1;padding:60px;text-align:center"><span style="font-size:48px">🔮</span><h3 style="margin-top:16px">No souls yet</h3></div>`; return; }
-        grid.innerHTML = profiles.map(p => {
-          const avatar = p.avatar_emoji||p.avatar||'🌙'; const avatarBg = p.avatar_bg||'linear-gradient(135deg,#667eea 0%,#764ba2 100%)';
-          const interests = p.interests ? p.interests.split(',').map(i=>i.trim()).filter(Boolean).slice(0,3) : [];
-          const isMe = currentUser && p.id === currentUser.id;
-          return `<div class="soul-card" onclick="viewProfile('${p.id}')">${renderAvatarHtml(p.avatar_url||null,avatar,avatarBg,'soul-avatar')}<div class="soul-name">${escapeHtml(p.username||'Anonymous')}${isMe?' (You)':''}</div><div class="soul-tagline">${escapeHtml(p.tagline||p.bio?.substring(0,50)||'A quiet soul')}</div>${interests.length?`<div class="interests">${interests.map(i=>`<span class="interest">${escapeHtml(i)}</span>`).join('')}</div>`:''} ${!isMe?`<button class="wave-btn" onclick="event.stopPropagation();sendWave(this)">👋 Send a quiet wave</button>`:''}</div>`;
+        // Load current user's interests + latest mood entry in parallel
+        let myInterests = [];
+        if (currentUser) {
+          const [profRes, moodRes] = await Promise.all([
+            db.from('profiles').select('interests').eq('id', currentUser.id).single(),
+            db.from('mood_entries').select('energy_level').eq('user_id', currentUser.id).order('logged_at', { ascending: false }).limit(1).maybeSingle()
+          ]);
+          if (profRes.data?.interests) {
+            myInterests = profRes.data.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
+          }
+        }
+
+        // Fetch all other users
+        let query = db.from('profiles').select('*').order('created_at', { ascending: false }).limit(40);
+        if (currentUser) query = query.neq('id', currentUser.id);
+        const { data: profiles } = await query;
+
+        if (!profiles || !profiles.length) {
+          grid.innerHTML = `<div style="grid-column:1/-1;padding:60px;text-align:center"><span style="font-size:48px">🔮</span><h3 style="margin-top:16px">No souls yet</h3><p style="color:var(--text-muted);margin-top:8px">Be one of the first to set up your profile!</p></div>`;
+          return;
+        }
+
+        // Score each profile by shared interests
+        const scored = profiles.map(p => {
+          let sharedInterests = [];
+          if (myInterests.length && p.interests) {
+            const theirs = p.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
+            sharedInterests = myInterests.filter(i => theirs.includes(i));
+          }
+          return { ...p, sharedInterests, score: sharedInterests.length };
+        });
+
+        // Sort: most shared interests first, then by newest
+        scored.sort((a, b) => b.score - a.score);
+
+        grid.innerHTML = scored.map(p => {
+          const avatar = p.avatar_emoji || p.avatar || '🌙';
+          const avatarBg = p.avatar_bg || 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)';
+          const displayInterests = p.interests ? p.interests.split(',').map(i => i.trim()).filter(Boolean).slice(0, 4) : [];
+          const isTopMatch = p.score >= 2;
+
+          const matchBadge = p.score > 0
+            ? `<div class="soul-match-badge">✨ ${p.score} shared interest${p.score > 1 ? 's' : ''}</div>`
+            : '';
+
+          const interestsHtml = displayInterests.length
+            ? `<div class="interests">${displayInterests.map(i => `<span class="interest ${p.sharedInterests.includes(i.toLowerCase()) ? 'shared' : ''}">${escapeHtml(i)}</span>`).join('')}</div>`
+            : '';
+
+          return `<div class="soul-card${isTopMatch ? ' top-match' : ''}" onclick="viewProfile('${p.id}')">
+            ${matchBadge}
+            ${renderAvatarHtml(p.avatar_url||null, avatar, avatarBg, 'soul-avatar')}
+            <div class="soul-name">${escapeHtml(p.username||'Anonymous')}</div>
+            <div class="soul-tagline">${escapeHtml(p.tagline || p.bio?.substring(0,60) || 'A quiet soul')}</div>
+            ${interestsHtml}
+            <button class="wave-btn" onclick="event.stopPropagation(); sendWave('${p.id}', this)">👋 Send a quiet wave</button>
+          </div>`;
         }).join('');
-      } catch(err) { console.error(err); }
+
+      } catch(err) { console.error('loadSouls error:', err); }
     }
 
-    function sendWave(btn) {
-  btn.classList.add('waved');
-  btn.innerHTML = '<span>✓</span> Wave sent!';
-  btn.onclick = null;
+    function sendWave(userId, btn) {
+      btn.classList.add('waved');
+      btn.innerHTML = '<span>✓</span> Wave sent!';
+      btn.onclick = null;
+      saveWaveToSupabase(userId);
+    }
 
-  const card = btn.closest('.soul-card');
-  const username = card.querySelector('.soul-name')?.textContent?.replace(' (You)', '').trim();
-  if (username) saveWaveToSupabase(username);
-}
-
-async function saveWaveToSupabase(toUsername) {
-  if (!db || !currentUser) {
-    showToast('Please sign in to send waves 🌙');
-    return;
-  }
-  try {
-    const { data: recipient } = await db
-      .from('profiles')
-      .select('id')
-      .eq('username', toUsername)
-      .single();
-
-    if (!recipient) return;
-
-    await db.from('waves').upsert({
-      from_user_id: currentUser.id,
-      to_user_id: recipient.id
-    });
-
-    await db.from('notifications').insert({
-      user_id: recipient.id,
-      type: 'wave',
-      message: '👋 Someone sent you a quiet wave',
-      seen: false
-    });
-
-    showToast('🌙 Quiet wave sent!');
-  } catch(e) {
-    console.log('Wave error:', e);
-  }
-}
+    async function saveWaveToSupabase(toUserId) {
+      if (!db || !currentUser) { showToast('Please sign in to send waves 🌙'); return; }
+      try {
+        await db.from('waves').upsert({ from_user_id: currentUser.id, to_user_id: toUserId });
+        await db.from('notifications').insert({ user_id: toUserId, type: 'wave', message: '👋 Someone sent you a quiet wave', seen: false });
+        showToast('🌙 Quiet wave sent!');
+      } catch(e) { console.log('Wave error:', e); }
+    }
 
     // ===== PROFILE MODAL =====
     let pendingMessageProfile = null;
