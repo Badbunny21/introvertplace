@@ -546,9 +546,9 @@
 
         <div class="tab-content active" id="tab-overview">
           <div class="status-grid">
-            <div class="status-card"><div class="status-icon">⚡</div><div class="status-label">Energy Level</div><div class="status-value">--/10</div><div class="status-bar"><div class="status-bar-fill energy" style="width:0%"></div></div></div>
-            <div class="status-card"><div class="status-icon">🔋</div><div class="status-label">Social Battery</div><div class="status-value">100%</div><div class="status-bar"><div class="status-bar-fill social" style="width:100%"></div></div></div>
-            <div class="status-card"><div class="status-icon">😮‍💨</div><div class="status-label">Stress Level</div><div class="status-value">--/10</div><div class="status-bar"><div class="status-bar-fill stress" style="width:0%"></div></div></div>
+            <div class="status-card"><div class="status-icon">⚡</div><div class="status-label">Energy Level</div><div class="status-value" id="energyStatValue">--/10</div><div class="status-bar"><div class="status-bar-fill energy" id="energyStatBar" style="width:0%"></div></div></div>
+            <div class="status-card"><div class="status-icon">🔋</div><div class="status-label">Social Battery</div><div class="status-value" id="overviewBatteryValue">100%</div><div class="status-bar"><div class="status-bar-fill social" id="overviewBatteryBar" style="width:100%"></div></div></div>
+            <div class="status-card"><div class="status-icon">😮‍💨</div><div class="status-label">Stress Level</div><div class="status-value" id="stressStatValue">--/10</div><div class="status-bar"><div class="status-bar-fill stress" id="stressStatBar" style="width:0%"></div></div></div>
           </div>
 
           <div class="wellness-message">
@@ -1422,6 +1422,7 @@
       updateBatteryDisplay();
       renderActivities();
       generatePredictions();
+      loadOverviewStats();
       closeActivityModal();
     }
 
@@ -1437,12 +1438,11 @@
 
       document.querySelector('.battery-status').textContent = status;
 
-      // Update overview card too
-      const overviewBattery = document.querySelector('#tab-overview .status-card:nth-child(2)');
-      if (overviewBattery) {
-        overviewBattery.querySelector('.status-value').textContent = currentBattery + '%';
-        overviewBattery.querySelector('.status-bar-fill').style.width = currentBattery + '%';
-      }
+      // Update overview battery card
+      const ovBattVal = document.getElementById('overviewBatteryValue');
+      const ovBattBar = document.getElementById('overviewBatteryBar');
+      if (ovBattVal) ovBattVal.textContent = currentBattery + '%';
+      if (ovBattBar) ovBattBar.style.width = currentBattery + '%';
     }
 
     function escapeHtml(text) {
@@ -1631,11 +1631,64 @@
       document.body.classList.add('font-' + fontSize);
     }
 
+    // ============ OVERVIEW STATS (Energy + Stress) ============
+    async function loadOverviewStats() {
+      if (!db || !currentUser) return;
+
+      try {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        // Energy Level: average of today's mood_entries.energy_level (or latest if only one)
+        const { data: moodData } = await db
+          .from('mood_entries')
+          .select('energy_level')
+          .eq('user_id', currentUser.id)
+          .gte('created_at', todayStart.toISOString())
+          .not('energy_level', 'is', null)
+          .order('created_at', { ascending: false });
+
+        const energyEl = document.getElementById('energyStatValue');
+        const energyBar = document.getElementById('energyStatBar');
+        if (moodData && moodData.length > 0) {
+          const avg = Math.round(moodData.reduce((sum, r) => sum + r.energy_level, 0) / moodData.length);
+          if (energyEl) energyEl.textContent = avg + '/10';
+          if (energyBar) energyBar.style.width = (avg * 10) + '%';
+        } else {
+          if (energyEl) energyEl.textContent = '--/10';
+          if (energyBar) energyBar.style.width = '0%';
+        }
+
+        // Stress Level: derived from today's total battery drain
+        // 0 drain = 0/10 stress, 100% drain = 10/10 stress
+        const { data: drainData } = await db
+          .from('battery_activities')
+          .select('drain')
+          .eq('user_id', currentUser.id)
+          .gte('logged_at', todayStart.toISOString());
+
+        const stressEl = document.getElementById('stressStatValue');
+        const stressBar = document.getElementById('stressStatBar');
+        if (drainData && drainData.length > 0) {
+          const totalDrain = drainData.reduce((sum, a) => sum + (a.drain || 0), 0);
+          const stress = Math.min(10, Math.round(totalDrain / 10));
+          if (stressEl) stressEl.textContent = stress + '/10';
+          if (stressBar) stressBar.style.width = (stress * 10) + '%';
+        } else {
+          if (stressEl) stressEl.textContent = '0/10';
+          if (stressBar) stressBar.style.width = '0%';
+        }
+      } catch(e) {
+        console.error('Overview stats error:', e);
+      }
+    }
+
     // ============ INITIALIZE ============
     async function initWellness() {
       applyAppearanceSettings();
       await initAuth();
       await loadBatteryData();
+      await loadOverviewStats();
     }
 
     initWellness();
