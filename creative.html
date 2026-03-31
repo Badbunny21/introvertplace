@@ -4780,8 +4780,16 @@ This could be:
           document.getElementById('wizardPage').classList.add('active');
           document.getElementById('creativePage').classList.remove('active');
         } else {
-          // Mode in localStorage but not yet in DB → save it up
-          await saveCreativeMode(selectedMode);
+          // Mode in localStorage but not yet saved to DB (e.g. completed wizard before signing in)
+          const localMode = localStorage.getItem('introvert_creative_mode');
+          if (VALID_MODES.includes(localMode)) {
+            selectedMode = localMode;
+            await saveCreativeMode(localMode);
+            // Make sure the page is showing their mode
+            document.getElementById('wizardPage').classList.remove('active');
+            document.getElementById('creativePage').classList.add('active');
+            showViewByName(localMode);
+          }
         }
       } catch(e) { console.error('Sync mode exception:', e); }
     }
@@ -4829,10 +4837,17 @@ This could be:
 
     // Keep currentUser in sync and reload data when auth state changes
     if (db) {
-      db.auth.onAuthStateChange((event, session) => {
+      db.auth.onAuthStateChange(async (event, session) => {
         if (session) {
+          const wasSignedOut = !currentUser;
           currentUser = session.user;
-          _cachedIsPremium = null; // reset on auth change
+          _cachedIsPremium = null;
+          // If user just signed in (wasn't signed in before), sync their saved mode from DB
+          // This handles the case where the wizard was completed while not signed in,
+          // or where the user arrives at this page and their session loads after the page
+          if (wasSignedOut || event === 'SIGNED_IN') {
+            await syncModeFromDB();
+          }
           loadCreativePosts();
         } else {
           currentUser = null;
