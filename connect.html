@@ -1051,6 +1051,7 @@
     // ===== COMMUNITY ROOM STATE =====
     let currentCommunity = null;
     let currentCommunityJoined = false;
+    let currentCommunityIsOwner = false;
     let currentComfortMode = 'occasional';
     let currentRoomId = null;
     let currentRoomChannels = [];
@@ -1075,23 +1076,27 @@
 
         const { count: memberCount } = await db.from('community_members').select('*', { count: 'exact', head: true }).eq('community_id', id);
         let isJoined = false;
+        let isOwner = false;
         let comfortMode = 'occasional';
         if (currentUser) {
-          const { data: membership } = await db.from('community_members').select('id, comfort_mode').eq('community_id', id).eq('user_id', currentUser.id).single();
-          isJoined = !!membership;
+          isOwner = community.creator_id === currentUser.id;
+          const { data: membership } = await db.from('community_members').select('id, comfort_mode, role').eq('community_id', id).eq('user_id', currentUser.id).single();
+          isJoined = !!membership || isOwner;
+          if (membership?.role === 'owner') isOwner = true;
           if (membership?.comfort_mode) comfortMode = membership.comfort_mode;
         }
 
-        openCommunityRoom(community, memberCount || 0, isJoined, comfortMode);
+        openCommunityRoom(community, memberCount || 0, isJoined, comfortMode, isOwner);
       } catch(err) {
         console.error('viewCommunity error:', err);
         showToast('Error loading community');
       }
     }
 
-    function openCommunityRoom(community, memberCount, isJoined, comfortMode) {
+    function openCommunityRoom(community, memberCount, isJoined, comfortMode, isOwner) {
       currentCommunity = community;
       currentCommunityJoined = isJoined;
+      currentCommunityIsOwner = !!isOwner;
       currentComfortMode = comfortMode || 'occasional';
       currentPostType = 'thought';
       userReactions = {}; userBookmarks = new Set(); expandedComments = new Set();
@@ -1111,15 +1116,28 @@
       // Mode badge
       updateModeBadge(comfortMode, isJoined);
 
-      // Join/Leave button
+      // Join/Leave/Manage button
       const joinBtn = document.getElementById('roomJoinBtn');
-      if (isJoined) { joinBtn.textContent = '✓ Joined'; joinBtn.classList.add('leave'); }
-      else { joinBtn.textContent = 'Join'; joinBtn.classList.remove('leave'); }
+      if (isOwner) {
+        joinBtn.textContent = '⚙️ Manage';
+        joinBtn.classList.remove('leave');
+        joinBtn.style.background = 'rgba(196,161,255,0.15)';
+        joinBtn.style.color = 'var(--accent-soft)';
+        joinBtn.style.border = '1px solid rgba(196,161,255,0.3)';
+      } else if (isJoined) {
+        joinBtn.textContent = '✓ Joined';
+        joinBtn.classList.add('leave');
+        joinBtn.style.cssText = '';
+      } else {
+        joinBtn.textContent = 'Join';
+        joinBtn.classList.remove('leave');
+        joinBtn.style.cssText = '';
+      }
 
-      // Composer visibility
+      // Composer visibility — owners always have access
       const composer = document.getElementById('roomComposer');
       const lurkBanner = document.getElementById('roomLurkBanner');
-      if (isJoined) { composer.style.display = ''; lurkBanner.style.display = 'none'; }
+      if (isOwner || isJoined) { composer.style.display = ''; lurkBanner.style.display = 'none'; }
       else { composer.style.display = 'none'; lurkBanner.style.display = 'flex'; }
 
       // Post type selector buttons
@@ -1454,16 +1472,73 @@
     // ===== HANDLE JOIN BTN IN ROOM =====
     function handleRoomJoinBtn() {
       if (!currentCommunity) return;
+      if (currentCommunityIsOwner) {
+        openManageCommunityModal(currentCommunity);
+        return;
+      }
       if (currentCommunityJoined) {
-        // Leave community
         if (confirm('Leave this community?')) leaveCommunityFromRoom(currentCommunity.id);
       } else {
         showJoinOverlay(currentCommunity.id, 'room', null);
       }
     }
 
+    function openManageCommunityModal(community) {
+      document.getElementById('manageCommunityModal')?.remove();
+      const m = document.createElement('div');
+      m.id = 'manageCommunityModal';
+      m.className = 'modal-overlay active';
+      m.innerHTML = `
+        <div class="modal-container" style="max-width:480px;">
+          <div class="modal-header">
+            <div>
+              <h2>⚙️ Manage Community</h2>
+              <p style="color:var(--text-muted);margin-top:4px;">${escapeHtml(community.name)}</p>
+            </div>
+            <button class="modal-close" onclick="document.getElementById('manageCommunityModal').remove()">✕</button>
+          </div>
+          <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
+            <button class="submit-btn" style="background:rgba(124,184,232,0.15);color:var(--accent-calm);border:1px solid rgba(124,184,232,0.3);" onclick="editCommunity('${community.id}')">✏️ Edit Name &amp; Description</button>
+            <button class="submit-btn" style="background:rgba(232,124,154,0.12);color:var(--accent-rose);border:1px solid rgba(232,124,154,0.25);" onclick="deleteCommunityConfirm('${community.id}')">🗑️ Delete Community</button>
+            <button class="submit-btn" style="background:var(--bg-elevated);color:var(--text-muted);border:1px solid var(--border-subtle);" onclick="document.getElementById('manageCommunityModal').remove()">Cancel</button>
+          </div>
+        </div>`;
+      document.body.appendChild(m);
+    }
+
+    async function deleteCommunityConfirm(communityId) {
+      if (!confirm('Permanently delete this community and all its posts? This cannot be undone.')) return;
+      if (!db || !currentUser) return;
+      try {
+        await db.from('community_posts').delete().eq('community_id', communityId);
+        await db.from('community_members').delete().eq('community_id', communityId);
+        await db.from('community_rooms').delete().eq('community_id', communityId);
+        await db.from('communities').delete().eq('id', communityId).eq('creator_id', currentUser.id);
+        document.getElementById('manageCommunityModal')?.remove();
+        document.getElementById('communityRoom')?.classList.remove('active');
+        showToast('🗑️ Community deleted');
+        loadCommunities();
+      } catch(e) { showToast('⚠️ Error deleting community'); }
+    }
+
+    async function editCommunity(communityId) {
+      if (!db || !currentUser) return;
+      document.getElementById('manageCommunityModal')?.remove();
+      const newName = prompt('Community name:', currentCommunity?.name || '');
+      if (!newName?.trim()) return;
+      const newDesc = prompt('Description:', currentCommunity?.description || '');
+      try {
+        await db.from('communities').update({ name: newName.trim(), description: newDesc?.trim() || '' }).eq('id', communityId).eq('creator_id', currentUser.id);
+        if (currentCommunity) { currentCommunity.name = newName.trim(); currentCommunity.description = newDesc?.trim() || ''; }
+        document.getElementById('roomTitle').textContent = newName.trim();
+        showToast('✓ Community updated');
+        loadCommunities();
+      } catch(e) { showToast('⚠️ Error updating community'); }
+    }
+
     async function leaveCommunityFromRoom(communityId) {
       if (!db || !currentUser) return;
+      if (currentCommunityIsOwner) { showToast('⚠️ You own this community. Use Manage to delete it.'); return; }
       try {
         await db.from('community_members').delete().eq('user_id', currentUser.id).eq('community_id', communityId);
         currentCommunityJoined = false;
@@ -1498,21 +1573,30 @@
         communities.forEach(c => { communityNames[c.id] = c.name; });
         grid.innerHTML = communities.map(c => {
           const mc = memberCounts[c.id] || 0;
+          const isOwned = currentUser && c.creator_id === currentUser.id;
           const isJoined = userMemberships.has(c.id);
+          let footerBtn;
+          if (isOwned) {
+            footerBtn = `<button class="join-btn" style="background:rgba(196,161,255,0.15);color:var(--accent-soft);border-color:rgba(196,161,255,0.3);" onclick="event.stopPropagation(); viewCommunity('${c.id}')">⚙️ Manage</button>`;
+          } else if (isJoined) {
+            footerBtn = `<button class="join-btn joined" onclick="event.stopPropagation(); leaveCommunityFromCard('${c.id}',this)">✓ Joined</button>`;
+          } else {
+            footerBtn = `<button class="join-btn" onclick="event.stopPropagation(); showJoinOverlay('${c.id}','card',this)">Join</button>`;
+          }
           return `
             <div class="community-card" onclick="viewCommunity('${c.id}')">
               <div class="community-top">
                 <div class="community-icon">${c.icon||'🏠'}</div>
                 <div class="community-info">
                   <h4>${escapeHtml(c.name)}</h4>
-                  <div class="community-stats"><span>${mc===1?'1 member':`${mc} members`}</span></div>
+                  <div class="community-stats"><span>${mc===1?'1 member':`${mc} members`}</span>${isOwned?'<span style="color:var(--accent-soft);font-size:11px;margin-left:6px;">Your community</span>':''}</div>
                 </div>
               </div>
               <p class="community-desc">${escapeHtml(c.description||'')}</p>
               <div class="community-tags"><span class="tag">${escapeHtml(c.category||'General')}</span></div>
               <div class="community-footer">
                 <div class="activity"><span class="activity-dot"></span><span>Active</span></div>
-                <button class="join-btn ${isJoined?'joined':''}" onclick="event.stopPropagation(); ${isJoined?`leaveCommunityFromCard('${c.id}',this)`:`showJoinOverlay('${c.id}','card',this)`}">${isJoined?'✓ Joined':'Join'}</button>
+                ${footerBtn}
               </div>
             </div>`;
         }).join('');
