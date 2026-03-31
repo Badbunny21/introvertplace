@@ -492,8 +492,11 @@
       z-index: 10;
       transform: translate(-50%, -50%);
       text-align: center;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: pointer;
     }
+    .user-center-star:hover .user-star-core { transform: scale(1.12); }
+    .user-center-star:hover .user-star-label { color: rgba(255,240,160,1); }
     .user-star-core {
       width: 52px; height: 52px;
       border-radius: 50%;
@@ -5138,6 +5141,8 @@ This could be:
       labelDiv.textContent = centerLabel;
       center.appendChild(coreDiv);
       center.appendChild(labelDiv);
+      center.title = 'View your profile';
+      center.addEventListener('click', () => { window.location.href = 'profile.html'; });
       el.appendChild(center);
 
       // Cluster labels
@@ -5241,42 +5246,45 @@ This could be:
           if (myData) ownCreations = myData;
         } catch(e) { console.error('Load own constellation creations error:', e); }
 
-        // Query 2: Other users' public creations — shown as distant galaxies
+        // Query 2: Other users who chose constellation mode — shown as distant galaxies
+        // Query profiles directly so users appear even if all their creations are private
         try {
-          const { data: othersData } = await db
-            .from('creations')
-            .select('id, type, title, content, description, mood, view_mode, user_id')
-            .in('visibility', ['public', 'community'])
-            .neq('user_id', myId)
-            .order('created_at', { ascending: false })
+          const { data: constProfiles } = await db
+            .from('profiles')
+            .select('id, username, tagline, updated_at')
+            .eq('display_mode', 'constellation')
+            .neq('id', myId)
             .limit(60);
 
-          if (othersData && othersData.length > 0) {
-            const otherUserIds = new Set();
-            othersData.forEach(c => {
-              if (!c.user_id) return;
-              otherUserIds.add(c.user_id);
-              if (!othersByUser[c.user_id]) othersByUser[c.user_id] = { username: null, creations: [] };
-              othersByUser[c.user_id].creations.push(c);
+          if (constProfiles && constProfiles.length > 0) {
+            constProfiles.forEach(p => {
+              othersByUser[p.id] = {
+                username: p.username || 'Anonymous',
+                tagline: p.tagline || '',
+                updatedAt: p.updated_at || null,
+                creations: []
+              };
             });
 
-            if (otherUserIds.size > 0) {
-              try {
-                const { data: profiles } = await db
-                  .from('profiles')
-                  .select('id, username, tagline, updated_at')
-                  .in('id', Array.from(otherUserIds));
-                if (profiles) {
-                  profiles.forEach(p => {
-                    if (othersByUser[p.id]) {
-                      othersByUser[p.id].username = p.username || 'Anonymous';
-                      othersByUser[p.id].tagline = p.tagline || '';
-                      othersByUser[p.id].updatedAt = p.updated_at || null;
-                    }
-                  });
-                }
-              } catch(e) {}
-            }
+            // Fetch their public creations to populate the mini-stars
+            const profileIds = constProfiles.map(p => p.id);
+            try {
+              const { data: othersData } = await db
+                .from('creations')
+                .select('id, type, title, content, description, mood, view_mode, user_id')
+                .in('user_id', profileIds)
+                .in('visibility', ['public', 'community'])
+                .order('created_at', { ascending: false })
+                .limit(120);
+
+              if (othersData) {
+                othersData.forEach(c => {
+                  if (othersByUser[c.user_id]) {
+                    othersByUser[c.user_id].creations.push(c);
+                  }
+                });
+              }
+            } catch(e) {}
           }
         } catch(e) {}
       }
