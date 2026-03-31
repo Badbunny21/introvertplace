@@ -4762,34 +4762,30 @@ This could be:
       try {
         const { data, error } = await db.from('profiles').select('display_mode').eq('id', currentUser.id).single();
         if (error) { console.error('Sync mode error:', error); return; }
-        if (data?.display_mode) {
-          // DB is source of truth — override localStorage if different
-          if (data.display_mode !== selectedMode || !document.getElementById('creativePage').classList.contains('active')) {
-            selectedMode = data.display_mode;
-            localStorage.setItem('introvert_creative_mode', selectedMode);
-            document.getElementById('wizardPage').classList.remove('active');
-            document.getElementById('creativePage').classList.add('active');
-            showViewByName(selectedMode);
-            if (selectedMode === 'canvas') initInfiniteCanvas();
-            else if (selectedMode === 'constellation') setTimeout(initConstellation, 50);
-            else if (selectedMode === 'seasonal') initSeasonalParticles();
-            setTimeout(loadSavedCreations, 100);
+
+        if (data?.display_mode && VALID_MODES.includes(data.display_mode)) {
+          // DB is the absolute source of truth — always override localStorage and current state
+          const dbMode = data.display_mode;
+          selectedMode = dbMode;
+          localStorage.setItem('introvert_creative_mode', dbMode);
+          document.getElementById('wizardPage').classList.remove('active');
+          document.getElementById('creativePage').classList.add('active');
+          showViewByName(dbMode);
+          if (dbMode === 'canvas') initInfiniteCanvas();
+          else if (dbMode === 'constellation') {
+            if (!constellationInitialized) setTimeout(initConstellation, 50);
+            else loadConstellationCreations();
           }
-        } else if (!localStorage.getItem('introvert_creative_mode')) {
-          // No mode in DB or localStorage → show wizard
+          else if (dbMode === 'seasonal') initSeasonalParticles();
+          setTimeout(loadSavedCreations, 100);
+        } else {
+          // No mode saved in DB — show wizard and clear any stale localStorage
+          // Never save localStorage to DB here: localStorage may hold a stale value
+          // from a previous anonymous session on this device
+          localStorage.removeItem('introvert_creative_mode');
+          selectedMode = 'constellation';
           document.getElementById('wizardPage').classList.add('active');
           document.getElementById('creativePage').classList.remove('active');
-        } else {
-          // Mode in localStorage but not yet saved to DB (e.g. completed wizard before signing in)
-          const localMode = localStorage.getItem('introvert_creative_mode');
-          if (VALID_MODES.includes(localMode)) {
-            selectedMode = localMode;
-            await saveCreativeMode(localMode);
-            // Make sure the page is showing their mode
-            document.getElementById('wizardPage').classList.remove('active');
-            document.getElementById('creativePage').classList.add('active');
-            showViewByName(localMode);
-          }
         }
       } catch(e) { console.error('Sync mode exception:', e); }
     }
@@ -5611,8 +5607,8 @@ This could be:
         } catch(e) {}
       }
 
-      setTimeout(() => {
-        if (ghosts) ghosts.style.display = 'none';
+      if (ghosts) ghosts.style.display = 'none';
+      {
 
         const MOOD_GRADIENTS = {
           calm:       'linear-gradient(135deg, rgba(124,232,168,0.3) 0%, rgba(124,184,232,0.2) 100%)',
@@ -5704,7 +5700,7 @@ This could be:
             setTimeout(() => { bar.style.width = bar.dataset.target + '%'; }, 200);
           });
         });
-      }, 900);
+      }
     }
 
     function initGardenFireflies() {
