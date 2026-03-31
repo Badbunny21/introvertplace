@@ -4102,8 +4102,8 @@
 
     <!-- Constellation View -->
     <div class="constellation active" id="constellationView">
-      <!-- Empty State -->
-      <div class="constellation-empty-state">
+      <!-- Empty State (hidden until query confirms zero results) -->
+      <div class="constellation-empty-state" style="display:none">
         <div class="constellation-empty-icon">✨</div>
         <h3>Your Creative Constellation</h3>
         <p>Your creations will appear as stars in your personal constellation. Each piece you create adds a new point of light.</p>
@@ -5209,95 +5209,94 @@ This could be:
         if (!e.target.closest('.creation-node') && !e.target.closest('#starInfoCard')) hideStarInfoCard();
       });
 
-      // Load creations — own go into personal galaxy, others become distant galaxies
-      async function loadConstellationCreations() {
-        // Always resolve auth fresh to avoid race condition where currentUser is still null
-        let myId = currentUser ? currentUser.id : null;
-        if (!myId && db) {
-          try {
-            const { data: { session } } = await db.auth.getSession();
-            if (session) myId = session.user.id;
-          } catch(e) {}
-        }
-
-        let ownCreations = [];
-        let othersByUser = {}; // { userId: { username, creations[] } }
-
-        if (db && myId) {
-          // Query 1: Only this user's constellation creations
-          try {
-            const { data: myData } = await db
-              .from('creations')
-              .select('id, type, title, content, description, mood, view_mode, user_id')
-              .eq('user_id', myId)
-              .eq('view_mode', 'constellation')
-              .order('created_at', { ascending: false })
-              .limit(100);
-            if (myData) ownCreations = myData;
-          } catch(e) { console.error('Load own constellation creations error:', e); }
-
-          // Query 2: Other users' public creations — shown as distant galaxies
-          // No view_mode filter so we never miss a user whose creation was saved with a different value
-          try {
-            const { data: othersData } = await db
-              .from('creations')
-              .select('id, type, title, content, description, mood, view_mode, user_id')
-              .in('visibility', ['public', 'community'])
-              .neq('user_id', myId)
-              .order('created_at', { ascending: false })
-              .limit(60);
-
-            if (othersData && othersData.length > 0) {
-              const otherUserIds = new Set();
-              othersData.forEach(c => {
-                if (!c.user_id) return;
-                otherUserIds.add(c.user_id);
-                if (!othersByUser[c.user_id]) othersByUser[c.user_id] = { username: null, creations: [] };
-                othersByUser[c.user_id].creations.push(c);
-              });
-
-              // Fetch usernames + bios + activity for other users
-              if (otherUserIds.size > 0) {
-                try {
-                  const { data: profiles } = await db
-                    .from('profiles')
-                    .select('id, username, tagline, updated_at')
-                    .in('id', Array.from(otherUserIds));
-                  if (profiles) {
-                    profiles.forEach(p => {
-                      if (othersByUser[p.id]) {
-                        othersByUser[p.id].username = p.username || 'Anonymous';
-                        othersByUser[p.id].tagline = p.tagline || '';
-                        othersByUser[p.id].updatedAt = p.updated_at || null;
-                      }
-                    });
-                  }
-                } catch(e) {}
-              }
-            }
-          } catch(e) {}
-        }
-
-        // Also clear any stale dismissed list from previous buggy code
-        localStorage.removeItem('dismissed_constellation_ids');
-
-        // Render own creations into personal galaxy
-        if (ownCreations.length > 0) {
-          if (emptyState) emptyState.style.display = 'none';
-          ownCreations.forEach(c => addCreationToConstellation(c));
-        }
-
-        // Render other users as distant galaxies — sort by recent activity (closest = most active)
-        const otherEntries = Object.entries(othersByUser).sort(([,a],[,b]) => {
-          const ta = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-          const tb = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-          return tb - ta; // most recently active first = placed closest
-        });
-        otherEntries.forEach(([userId, info], idx) => {
-          addDistantGalaxy(userId, info.username || 'Anonymous', info.creations, idx, otherEntries.length, info.tagline || '', info.updatedAt);
-        });
-      }
       loadConstellationCreations();
+    }
+
+    // Outer-scope so loadCreativePosts() and onAuthStateChange can call it directly
+    async function loadConstellationCreations() {
+      const emptyState = document.querySelector('#constellationView .constellation-empty-state');
+
+      // Always resolve auth fresh to avoid race condition where currentUser is still null
+      let myId = currentUser ? currentUser.id : null;
+      if (!myId && db) {
+        try {
+          const { data: { session } } = await db.auth.getSession();
+          if (session) myId = session.user.id;
+        } catch(e) {}
+      }
+
+      let ownCreations = [];
+      let othersByUser = {}; // { userId: { username, creations[] } }
+
+      if (db && myId) {
+        // Query 1: Own constellation creations — also include null view_mode for backwards compatibility
+        try {
+          const { data: myData } = await db
+            .from('creations')
+            .select('id, type, title, content, description, mood, view_mode, user_id')
+            .eq('user_id', myId)
+            .or('view_mode.eq.constellation,view_mode.is.null')
+            .order('created_at', { ascending: false })
+            .limit(100);
+          if (myData) ownCreations = myData;
+        } catch(e) { console.error('Load own constellation creations error:', e); }
+
+        // Query 2: Other users' public creations — shown as distant galaxies
+        try {
+          const { data: othersData } = await db
+            .from('creations')
+            .select('id, type, title, content, description, mood, view_mode, user_id')
+            .in('visibility', ['public', 'community'])
+            .neq('user_id', myId)
+            .order('created_at', { ascending: false })
+            .limit(60);
+
+          if (othersData && othersData.length > 0) {
+            const otherUserIds = new Set();
+            othersData.forEach(c => {
+              if (!c.user_id) return;
+              otherUserIds.add(c.user_id);
+              if (!othersByUser[c.user_id]) othersByUser[c.user_id] = { username: null, creations: [] };
+              othersByUser[c.user_id].creations.push(c);
+            });
+
+            if (otherUserIds.size > 0) {
+              try {
+                const { data: profiles } = await db
+                  .from('profiles')
+                  .select('id, username, tagline, updated_at')
+                  .in('id', Array.from(otherUserIds));
+                if (profiles) {
+                  profiles.forEach(p => {
+                    if (othersByUser[p.id]) {
+                      othersByUser[p.id].username = p.username || 'Anonymous';
+                      othersByUser[p.id].tagline = p.tagline || '';
+                      othersByUser[p.id].updatedAt = p.updated_at || null;
+                    }
+                  });
+                }
+              } catch(e) {}
+            }
+          }
+        } catch(e) {}
+      }
+
+      localStorage.removeItem('dismissed_constellation_ids');
+
+      // Show or hide empty state based on whether user has own creations
+      if (emptyState) emptyState.style.display = ownCreations.length === 0 ? '' : 'none';
+
+      ownCreations.forEach(c => addCreationToConstellation(c));
+
+      // Render other users as distant galaxies
+      const otherEntries = Object.entries(othersByUser).sort(([,a],[,b]) => {
+        const ta = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+        const tb = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+        return tb - ta;
+      });
+      otherEntries.forEach(([userId, info], idx) => {
+        addDistantGalaxy(userId, info.username || 'Anonymous', info.creations, idx, otherEntries.length, info.tagline || '', info.updatedAt);
+      });
     }
 
     // ==================== INFINITE CANVAS ====================
