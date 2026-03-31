@@ -746,10 +746,10 @@
           <div class="search-section">
             <div class="search-box">
               <span class="search-icon">🔍</span>
-              <input type="text" class="search-input" id="communitiesSearchInput" placeholder="Search communities or interests..." autocomplete="off">
+              <input type="text" class="search-input" id="communitiesSearchInput" placeholder="Search people or communities..." autocomplete="off">
               <div class="search-results" id="communitiesSearchResults"></div>
             </div>
-            <p class="search-hints"><span>🏠 communities</span><span>💭 interests</span></p>
+            <p class="search-hints"><span>👤 people</span><span>🏠 communities</span></p>
           </div>
           <div class="section-header">
             <h2>Discover Communities</h2>
@@ -1779,13 +1779,53 @@
 
     async function performSearch(query) {
       if (!db) { showNoResults(query); return; }
-      let communities = [];
-      try { const { data } = await db.from('communities').select('*').or(`name.ilike.%${query}%,description.ilike.%${query}%`).limit(8); if (data) communities = data; } catch(e) {}
-      renderSearchResults(communities, query);
+      let communities = [], users = [];
+      try {
+        const [commRes, userRes] = await Promise.all([
+          db.from('communities').select('*').or(`name.ilike.%${query}%,description.ilike.%${query}%`).limit(6),
+          db.from('profiles').select('id, username, avatar_emoji, avatar_url, avatar_bg, tagline').ilike('username', `%${query}%`).limit(5)
+        ]);
+        if (commRes.data) communities = commRes.data;
+        if (userRes.data) users = userRes.data;
+      } catch(e) {}
+      renderSearchResults(communities, users, query);
     }
-    function renderSearchResults(communities, query) {
-      if (!communities.length) { showNoResults(query); return; }
-      communitiesSearchResults.innerHTML = `<div class="search-category">🏠 Communities</div>` + communities.map(c => `<div class="search-result-item" onclick="viewCommunity('${c.id}')"><div class="search-result-icon">${c.icon||'🏠'}</div><div class="search-result-info"><div class="search-result-name">${escapeHtml(c.name)}</div><div class="search-result-meta">${escapeHtml(c.description?.substring(0,60)||'')}...</div></div><div class="search-result-badge">${c.member_count||0} members</div></div>`).join('');
+
+    function renderSearchResults(communities, users, query) {
+      if (!communities.length && !users.length) { showNoResults(query); return; }
+      let html = '';
+
+      if (users.length) {
+        html += `<div class="search-category">👤 People</div>`;
+        html += users.map(u => {
+          const avatar = u.avatar_url
+            ? `<img src="${escapeHtml(u.avatar_url)}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;">`
+            : `<div style="width:44px;height:44px;border-radius:10px;background:${u.avatar_bg||'var(--bg-elevated)'};display:flex;align-items:center;justify-content:center;font-size:22px;">${u.avatar_emoji||'🌙'}</div>`;
+          const isMe = currentUser && u.id === currentUser.id;
+          return `<div class="search-result-item" onclick="viewProfile('${u.id}')">
+            <div class="search-result-icon" style="background:none;padding:0;">${avatar}</div>
+            <div class="search-result-info">
+              <div class="search-result-name">${escapeHtml(u.username||'Anonymous')}${isMe ? ' <span style="font-size:11px;color:var(--text-muted)">(you)</span>' : ''}</div>
+              <div class="search-result-meta">${escapeHtml(u.tagline||'Introvert Place member')}</div>
+            </div>
+            <div class="search-result-badge">Profile</div>
+          </div>`;
+        }).join('');
+      }
+
+      if (communities.length) {
+        html += `<div class="search-category">🏠 Communities</div>`;
+        html += communities.map(c => `<div class="search-result-item" onclick="viewCommunity('${c.id}')">
+          <div class="search-result-icon">${c.icon||'🏠'}</div>
+          <div class="search-result-info">
+            <div class="search-result-name">${escapeHtml(c.name)}</div>
+            <div class="search-result-meta">${escapeHtml(c.description?.substring(0,60)||'')}${c.description?.length>60?'...':''}</div>
+          </div>
+          <div class="search-result-badge">${c.member_count||0} members</div>
+        </div>`).join('');
+      }
+
+      communitiesSearchResults.innerHTML = html;
     }
     function showNoResults(query) { communitiesSearchResults.innerHTML = `<div class="search-results-empty"><div class="icon">🔍</div><p>No results for "${escapeHtml(query)}"</p><p style="font-size:13px;margin-top:8px">Try different keywords or create one!</p></div>`; }
 
