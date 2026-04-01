@@ -1418,6 +1418,11 @@
       activities.unshift(activity);
       currentBattery = Math.max(0, currentBattery - drain);
 
+      // Update public battery level on profile so Find Souls can match by social battery
+      if (db && currentUser) {
+        db.from('profiles').update({ last_battery: currentBattery }).eq('id', currentUser.id).then(() => {});
+      }
+
       saveBatteryLocal();
       updateBatteryDisplay();
       renderActivities();

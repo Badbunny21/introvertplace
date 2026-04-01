@@ -1833,26 +1833,40 @@
     function showNoResults(query) { communitiesSearchResults.innerHTML = `<div class="search-results-empty"><div class="icon">🔍</div><p>No results for "${escapeHtml(query)}"</p><p style="font-size:13px;margin-top:8px">Try different keywords or create one!</p></div>`; }
 
     // ===== SOULS =====
+    // Battery level groups: low (0-33), medium (34-66), high (67-100)
+    function batteryGroup(v) { return v == null ? null : v <= 33 ? 'low' : v <= 66 ? 'medium' : 'high'; }
+    // Energy groups: low (1-3), medium (4-7), high (8-10)
+    function energyGroup(v) { return v == null ? null : v <= 3 ? 'low' : v <= 7 ? 'medium' : 'high'; }
+
     async function loadSouls() {
       if (!db) return;
       const grid = document.getElementById('soulsGrid'); if (!grid) return;
       grid.innerHTML = `<div style="grid-column:1/-1;padding:60px;text-align:center"><span style="font-size:40px">✨</span><p style="color:var(--text-muted);margin-top:12px">Finding your kind of souls...</p></div>`;
 
       try {
-        // Load current user's interests + latest mood entry in parallel
-        let myInterests = [];
+        // Load current user's own profile (interests + energy + battery)
+        let myInterests = [], myEnergy = null, myBattery = null;
         if (currentUser) {
-          const [profRes, moodRes] = await Promise.all([
-            db.from('profiles').select('interests').eq('id', currentUser.id).single(),
-            db.from('mood_entries').select('energy_level').eq('user_id', currentUser.id).order('logged_at', { ascending: false }).limit(1).maybeSingle()
-          ]);
-          if (profRes.data?.interests) {
-            myInterests = profRes.data.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
+          const { data: me } = await db.from('profiles')
+            .select('interests, last_energy_level, last_battery')
+            .eq('id', currentUser.id).single();
+          if (me?.interests) myInterests = me.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
+          myEnergy = me?.last_energy_level ?? null;
+          myBattery = me?.last_battery ?? null;
+          // Fallback: read battery from localStorage if not yet in DB
+          if (myBattery == null) {
+            try {
+              const saved = JSON.parse(localStorage.getItem('socialBattery') || 'null');
+              if (saved?.date === new Date().toDateString() && typeof saved.battery === 'number') myBattery = saved.battery;
+            } catch(e) {}
           }
         }
 
-        // Fetch all other users
-        let query = db.from('profiles').select('*').order('created_at', { ascending: false }).limit(40);
+        // Fetch all other users (with the new match columns)
+        let query = db.from('profiles')
+          .select('id, username, avatar, avatar_emoji, avatar_bg, avatar_url, tagline, bio, interests, last_energy_level, last_battery')
+          .order('created_at', { ascending: false })
+          .limit(40);
         if (currentUser) query = query.neq('id', currentUser.id);
         const { data: profiles } = await query;
 
@@ -1861,28 +1875,63 @@
           return;
         }
 
-        // Score each profile by shared interests
+        // Score each profile — energy match, battery match, interests
+        const myEnergyGroup = energyGroup(myEnergy);
+        const myBatteryGroup = batteryGroup(myBattery);
+
         const scored = profiles.map(p => {
+          let score = 0;
+          const matchReasons = [];
           let sharedInterests = [];
+
+          // Energy match: same group = 15pts, adjacent group = 5pts
+          const theirEnergyGroup = energyGroup(p.last_energy_level);
+          if (myEnergyGroup && theirEnergyGroup) {
+            if (myEnergyGroup === theirEnergyGroup) { score += 15; matchReasons.push('Similar energy'); }
+            else { score += 5; } // adjacent groups still slightly compatible
+          }
+
+          // Battery match: same group = 10pts
+          const theirBatteryGroup = batteryGroup(p.last_battery);
+          if (myBatteryGroup && theirBatteryGroup && myBatteryGroup === theirBatteryGroup) {
+            score += 10; matchReasons.push('Similar social battery');
+          }
+
+          // Interest overlap: 8pts each
           if (myInterests.length && p.interests) {
             const theirs = p.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
             sharedInterests = myInterests.filter(i => theirs.includes(i));
+            score += sharedInterests.length * 8;
+            if (sharedInterests.length) matchReasons.push(`${sharedInterests.length} shared interest${sharedInterests.length > 1 ? 's' : ''}`);
           }
-          return { ...p, sharedInterests, score: sharedInterests.length };
+
+          return { ...p, score, matchReasons, sharedInterests };
         });
 
-        // Sort: most shared interests first, then by newest
         scored.sort((a, b) => b.score - a.score);
+
+        // Decide what label to show based on the user's own data availability
+        const hasMyData = myEnergyGroup || myBatteryGroup || myInterests.length;
 
         grid.innerHTML = scored.map(p => {
           const avatar = p.avatar_emoji || p.avatar || '🌙';
           const avatarBg = p.avatar_bg || 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)';
           const displayInterests = p.interests ? p.interests.split(',').map(i => i.trim()).filter(Boolean).slice(0, 4) : [];
-          const isTopMatch = p.score >= 2;
+          const isTopMatch = p.score >= 15;
 
-          const matchBadge = p.score > 0
-            ? `<div class="soul-match-badge">✨ ${p.score} shared interest${p.score > 1 ? 's' : ''}</div>`
-            : '';
+          let matchBadge = '';
+          if (hasMyData && p.matchReasons.length) {
+            matchBadge = `<div class="soul-match-badge">✨ ${p.matchReasons[0]}${p.matchReasons.length > 1 ? ' · +' + (p.matchReasons.length - 1) + ' more' : ''}</div>`;
+          }
+
+          // Energy/battery vibe indicators
+          let vibeHtml = '';
+          if (p.last_energy_level != null || p.last_battery != null) {
+            const eLabel = p.last_energy_level != null ? `⚡ ${energyGroup(p.last_energy_level)} energy` : '';
+            const bLabel = p.last_battery != null ? `🔋 ${batteryGroup(p.last_battery)} battery` : '';
+            const vibes = [eLabel, bLabel].filter(Boolean);
+            if (vibes.length) vibeHtml = `<div class="interests" style="margin-bottom:12px;">${vibes.map(v => `<span class="interest">${v}</span>`).join('')}</div>`;
+          }
 
           const interestsHtml = displayInterests.length
             ? `<div class="interests">${displayInterests.map(i => `<span class="interest ${p.sharedInterests.includes(i.toLowerCase()) ? 'shared' : ''}">${escapeHtml(i)}</span>`).join('')}</div>`
@@ -1893,6 +1942,7 @@
             ${renderAvatarHtml(p.avatar_url||null, avatar, avatarBg, 'soul-avatar')}
             <div class="soul-name">${escapeHtml(p.username||'Anonymous')}</div>
             <div class="soul-tagline">${escapeHtml(p.tagline || p.bio?.substring(0,60) || 'A quiet soul')}</div>
+            ${vibeHtml}
             ${interestsHtml}
             <button class="wave-btn" onclick="event.stopPropagation(); sendWave('${p.id}', this)">👋 Send a quiet wave</button>
           </div>`;

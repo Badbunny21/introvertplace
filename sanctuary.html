@@ -737,6 +737,9 @@
 
         if (error) throw error;
 
+        // Update public energy level on profile so Find Souls can match by energy
+        db.from('profiles').update({ last_energy_level: parseInt(energyLevel) }).eq('id', currentUser.id).then(() => {});
+
         showToast('Mood updated!');
         if (notesTextarea) notesTextarea.value = '';
         loadMoodHistory();
