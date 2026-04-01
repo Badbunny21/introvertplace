@@ -1031,6 +1031,7 @@
     // ===== HELPERS =====
     function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
     function getDomain(url) { try { return new URL(url).hostname.replace('www.', ''); } catch { return ''; } }
+    function isSafeUrl(url) { try { const u = new URL(url); return u.protocol === 'http:' || u.protocol === 'https:'; } catch { return false; } }
     function formatMessageTime(isoStr) {
       const date = new Date(isoStr); const now = new Date(); const diff = now - date;
       const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), d = Math.floor(diff/86400000);
@@ -1394,7 +1395,7 @@
               </div>
               ${post.title ? `<h3 class="post-title">${escapeHtml(post.title)}</h3>` : ''}
               <div class="post-content">${escapeHtml(post.content)}</div>
-              ${post.link_url ? `<a href="${escapeHtml(post.link_url)}" target="_blank" rel="noopener" class="post-link"><span>🔗</span><span>${escapeHtml(post.link_title || post.link_url)}</span><span style="font-size:11px;color:var(--text-muted)">${getDomain(post.link_url)}</span></a>` : ''}
+              ${post.link_url && isSafeUrl(post.link_url) ? `<a href="${escapeHtml(post.link_url)}" target="_blank" rel="noopener noreferrer" class="post-link"><span>🔗</span><span>${escapeHtml(post.link_title || post.link_url)}</span><span style="font-size:11px;color:var(--text-muted)">${getDomain(post.link_url)}</span></a>` : ''}
               <div class="post-actions">
                 ${Object.entries(REACTIONS).map(([key,cfg]) => {
                   const count = postReactions[key] || 0;
@@ -2041,6 +2042,7 @@
         });
         conversationsCache = Object.values(convos);
         const partnerIds = Object.keys(convos);
+        if (!partnerIds.length) { container.innerHTML = `<div class="messages-empty"><span class="icon">💬</span><h3>No messages yet</h3><p style="color:var(--text-muted);margin-top:8px">Connect with souls to start chatting!</p></div>`; return; }
         const { data: profiles } = await db.from('profiles').select('id, username, avatar, avatar_emoji, avatar_bg, avatar_url').in('id', partnerIds);
         const profileMap = {}; if (profiles) profiles.forEach(p => { profileMap[p.id] = p; });
         container.innerHTML = conversationsCache.map(convo => {
