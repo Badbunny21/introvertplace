@@ -1847,12 +1847,20 @@
         // Load current user's own profile (interests + energy + battery)
         let myInterests = [], myEnergy = null, myBattery = null;
         if (currentUser) {
-          const { data: me } = await db.from('profiles')
-            .select('interests, last_energy_level, last_battery')
-            .eq('id', currentUser.id).single();
-          if (me?.interests) myInterests = me.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
-          myEnergy = me?.last_energy_level ?? null;
-          myBattery = me?.last_battery ?? null;
+          try {
+            const { data: me } = await db.from('profiles')
+              .select('interests, last_energy_level, last_battery')
+              .eq('id', currentUser.id).single();
+            if (me?.interests) myInterests = me.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
+            myEnergy = me?.last_energy_level ?? null;
+            myBattery = me?.last_battery ?? null;
+          } catch(profileErr) {
+            // Columns may not exist yet — try fetching just interests
+            try {
+              const { data: me2 } = await db.from('profiles').select('interests').eq('id', currentUser.id).single();
+              if (me2?.interests) myInterests = me2.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
+            } catch(e) {}
+          }
           // Fallback: read battery from localStorage if not yet in DB
           if (myBattery == null) {
             try {
@@ -1862,9 +1870,9 @@
           }
         }
 
-        // Fetch all other users (with the new match columns)
+        // Fetch all other users — use * so query works before migration adds energy/battery columns
         let query = db.from('profiles')
-          .select('id, username, avatar, avatar_emoji, avatar_bg, avatar_url, tagline, bio, interests, last_energy_level, last_battery')
+          .select('*')
           .order('created_at', { ascending: false })
           .limit(40);
         if (currentUser) query = query.neq('id', currentUser.id);
