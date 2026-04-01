@@ -1844,16 +1844,22 @@
       grid.innerHTML = `<div style="grid-column:1/-1;padding:60px;text-align:center"><span style="font-size:40px">✨</span><p style="color:var(--text-muted);margin-top:12px">Finding your kind of souls...</p></div>`;
 
       try {
-        // Load current user's own profile (interests + energy + battery)
-        let myInterests = [], myEnergy = null, myBattery = null;
+        // Load current user's own profile (interests + energy + battery + mood)
+        let myInterests = [], myEnergy = null, myBattery = null, myMood = null;
         if (currentUser) {
+          // Also check localStorage for session mood (set when user picked mood on app.html)
+          try {
+            const saved = JSON.parse(localStorage.getItem('currentMood') || 'null');
+            if (saved?.id) myMood = saved.id;
+          } catch(e) {}
           try {
             const { data: me } = await db.from('profiles')
-              .select('interests, last_energy_level, last_battery')
+              .select('interests, last_energy_level, last_battery, last_mood')
               .eq('id', currentUser.id).single();
             if (me?.interests) myInterests = me.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
             myEnergy = me?.last_energy_level ?? null;
             myBattery = me?.last_battery ?? null;
+            if (me?.last_mood) myMood = me.last_mood; // DB overrides localStorage
           } catch(profileErr) {
             // Columns may not exist yet — try fetching just interests
             try {
@@ -1896,7 +1902,12 @@
           const theirEnergyGroup = energyGroup(p.last_energy_level);
           if (myEnergyGroup && theirEnergyGroup) {
             if (myEnergyGroup === theirEnergyGroup) { score += 15; matchReasons.push('Similar energy'); }
-            else { score += 5; } // adjacent groups still slightly compatible
+            else { score += 5; }
+          }
+
+          // Mood match (fallback when no numeric energy): same mood = 12pts
+          if (myMood && p.last_mood && myMood === p.last_mood) {
+            score += 12; if (!matchReasons.includes('Similar energy')) matchReasons.push('Same vibe today');
           }
 
           // Battery match: same group = 10pts
@@ -1919,7 +1930,7 @@
         scored.sort((a, b) => b.score - a.score);
 
         // Decide what label to show based on the user's own data availability
-        const hasMyData = myEnergyGroup || myBatteryGroup || myInterests.length;
+        const hasMyData = myEnergyGroup || myBatteryGroup || myInterests.length || myMood;
 
         grid.innerHTML = scored.map(p => {
           const avatar = p.avatar_emoji || p.avatar || '🌙';
@@ -1932,13 +1943,14 @@
             matchBadge = `<div class="soul-match-badge">✨ ${p.matchReasons[0]}${p.matchReasons.length > 1 ? ' · +' + (p.matchReasons.length - 1) + ' more' : ''}</div>`;
           }
 
-          // Energy/battery vibe indicators
+          // Energy/battery/mood vibe indicators
           let vibeHtml = '';
-          if (p.last_energy_level != null || p.last_battery != null) {
-            const eLabel = p.last_energy_level != null ? `⚡ ${energyGroup(p.last_energy_level)} energy` : '';
+          {
+            const MOOD_EMOJI = { peaceful:'😌', happy:'😊', calm:'😇', neutral:'😐', reflective:'🤔', anxious:'😰', low:'😔', tired:'😴' };
+            const eLabel = p.last_energy_level != null ? `⚡ ${energyGroup(p.last_energy_level)} energy` : (p.last_mood ? `${MOOD_EMOJI[p.last_mood]||'✨'} ${p.last_mood}` : '');
             const bLabel = p.last_battery != null ? `🔋 ${batteryGroup(p.last_battery)} battery` : '';
             const vibes = [eLabel, bLabel].filter(Boolean);
-            if (vibes.length) vibeHtml = `<div class="interests" style="margin-bottom:12px;">${vibes.map(v => `<span class="interest">${v}</span>`).join('')}</div>`;
+            if (vibes.length) vibeHtml = `<div class="interests" style="margin-bottom:12px;">${vibes.map(v => `<span class="interest">${escapeHtml(v)}</span>`).join('')}</div>`;
           }
 
           const interestsHtml = displayInterests.length

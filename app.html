@@ -715,11 +715,26 @@
       }
     }
 
+    // Mood → energy level mapping (used for Find Souls matching)
+    const MOOD_ENERGY = {
+      peaceful: 7, happy: 8, calm: 7, neutral: 5,
+      reflective: 5, anxious: 4, low: 2, tired: 3
+    };
+
     // Handle mood selection
     function selectMood(moodId, label, emoji) {
       // Save mood to localStorage (persists) and sessionStorage (prevents re-show on refresh)
       localStorage.setItem('currentMood', JSON.stringify({ id: moodId, label, emoji }));
       sessionStorage.setItem('moodCompleted', 'true');
+
+      // Save mood + derived energy to profile so Find Souls can match by energy
+      if (currentUser && db) {
+        const energyLevel = MOOD_ENERGY[moodId] || 5;
+        db.from('profiles')
+          .update({ last_mood: moodId, last_energy_level: energyLevel })
+          .eq('id', currentUser.id)
+          .then(() => {});
+      }
 
       // Hide mood overlay with animation
       document.getElementById('moodOverlay').classList.remove('visible');
