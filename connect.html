@@ -1074,9 +1074,53 @@
         let isJoined = false, isOwner = false;
         let comfortMode = 'occasional';
         if (currentUser) {
-          const { data: membership } = await db.from('community_members').select('id, comfort_mode, role').eq('community_id', id).eq('user_id', currentUser.id).single();
+          // Try the full column set first. If comfort_mode or role don't exist yet
+          // (20260221 migration not applied), fall back to id-only selection.
+          let membership = null;
+          try {
+            const { data, error } = await db.from('community_members')
+              .select('id, comfort_mode, role')
+              .eq('community_id', id)
+              .eq('user_id', currentUser.id)
+              .single();
+            if (!error) {
+              membership = data;
+            } else {
+              // Column-missing fallback — just confirm existence
+              const { data: fb } = await db.from('community_members')
+                .select('id')
+                .eq('community_id', id)
+                .eq('user_id', currentUser.id)
+                .single();
+              if (fb) membership = { id: fb.id, role: null, comfort_mode: null };
+            }
+          } catch(e) { /* ignore — handled below */ }
+
           isJoined = !!membership;
-          isOwner = membership?.role === 'owner';
+          // Creator is always an owner, even if their membership row is missing
+          // (belt-and-suspenders until the DB trigger migration is applied).
+          isOwner = membership?.role === 'owner' || community.creator_id === currentUser.id;
+
+          // If creator opened their own community but has no membership row,
+          // auto-insert it now so future queries work correctly.
+          if (community.creator_id === currentUser.id && !membership) {
+            isJoined = true;
+            db.from('community_members')
+              .upsert(
+                { community_id: id, user_id: currentUser.id, role: 'owner' },
+                { onConflict: 'user_id,community_id', ignoreDuplicates: true }
+              )
+              .catch(() => {
+                // role column may not exist yet — retry without it
+                db.from('community_members')
+                  .upsert(
+                    { community_id: id, user_id: currentUser.id },
+                    { onConflict: 'user_id,community_id', ignoreDuplicates: true }
+                  )
+                  .catch(() => {});
+              });
+          }
+
           if (membership?.comfort_mode) comfortMode = membership.comfort_mode;
         }
 
@@ -1320,12 +1364,31 @@
       feed.innerHTML = '<div class="posts-empty"><div class="icon">🌱</div><p>Loading...</p></div>';
 
       try {
-        let query = db.from('community_posts').select('*').eq('community_id', communityId);
-        // Filter by room if we have a real UUID
-        if (channelId && channelId.length > 10) query = query.eq('room_id', channelId);
-        query = query.order('is_pinned', { ascending: false }).order('created_at', { ascending: false }).limit(50);
-        const { data: posts, error } = await query;
+        // Build base query. Only apply room_id filter when channelId is a real UUID
+        // (default channel ids like 'start_here' are short strings, not UUIDs).
+        const baseQ = db.from('community_posts').select('*').eq('community_id', communityId);
+        const filteredQ = (channelId && channelId.length > 10)
+          ? baseQ.eq('room_id', channelId)
+          : baseQ;
 
+        // Try ordering by is_pinned first. Fall back to created_at-only if the
+        // column doesn't exist yet (i.e. 20260209_community_full_experience.sql
+        // migration has not been applied to this environment).
+        let postsResult = await filteredQ
+          .order('is_pinned', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (postsResult.error) {
+          // Retry without is_pinned / room_id so any column-missing error is bypassed.
+          postsResult = await db.from('community_posts')
+            .select('*')
+            .eq('community_id', communityId)
+            .order('created_at', { ascending: false })
+            .limit(50);
+        }
+
+        const { data: posts, error } = postsResult;
         if (error) throw error;
         if (!posts || posts.length === 0) {
           feed.innerHTML = '<div class="posts-empty"><div class="icon">🌱</div><p>No posts yet — be the first to share something!</p></div>';
@@ -1544,13 +1607,16 @@
 
     // ===== EDIT COMMUNITY =====
     function openEditCommunity(communityId) {
-      const c = currentCommunity?.id === communityId ? currentCommunity : null;
+      // Use currentCommunity directly — it is always set when this function is
+      // reachable (openCommunityRoom sets it before wiring the onclick).
+      const c = currentCommunity;
       if (!c) return;
       let modal = document.getElementById('editCommunityModal');
       if (!modal) {
         modal = document.createElement('div');
         modal.id = 'editCommunityModal';
-        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px';
+        // z-index 9999 keeps the modal above the community room panel (z-index ~100-200)
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
         modal.innerHTML = `
           <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:20px;padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto">
             <h3 style="font-family:'Fraunces',serif;font-size:22px;margin-bottom:24px">Edit Community</h3>
@@ -1617,9 +1683,21 @@
         showToast('✨ Community created!');
         if (data && data[0] && currentUser) {
           const newId = data[0].id;
-          await db.from('community_members').insert({ user_id: currentUser.id, community_id: newId, role: 'owner', comfort_mode: 'active', notification_level: 'important' }).catch(() => {
-            db.from('community_members').insert({ user_id: currentUser.id, community_id: newId }).catch(()=>{});
-          });
+          // upsert so the DB trigger's auto-insert doesn't conflict with this one.
+          // Falls back to minimal insert if extra columns (role, comfort_mode) don't exist yet.
+          await db.from('community_members')
+            .upsert(
+              { user_id: currentUser.id, community_id: newId, role: 'owner', comfort_mode: 'active', notification_level: 'important' },
+              { onConflict: 'user_id,community_id', ignoreDuplicates: true }
+            )
+            .catch(() => {
+              db.from('community_members')
+                .upsert(
+                  { user_id: currentUser.id, community_id: newId },
+                  { onConflict: 'user_id,community_id', ignoreDuplicates: true }
+                )
+                .catch(() => {});
+            });
           try {
             await db.from('community_rooms').insert([
               { community_id: newId, name: '📌 Start Here', type: 'start_here', description: 'Welcome & rules', position_order: 0 },
