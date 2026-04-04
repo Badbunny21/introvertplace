@@ -5,6 +5,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Connect - Introvert Place</title>
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="shortcut icon" href="/assets/logo.png">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://dlgntsscabbhdqlxqpwd.supabase.co">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -208,6 +215,9 @@
     .soul-tagline { font-size: 14px; color: var(--text-muted); font-style: italic; margin-bottom: 16px; }
     .interests { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; }
     .interest { padding: 6px 12px; background: var(--bg-elevated); border-radius: var(--radius-full); font-size: 12px; color: var(--text-secondary); }
+    .interest.shared { background: rgba(196,161,255,0.15); border: 1px solid rgba(196,161,255,0.3); color: var(--accent-soft); }
+    .soul-match-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(196,161,255,0.12); border: 1px solid rgba(196,161,255,0.25); border-radius: var(--radius-full); font-size: 12px; color: var(--accent-soft); margin-bottom: 16px; }
+    .soul-card.top-match { border-color: rgba(196,161,255,0.3); box-shadow: 0 0 0 1px rgba(196,161,255,0.1); }
     .wave-btn { width: 100%; padding: 12px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 14px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .wave-btn:hover { background: var(--accent-soft); color: var(--bg-deep); border-color: var(--accent-soft); }
     .wave-btn.waved { background: rgba(196,161,255,0.15); border-color: rgba(196,161,255,0.3); color: var(--accent-soft); pointer-events: none; }
@@ -657,6 +667,14 @@
     /* Report */
     .report-dialog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1200; display: flex; align-items: center; justify-content: center; }
     .report-dialog { background: var(--bg-elevated); border: 1px solid var(--border-light); border-radius: var(--radius-xl); padding: 24px; max-width: 340px; width: 90%; }
+
+    /* Manage community modal — shown on top of community room, so cannot use .modal class */
+    .manage-modal-overlay { position: fixed; inset: 0; background: rgba(10,12,16,0.9); backdrop-filter: blur(12px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .manage-modal-overlay .modal-container { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; padding: 28px; position: relative; }
+    .manage-modal-overlay .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding: 0; text-align: left; }
+    .manage-modal-overlay .modal-header h2 { font-size: 22px; margin-bottom: 4px; }
+    .modal-close { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 50%; width: 36px; height: 36px; color: var(--text-muted); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
     .report-dialog h3 { font-size: 16px; margin-bottom: 14px; font-family: 'Fraunces', serif; font-weight: 400; }
     .report-reason-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
     .report-reason-btn { padding: 10px 14px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-primary); text-align: left; cursor: pointer; font-size: 13px; transition: background 0.2s, border-color 0.2s; font-family: 'DM Sans', sans-serif; }
@@ -692,10 +710,15 @@
       .view-nav-item { padding: 10px 16px; }
       .view-nav { max-width: 280px; }
       .room-topbar-title { font-size: 17px; }
+      /* Force single-column grids on mobile */
+      .communities-grid,
+      .souls-grid { grid-template-columns: 1fr; gap: 12px; }
     }
     @media (max-width: 480px) {
       .room-topbar-meta { display: none; }
       .reading-mode-toggle { display: none; }
+      .communities-grid,
+      .souls-grid { gap: 10px; }
     }
 
     /* ── Mobile: prevent iOS zoom on input focus ── */
@@ -743,10 +766,10 @@
           <div class="search-section">
             <div class="search-box">
               <span class="search-icon">🔍</span>
-              <input type="text" class="search-input" id="communitiesSearchInput" placeholder="Search communities or interests..." autocomplete="off">
+              <input type="text" class="search-input" id="communitiesSearchInput" placeholder="Search people or communities..." autocomplete="off">
               <div class="search-results" id="communitiesSearchResults"></div>
             </div>
-            <p class="search-hints"><span>🏠 communities</span><span>💭 interests</span></p>
+            <p class="search-hints"><span>👤 people</span><span>🏠 communities</span></p>
           </div>
           <div class="section-header">
             <h2>Discover Communities</h2>
@@ -975,7 +998,7 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
     // ===== SUPABASE =====
@@ -997,8 +1020,8 @@
       document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
       document.getElementById('view-' + viewName)?.classList.add('active');
       const url = new URL(window.location); url.searchParams.set('view', viewName); history.replaceState(null, '', url);
-      if (viewName === 'souls' && !soulsLoaded) { soulsLoaded = true; loadSouls(); }
-      if (viewName === 'messages' && !conversationsLoaded) { conversationsLoaded = true; loadConversations(); }
+      if (viewName === 'souls') { loadSouls(); }
+      if (viewName === 'messages') { loadConversations(); }
       if (viewName !== 'messages') stopMessagePolling();
     }
     document.querySelectorAll('.filter').forEach(f => f.addEventListener('click', function() { document.querySelectorAll('.filter').forEach(x => x.classList.remove('active')); this.classList.add('active'); }));
@@ -1017,6 +1040,7 @@
     // ===== HELPERS =====
     function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
     function getDomain(url) { try { return new URL(url).hostname.replace('www.', ''); } catch { return ''; } }
+    function isSafeUrl(url) { try { const u = new URL(url); return u.protocol === 'http:' || u.protocol === 'https:'; } catch { return false; } }
     function formatMessageTime(isoStr) {
       const date = new Date(isoStr); const now = new Date(); const diff = now - date;
       const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), d = Math.floor(diff/86400000);
@@ -1048,6 +1072,7 @@
     // ===== COMMUNITY ROOM STATE =====
     let currentCommunity = null;
     let currentCommunityJoined = false;
+    let currentCommunityIsOwner = false;
     let currentComfortMode = 'occasional';
     let currentRoomId = null;
     let currentRoomChannels = [];
@@ -1134,6 +1159,7 @@
     function openCommunityRoom(community, memberCount, isJoined, comfortMode, isOwner) {
       currentCommunity = community;
       currentCommunityJoined = isJoined;
+      currentCommunityIsOwner = !!isOwner;
       currentComfortMode = comfortMode || 'occasional';
       currentPostType = 'thought';
       userReactions = {}; userBookmarks = new Set(); expandedComments = new Set();
@@ -1169,10 +1195,10 @@
         joinBtn.onclick = () => handleRoomJoinBtn();
       }
 
-      // Composer visibility
+      // Composer visibility — owners always have access
       const composer = document.getElementById('roomComposer');
       const lurkBanner = document.getElementById('roomLurkBanner');
-      if (isJoined) { composer.style.display = ''; lurkBanner.style.display = 'none'; }
+      if (isOwner || isJoined) { composer.style.display = ''; lurkBanner.style.display = 'none'; }
       else { composer.style.display = 'none'; lurkBanner.style.display = 'flex'; }
 
       // Post type selector buttons
@@ -1437,7 +1463,7 @@
               </div>
               ${post.title ? `<h3 class="post-title">${escapeHtml(post.title)}</h3>` : ''}
               <div class="post-content">${escapeHtml(post.content)}</div>
-              ${post.link_url ? `<a href="${escapeHtml(post.link_url)}" target="_blank" rel="noopener" class="post-link"><span>🔗</span><span>${escapeHtml(post.link_title || post.link_url)}</span><span style="font-size:11px;color:var(--text-muted)">${getDomain(post.link_url)}</span></a>` : ''}
+              ${post.link_url && isSafeUrl(post.link_url) ? `<a href="${escapeHtml(post.link_url)}" target="_blank" rel="noopener noreferrer" class="post-link"><span>🔗</span><span>${escapeHtml(post.link_title || post.link_url)}</span><span style="font-size:11px;color:var(--text-muted)">${getDomain(post.link_url)}</span></a>` : ''}
               <div class="post-actions">
                 ${Object.entries(REACTIONS).map(([key,cfg]) => {
                   const count = postReactions[key] || 0;
@@ -1519,23 +1545,83 @@
       const content = input?.value?.trim(); if (!content) return;
       try {
         await db.from('community_comments').insert({ post_id: postId, author_id: currentUser.id, content });
-        input.value = ''; showToast('💬 Reply added'); loadComments(postId); loadRoomPosts(currentCommunity.id, currentRoomId);
+        input.value = ''; showToast('💬 Reply added'); loadComments(postId);
+        // Update comment count on the toggle button without reloading all posts
+        const toggleBtn = document.querySelector(`.post-card[data-post-id="${postId}"] .comment-toggle`);
+        if (toggleBtn) { const cur = parseInt(toggleBtn.textContent) || 0; toggleBtn.textContent = `💬 ${cur + 1}`; }
       } catch(err) { showToast('Error adding reply'); }
     }
 
     // ===== HANDLE JOIN BTN IN ROOM =====
     function handleRoomJoinBtn() {
       if (!currentCommunity) return;
+      if (currentCommunityIsOwner) {
+        openManageCommunityModal(currentCommunity);
+        return;
+      }
       if (currentCommunityJoined) {
-        // Leave community
         if (confirm('Leave this community?')) leaveCommunityFromRoom(currentCommunity.id);
       } else {
         showJoinOverlay(currentCommunity.id, 'room', null);
       }
     }
 
+    function openManageCommunityModal(community) {
+      document.getElementById('manageCommunityModal')?.remove();
+      const m = document.createElement('div');
+      m.id = 'manageCommunityModal';
+      m.className = 'manage-modal-overlay';
+      m.innerHTML = `
+        <div class="modal-container" style="max-width:480px;">
+          <div class="modal-header">
+            <div>
+              <h2>⚙️ Manage Community</h2>
+              <p style="color:var(--text-muted);margin-top:4px;">${escapeHtml(community.name)}</p>
+            </div>
+            <button class="modal-close" onclick="document.getElementById('manageCommunityModal').remove()">✕</button>
+          </div>
+          <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
+            <button class="submit-btn" style="background:rgba(124,184,232,0.15);color:var(--accent-calm);border:1px solid rgba(124,184,232,0.3);" onclick="editCommunity('${community.id}')">✏️ Edit Name &amp; Description</button>
+            <button class="submit-btn" style="background:rgba(232,124,154,0.12);color:var(--accent-rose);border:1px solid rgba(232,124,154,0.25);" onclick="deleteCommunityConfirm('${community.id}')">🗑️ Delete Community</button>
+            <button class="submit-btn" style="background:var(--bg-elevated);color:var(--text-muted);border:1px solid var(--border-subtle);" onclick="document.getElementById('manageCommunityModal').remove()">Cancel</button>
+          </div>
+        </div>`;
+      document.body.appendChild(m);
+    }
+
+    async function deleteCommunityConfirm(communityId) {
+      if (!confirm('Permanently delete this community and all its posts? This cannot be undone.')) return;
+      if (!db || !currentUser) return;
+      try {
+        await db.from('community_posts').delete().eq('community_id', communityId);
+        await db.from('community_members').delete().eq('community_id', communityId);
+        await db.from('community_rooms').delete().eq('community_id', communityId);
+        await db.from('communities').delete().eq('id', communityId).eq('creator_id', currentUser.id);
+        document.getElementById('manageCommunityModal')?.remove();
+        closeCommunityRoom();
+        showToast('🗑️ Community deleted');
+        loadCommunities();
+      } catch(e) { showToast('⚠️ Error deleting community'); }
+    }
+
+    async function editCommunity(communityId) {
+      if (!db || !currentUser) return;
+      document.getElementById('manageCommunityModal')?.remove();
+      const newName = prompt('Community name:', currentCommunity?.name || '');
+      if (!newName?.trim()) return;
+      const newDesc = prompt('Description:', currentCommunity?.description || '');
+      try {
+        await db.from('communities').update({ name: newName.trim(), description: newDesc?.trim() || '' }).eq('id', communityId).eq('creator_id', currentUser.id);
+        if (currentCommunity) { currentCommunity.name = newName.trim(); currentCommunity.description = newDesc?.trim() || ''; }
+        document.getElementById('roomTopbarTitle').textContent = newName.trim();
+        showToast('✓ Community updated');
+        loadCommunities();
+      } catch(e) { showToast('⚠️ Error updating community'); }
+    }
+
     async function leaveCommunityFromRoom(communityId) {
       if (!db || !currentUser) return;
+      if (currentCommunityIsOwner) { showToast('⚠️ You own this community. Use Manage to delete it.'); return; }
       try {
         await db.from('community_members').delete().eq('user_id', currentUser.id).eq('community_id', communityId);
         currentCommunityJoined = false;
@@ -1570,6 +1656,7 @@
         communities.forEach(c => { communityNames[c.id] = c.name; });
         grid.innerHTML = communities.map(c => {
           const mc = memberCounts[c.id] || 0;
+          const isOwned = currentUser && c.creator_id === currentUser.id;
           const isJoined = userMemberships.has(c.id);
           const isOwner = userOwnerships.has(c.id);
           return `
@@ -1578,7 +1665,7 @@
                 <div class="community-icon">${c.icon||'🏠'}</div>
                 <div class="community-info">
                   <h4>${escapeHtml(c.name)}</h4>
-                  <div class="community-stats"><span>${mc===1?'1 member':`${mc} members`}</span></div>
+                  <div class="community-stats"><span>${mc===1?'1 member':`${mc} members`}</span>${isOwned?'<span style="color:var(--accent-soft);font-size:11px;margin-left:6px;">Your community</span>':''}</div>
                 </div>
               </div>
               <p class="community-desc">${escapeHtml(c.description||'')}</p>
@@ -1844,73 +1931,210 @@
 
     async function performSearch(query) {
       if (!db) { showNoResults(query); return; }
-      let communities = [];
-      try { const { data } = await db.from('communities').select('*').or(`name.ilike.%${query}%,description.ilike.%${query}%`).limit(8); if (data) communities = data; } catch(e) {}
-      renderSearchResults(communities, query);
+      let communities = [], users = [];
+      try {
+        const [commRes, userRes] = await Promise.all([
+          db.from('communities').select('*').or(`name.ilike.%${query}%,description.ilike.%${query}%`).limit(6),
+          db.from('profiles').select('id, username, avatar_emoji, avatar_url, avatar_bg, tagline').ilike('username', `%${query}%`).limit(5)
+        ]);
+        if (commRes.data) communities = commRes.data;
+        if (userRes.data) users = userRes.data;
+      } catch(e) {}
+      renderSearchResults(communities, users, query);
     }
-    function renderSearchResults(communities, query) {
-      if (!communities.length) { showNoResults(query); return; }
-      communitiesSearchResults.innerHTML = `<div class="search-category">🏠 Communities</div>` + communities.map(c => `<div class="search-result-item" onclick="viewCommunity('${c.id}')"><div class="search-result-icon">${c.icon||'🏠'}</div><div class="search-result-info"><div class="search-result-name">${escapeHtml(c.name)}</div><div class="search-result-meta">${escapeHtml(c.description?.substring(0,60)||'')}...</div></div><div class="search-result-badge">${c.member_count||0} members</div></div>`).join('');
+
+    function renderSearchResults(communities, users, query) {
+      if (!communities.length && !users.length) { showNoResults(query); return; }
+      let html = '';
+
+      if (users.length) {
+        html += `<div class="search-category">👤 People</div>`;
+        html += users.map(u => {
+          const avatar = u.avatar_url
+            ? `<img src="${escapeHtml(u.avatar_url)}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;">`
+            : `<div style="width:44px;height:44px;border-radius:10px;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:22px;">${u.avatar_emoji||'🌙'}</div>`;
+          const isMe = currentUser && u.id === currentUser.id;
+          return `<div class="search-result-item" onclick="viewProfile('${u.id}')">
+            <div class="search-result-icon" style="background:none;padding:0;">${avatar}</div>
+            <div class="search-result-info">
+              <div class="search-result-name">${escapeHtml(u.username||'Anonymous')}${isMe ? ' <span style="font-size:11px;color:var(--text-muted)">(you)</span>' : ''}</div>
+              <div class="search-result-meta">${escapeHtml(u.tagline||'Introvert Place member')}</div>
+            </div>
+            <div class="search-result-badge">Profile</div>
+          </div>`;
+        }).join('');
+      }
+
+      if (communities.length) {
+        html += `<div class="search-category">🏠 Communities</div>`;
+        html += communities.map(c => `<div class="search-result-item" onclick="viewCommunity('${c.id}')">
+          <div class="search-result-icon">${c.icon||'🏠'}</div>
+          <div class="search-result-info">
+            <div class="search-result-name">${escapeHtml(c.name)}</div>
+            <div class="search-result-meta">${escapeHtml(c.description?.substring(0,60)||'')}${c.description?.length>60?'...':''}</div>
+          </div>
+          <div class="search-result-badge">${c.member_count||0} members</div>
+        </div>`).join('');
+      }
+
+      communitiesSearchResults.innerHTML = html;
     }
     function showNoResults(query) { communitiesSearchResults.innerHTML = `<div class="search-results-empty"><div class="icon">🔍</div><p>No results for "${escapeHtml(query)}"</p><p style="font-size:13px;margin-top:8px">Try different keywords or create one!</p></div>`; }
 
     // ===== SOULS =====
+    // Battery level groups: low (0-33), medium (34-66), high (67-100)
+    function batteryGroup(v) { return v == null ? null : v <= 33 ? 'low' : v <= 66 ? 'medium' : 'high'; }
+    // Energy groups: low (1-3), medium (4-7), high (8-10)
+    function energyGroup(v) { return v == null ? null : v <= 3 ? 'low' : v <= 7 ? 'medium' : 'high'; }
+
     async function loadSouls() {
       if (!db) return;
       const grid = document.getElementById('soulsGrid'); if (!grid) return;
+      grid.innerHTML = `<div style="grid-column:1/-1;padding:60px;text-align:center"><span style="font-size:40px">✨</span><p style="color:var(--text-muted);margin-top:12px">Finding your kind of souls...</p></div>`;
+
       try {
-        const { data: profiles } = await db.from('profiles').select('*').order('created_at', { ascending: false }).limit(20);
-        if (!profiles || !profiles.length) { grid.innerHTML = `<div style="grid-column:1/-1;padding:60px;text-align:center"><span style="font-size:48px">🔮</span><h3 style="margin-top:16px">No souls yet</h3></div>`; return; }
-        grid.innerHTML = profiles.map(p => {
-          const avatar = p.avatar_emoji||p.avatar||'🌙'; const avatarBg = p.avatar_bg||'linear-gradient(135deg,#667eea 0%,#764ba2 100%)';
-          const interests = p.interests ? p.interests.split(',').map(i=>i.trim()).filter(Boolean).slice(0,3) : [];
-          const isMe = currentUser && p.id === currentUser.id;
-          return `<div class="soul-card" onclick="viewProfile('${p.id}')">${renderAvatarHtml(p.avatar_url||null,avatar,avatarBg,'soul-avatar')}<div class="soul-name">${escapeHtml(p.username||'Anonymous')}${isMe?' (You)':''}</div><div class="soul-tagline">${escapeHtml(p.tagline||p.bio?.substring(0,50)||'A quiet soul')}</div>${interests.length?`<div class="interests">${interests.map(i=>`<span class="interest">${escapeHtml(i)}</span>`).join('')}</div>`:''} ${!isMe?`<button class="wave-btn" onclick="event.stopPropagation();sendWave(this)">👋 Send a quiet wave</button>`:''}</div>`;
+        // Load current user's own profile (interests + energy + battery + mood)
+        let myInterests = [], myEnergy = null, myBattery = null, myMood = null;
+        if (currentUser) {
+          // Also check localStorage for session mood (set when user picked mood on app.html)
+          try {
+            const saved = JSON.parse(localStorage.getItem('currentMood') || 'null');
+            if (saved?.id) myMood = saved.id;
+          } catch(e) {}
+          try {
+            const { data: me } = await db.from('profiles')
+              .select('interests, last_energy_level, last_battery, last_mood')
+              .eq('id', currentUser.id).single();
+            if (me?.interests) myInterests = me.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
+            myEnergy = me?.last_energy_level ?? null;
+            myBattery = me?.last_battery ?? null;
+            if (me?.last_mood) myMood = me.last_mood; // DB overrides localStorage
+          } catch(profileErr) {
+            // Columns may not exist yet — try fetching just interests
+            try {
+              const { data: me2 } = await db.from('profiles').select('interests').eq('id', currentUser.id).single();
+              if (me2?.interests) myInterests = me2.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
+            } catch(e) {}
+          }
+          // Fallback: read battery from localStorage if not yet in DB
+          if (myBattery == null) {
+            try {
+              const saved = JSON.parse(localStorage.getItem('socialBattery') || 'null');
+              if (saved?.date === new Date().toDateString() && typeof saved.battery === 'number') myBattery = saved.battery;
+            } catch(e) {}
+          }
+        }
+
+        // Fetch all other users — use * so query works before migration adds energy/battery columns
+        let query = db.from('profiles')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(40);
+        if (currentUser) query = query.neq('id', currentUser.id);
+        const { data: profiles } = await query;
+
+        if (!profiles || !profiles.length) {
+          grid.innerHTML = `<div style="grid-column:1/-1;padding:60px;text-align:center"><span style="font-size:48px">🔮</span><h3 style="margin-top:16px">No souls yet</h3><p style="color:var(--text-muted);margin-top:8px">Be one of the first to set up your profile!</p></div>`;
+          return;
+        }
+
+        // Score each profile — energy match, battery match, interests
+        const myEnergyGroup = energyGroup(myEnergy);
+        const myBatteryGroup = batteryGroup(myBattery);
+
+        const scored = profiles.map(p => {
+          let score = 0;
+          const matchReasons = [];
+          let sharedInterests = [];
+
+          // Energy match: same group = 15pts, adjacent group = 5pts
+          const theirEnergyGroup = energyGroup(p.last_energy_level);
+          if (myEnergyGroup && theirEnergyGroup) {
+            if (myEnergyGroup === theirEnergyGroup) { score += 15; matchReasons.push('Similar energy'); }
+            else { score += 5; }
+          }
+
+          // Mood match (fallback when no numeric energy): same mood = 12pts
+          if (myMood && p.last_mood && myMood === p.last_mood) {
+            score += 12; if (!matchReasons.includes('Similar energy')) matchReasons.push('Same vibe today');
+          }
+
+          // Battery match: same group = 10pts
+          const theirBatteryGroup = batteryGroup(p.last_battery);
+          if (myBatteryGroup && theirBatteryGroup && myBatteryGroup === theirBatteryGroup) {
+            score += 10; matchReasons.push('Similar social battery');
+          }
+
+          // Interest overlap: 8pts each
+          if (myInterests.length && p.interests) {
+            const theirs = p.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean);
+            sharedInterests = myInterests.filter(i => theirs.includes(i));
+            score += sharedInterests.length * 8;
+            if (sharedInterests.length) matchReasons.push(`${sharedInterests.length} shared interest${sharedInterests.length > 1 ? 's' : ''}`);
+          }
+
+          return { ...p, score, matchReasons, sharedInterests };
+        });
+
+        scored.sort((a, b) => b.score - a.score);
+
+        // Decide what label to show based on the user's own data availability
+        const hasMyData = myEnergyGroup || myBatteryGroup || myInterests.length || myMood;
+
+        grid.innerHTML = scored.map(p => {
+          const avatar = p.avatar_emoji || p.avatar || '🌙';
+          const avatarBg = p.avatar_bg || 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)';
+          const displayInterests = p.interests ? p.interests.split(',').map(i => i.trim()).filter(Boolean).slice(0, 4) : [];
+          const isTopMatch = p.score >= 15;
+
+          let matchBadge = '';
+          if (hasMyData && p.matchReasons.length) {
+            matchBadge = `<div class="soul-match-badge">✨ ${p.matchReasons[0]}${p.matchReasons.length > 1 ? ' · +' + (p.matchReasons.length - 1) + ' more' : ''}</div>`;
+          }
+
+          // Energy/battery/mood vibe indicators
+          let vibeHtml = '';
+          {
+            const MOOD_EMOJI = { peaceful:'😌', happy:'😊', calm:'😇', neutral:'😐', reflective:'🤔', anxious:'😰', low:'😔', tired:'😴' };
+            const eLabel = p.last_energy_level != null ? `⚡ ${energyGroup(p.last_energy_level)} energy` : (p.last_mood ? `${MOOD_EMOJI[p.last_mood]||'✨'} ${p.last_mood}` : '');
+            const bLabel = p.last_battery != null ? `🔋 ${batteryGroup(p.last_battery)} battery` : '';
+            const vibes = [eLabel, bLabel].filter(Boolean);
+            if (vibes.length) vibeHtml = `<div class="interests" style="margin-bottom:12px;">${vibes.map(v => `<span class="interest">${escapeHtml(v)}</span>`).join('')}</div>`;
+          }
+
+          const interestsHtml = displayInterests.length
+            ? `<div class="interests">${displayInterests.map(i => `<span class="interest ${p.sharedInterests.includes(i.toLowerCase()) ? 'shared' : ''}">${escapeHtml(i)}</span>`).join('')}</div>`
+            : '';
+
+          return `<div class="soul-card${isTopMatch ? ' top-match' : ''}" onclick="viewProfile('${p.id}')">
+            ${matchBadge}
+            ${renderAvatarHtml(p.avatar_url||null, avatar, avatarBg, 'soul-avatar')}
+            <div class="soul-name">${escapeHtml(p.username||'Anonymous')}</div>
+            <div class="soul-tagline">${escapeHtml(p.tagline || p.bio?.substring(0,60) || 'A quiet soul')}</div>
+            ${vibeHtml}
+            ${interestsHtml}
+            <button class="wave-btn" onclick="event.stopPropagation(); sendWave('${p.id}', this)">👋 Send a quiet wave</button>
+          </div>`;
         }).join('');
-      } catch(err) { console.error(err); }
+
+      } catch(err) { console.error('loadSouls error:', err); }
     }
 
-    function sendWave(btn) {
-  btn.classList.add('waved');
-  btn.innerHTML = '<span>✓</span> Wave sent!';
-  btn.onclick = null;
+    function sendWave(userId, btn) {
+      btn.classList.add('waved');
+      btn.innerHTML = '<span>✓</span> Wave sent!';
+      btn.onclick = null;
+      saveWaveToSupabase(userId);
+    }
 
-  const card = btn.closest('.soul-card');
-  const username = card.querySelector('.soul-name')?.textContent?.replace(' (You)', '').trim();
-  if (username) saveWaveToSupabase(username);
-}
-
-async function saveWaveToSupabase(toUsername) {
-  if (!db || !currentUser) {
-    showToast('Please sign in to send waves 🌙');
-    return;
-  }
-  try {
-    const { data: recipient } = await db
-      .from('profiles')
-      .select('id')
-      .eq('username', toUsername)
-      .single();
-
-    if (!recipient) return;
-
-    await db.from('waves').upsert({
-      from_user_id: currentUser.id,
-      to_user_id: recipient.id
-    });
-
-    await db.from('notifications').insert({
-      user_id: recipient.id,
-      type: 'wave',
-      message: '👋 Someone sent you a quiet wave',
-      seen: false
-    });
-
-    showToast('🌙 Quiet wave sent!');
-  } catch(e) {
-    console.log('Wave error:', e);
-  }
-}
+    async function saveWaveToSupabase(toUserId) {
+      if (!db || !currentUser) { showToast('Please sign in to send waves 🌙'); return; }
+      try {
+        await db.from('waves').upsert({ from_user_id: currentUser.id, to_user_id: toUserId });
+        await db.from('notifications').insert({ user_id: toUserId, type: 'wave', message: '👋 Someone sent you a quiet wave', seen: false });
+        showToast('🌙 Quiet wave sent!');
+      } catch(e) { console.log('Wave error:', e); }
+    }
 
     // ===== PROFILE MODAL =====
     let pendingMessageProfile = null;
@@ -1955,6 +2179,7 @@ async function saveWaveToSupabase(toUsername) {
         });
         conversationsCache = Object.values(convos);
         const partnerIds = Object.keys(convos);
+        if (!partnerIds.length) { container.innerHTML = `<div class="messages-empty"><span class="icon">💬</span><h3>No messages yet</h3><p style="color:var(--text-muted);margin-top:8px">Connect with souls to start chatting!</p></div>`; return; }
         const { data: profiles } = await db.from('profiles').select('id, username, avatar, avatar_emoji, avatar_bg, avatar_url').in('id', partnerIds);
         const profileMap = {}; if (profiles) profiles.forEach(p => { profileMap[p.id] = p; });
         container.innerHTML = conversationsCache.map(convo => {

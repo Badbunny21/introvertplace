@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Your Sanctuary - Introvert Place</title>
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="shortcut icon" href="/assets/logo.png">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://dlgntsscabbhdqlxqpwd.supabase.co">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -393,11 +400,11 @@
               </div>
             </div>
             <div class="header-stats">
-              <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Reflections</div></div>
+              <div class="stat-card"><div class="stat-value" id="reflectionStatValue">0</div><div class="stat-label">Reflections</div></div>
               <div class="stat-card battery">
-                <div class="stat-value">100%</div>
+                <div class="stat-value" id="batteryStatValue">100%</div>
                 <div class="stat-label">Social Battery</div>
-                <div class="mini-battery"><div class="mini-battery-fill" style="width:100%"></div></div>
+                <div class="mini-battery"><div class="mini-battery-fill" id="miniBatteryFill" style="width:100%"></div></div>
               </div>
             </div>
           </div>
@@ -590,7 +597,7 @@
   </div>
 
   <!-- Supabase -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
     // Supabase initialization
@@ -662,6 +669,7 @@
         loadMoodHistory();
         loadReflections();
         updateStats();
+        loadSanctuaryBattery();
       } catch (err) {
         console.error('Auth error:', err);
       }
@@ -731,6 +739,9 @@
         });
 
         if (error) throw error;
+
+        // Update public energy level on profile so Find Souls can match by energy
+        db.from('profiles').update({ last_energy_level: parseInt(energyLevel) }).eq('id', currentUser.id).then(() => {});
 
         showToast('Mood updated!');
         if (notesTextarea) notesTextarea.value = '';
@@ -1170,12 +1181,54 @@
           .select('*', { count: 'exact', head: true })
           .eq('user_id', currentUser.id);
 
-        // Update UI
-        const statCards = document.querySelectorAll('.stat-card .stat-value');
-        if (statCards[1]) statCards[1].textContent = (journalCount || 0) + (reflectionCount || 0);
+        // Update reflections stat (was incorrectly writing to battery slot before)
+        const reflectionEl = document.getElementById('reflectionStatValue');
+        if (reflectionEl) reflectionEl.textContent = (journalCount || 0) + (reflectionCount || 0);
       } catch (err) {
         console.error('Stats error:', err);
       }
+    }
+
+    // Load social battery — reads from localStorage (shared with wellness.html) with 24h reset,
+    // then syncs from DB to get the authoritative value
+    async function loadSanctuaryBattery() {
+      let battery = 100;
+
+      // 1. Check localStorage fast-path (wellness.html writes here too)
+      try {
+        const saved = localStorage.getItem('socialBattery');
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.date === new Date().toDateString()) {
+            battery = typeof data.battery === 'number' ? data.battery : 100;
+          }
+          // If date doesn't match it's a new day — battery resets to 100 (default above)
+        }
+      } catch(e) {}
+
+      // 2. DB is source of truth — recalculate from today's actual activities
+      if (db && currentUser) {
+        try {
+          const todayStart = new Date();
+          todayStart.setHours(0, 0, 0, 0);
+          const { data, error } = await db
+            .from('battery_activities')
+            .select('drain')
+            .eq('user_id', currentUser.id)
+            .gte('logged_at', todayStart.toISOString());
+
+          if (!error && data) {
+            const totalDrain = data.reduce((sum, a) => sum + (a.drain || 0), 0);
+            battery = Math.max(0, 100 - totalDrain);
+          }
+        } catch(e) { console.error('Battery load error:', e); }
+      }
+
+      // 3. Update the UI
+      const batteryEl = document.getElementById('batteryStatValue');
+      const fillEl = document.getElementById('miniBatteryFill');
+      if (batteryEl) batteryEl.textContent = battery + '%';
+      if (fillEl) fillEl.style.width = battery + '%';
     }
 
     // Character count for textarea

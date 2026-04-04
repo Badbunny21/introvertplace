@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Introvert Place — App</title>
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="shortcut icon" href="/assets/logo.png">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://dlgntsscabbhdqlxqpwd.supabase.co">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -358,7 +365,7 @@
     /* ============ FEEDBACK BUTTON & MODAL ============ */
     .feedback-btn {
       position: fixed;
-      bottom: 80px;
+      bottom: calc(80px + env(safe-area-inset-bottom, 0px));
       right: 16px;
       width: 48px;
       height: 48px;
@@ -544,7 +551,7 @@
     button, a, [onclick] { touch-action: manipulation; }
     body { -webkit-overflow-scrolling: touch; }
   </style>
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -711,11 +718,26 @@
       }
     }
 
+    // Mood → energy level mapping (used for Find Souls matching)
+    const MOOD_ENERGY = {
+      peaceful: 7, happy: 8, calm: 7, neutral: 5,
+      reflective: 5, anxious: 4, low: 2, tired: 3
+    };
+
     // Handle mood selection
     function selectMood(moodId, label, emoji) {
       // Save mood to localStorage (persists) and sessionStorage (prevents re-show on refresh)
       localStorage.setItem('currentMood', JSON.stringify({ id: moodId, label, emoji }));
       sessionStorage.setItem('moodCompleted', 'true');
+
+      // Save mood + derived energy to profile so Find Souls can match by energy
+      if (currentUser && db) {
+        const energyLevel = MOOD_ENERGY[moodId] || 5;
+        db.from('profiles')
+          .update({ last_mood: moodId, last_energy_level: energyLevel })
+          .eq('id', currentUser.id)
+          .then(() => {});
+      }
 
       // Hide mood overlay with animation
       document.getElementById('moodOverlay').classList.remove('visible');
@@ -768,7 +790,7 @@
     async function logout() {
       await db.auth.signOut();
       // Clear all app-specific localStorage keys
-      const appKeys = ['currentMood', 'introvert_profile', 'gardenRoomConfig', 'gardenUserRooms', 'gardenRoomMood'];
+      const appKeys = ['currentMood', 'introvert_profile', 'gardenRoomConfig', 'gardenUserRooms', 'gardenRoomMood', 'introvert_creative_mode', 'socialBattery'];
       appKeys.forEach(k => localStorage.removeItem(k));
       sessionStorage.clear();
       window.location.href = 'index.html';
@@ -844,8 +866,60 @@
       }
     });
 
+    // Handle Stripe payment redirect (success/canceled)
+    function handlePaymentRedirect() {
+      const params = new URLSearchParams(window.location.search);
+      const payment = params.get('payment');
+      if (!payment) return;
+
+      // Clean the URL so refreshing doesn't re-show the message
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+
+      if (payment === 'success') {
+        // Small delay so page is fully loaded before showing toast
+        setTimeout(() => {
+          showPaymentToast('🎉 Welcome to Quiet Soul! Your subscription is now active.', 'success');
+        }, 800);
+      } else if (payment === 'canceled') {
+        setTimeout(() => {
+          showPaymentToast('No worries — you can upgrade anytime from your profile.', 'info');
+        }, 800);
+      }
+    }
+
+    function showPaymentToast(message, type) {
+      const toast = document.createElement('div');
+      toast.textContent = message;
+      Object.assign(toast.style, {
+        position: 'fixed',
+        top: '24px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: type === 'success' ? 'rgba(124,232,168,0.15)' : 'rgba(196,161,255,0.15)',
+        border: '1px solid ' + (type === 'success' ? 'rgba(124,232,168,0.4)' : 'rgba(196,161,255,0.4)'),
+        color: type === 'success' ? '#7ce8a8' : '#c4a1ff',
+        padding: '14px 24px',
+        borderRadius: '12px',
+        fontSize: '15px',
+        fontFamily: 'Inter, sans-serif',
+        backdropFilter: 'blur(12px)',
+        zIndex: '99999',
+        maxWidth: '90vw',
+        textAlign: 'center',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+        transition: 'opacity 0.4s ease',
+      });
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+      }, 5000);
+    }
+
     // Initialize
     init();
+    handlePaymentRedirect();
 
     // ============ FEEDBACK FUNCTIONALITY ============
     let selectedFeedbackType = 'general';
@@ -937,7 +1011,7 @@
       </div>
     </div>
   </div>
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Wellness - Introvert Place</title>
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="shortcut icon" href="/assets/logo.png">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://dlgntsscabbhdqlxqpwd.supabase.co">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -477,10 +484,18 @@
       .breath-step-number { width: 44px; height: 44px; font-size: 22px; }
       .modal-content { padding: 40px 20px; }
       .breath-visualization { width: 220px; height: 220px; margin-bottom: 24px; }
+      /* Convert tabs to a 2×2 grid on small phones */
+      .wellness-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .wellness-tab { min-width: 0; padding: 14px 12px; }
     }
     @media (max-width: 380px) {
       .wellness-header h1 { font-size: 26px; }
       .content-wrapper { padding: 16px 12px; }
+      .wellness-tab { padding: 12px 8px; }
+      .wellness-tab .tab-icon { font-size: 24px; }
+      .wellness-tab .tab-label { font-size: 11px; }
+      /* Stack activity options on very small phones */
+      .activity-options { grid-template-columns: 1fr; }
     }
 
     /* Theme Variations */
@@ -534,9 +549,9 @@
 
         <div class="tab-content active" id="tab-overview">
           <div class="status-grid">
-            <div class="status-card"><div class="status-icon">⚡</div><div class="status-label">Energy Level</div><div class="status-value">--/10</div><div class="status-bar"><div class="status-bar-fill energy" style="width:0%"></div></div></div>
-            <div class="status-card"><div class="status-icon">🔋</div><div class="status-label">Social Battery</div><div class="status-value">100%</div><div class="status-bar"><div class="status-bar-fill social" style="width:100%"></div></div></div>
-            <div class="status-card"><div class="status-icon">😮‍💨</div><div class="status-label">Stress Level</div><div class="status-value">--/10</div><div class="status-bar"><div class="status-bar-fill stress" style="width:0%"></div></div></div>
+            <div class="status-card"><div class="status-icon">⚡</div><div class="status-label">Energy Level</div><div class="status-value" id="energyStatValue">--/10</div><div class="status-bar"><div class="status-bar-fill energy" id="energyStatBar" style="width:0%"></div></div></div>
+            <div class="status-card"><div class="status-icon">🔋</div><div class="status-label">Social Battery</div><div class="status-value" id="overviewBatteryValue">100%</div><div class="status-bar"><div class="status-bar-fill social" id="overviewBatteryBar" style="width:100%"></div></div></div>
+            <div class="status-card"><div class="status-icon">😮‍💨</div><div class="status-label">Stress Level</div><div class="status-value" id="stressStatValue">--/10</div><div class="status-bar"><div class="status-bar-fill stress" id="stressStatBar" style="width:0%"></div></div></div>
           </div>
 
           <div class="wellness-message">
@@ -837,7 +852,7 @@
   </div>
 
   <!-- Supabase -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
     // ============ SUPABASE INIT ============
@@ -1406,10 +1421,16 @@
       activities.unshift(activity);
       currentBattery = Math.max(0, currentBattery - drain);
 
+      // Update public battery level on profile so Find Souls can match by social battery
+      if (db && currentUser) {
+        db.from('profiles').update({ last_battery: currentBattery }).eq('id', currentUser.id).then(() => {});
+      }
+
       saveBatteryLocal();
       updateBatteryDisplay();
       renderActivities();
       generatePredictions();
+      loadOverviewStats();
       closeActivityModal();
     }
 
@@ -1425,12 +1446,11 @@
 
       document.querySelector('.battery-status').textContent = status;
 
-      // Update overview card too
-      const overviewBattery = document.querySelector('#tab-overview .status-card:nth-child(2)');
-      if (overviewBattery) {
-        overviewBattery.querySelector('.status-value').textContent = currentBattery + '%';
-        overviewBattery.querySelector('.status-bar-fill').style.width = currentBattery + '%';
-      }
+      // Update overview battery card
+      const ovBattVal = document.getElementById('overviewBatteryValue');
+      const ovBattBar = document.getElementById('overviewBatteryBar');
+      if (ovBattVal) ovBattVal.textContent = currentBattery + '%';
+      if (ovBattBar) ovBattBar.style.width = currentBattery + '%';
     }
 
     function escapeHtml(text) {
@@ -1619,11 +1639,64 @@
       document.body.classList.add('font-' + fontSize);
     }
 
+    // ============ OVERVIEW STATS (Energy + Stress) ============
+    async function loadOverviewStats() {
+      if (!db || !currentUser) return;
+
+      try {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        // Energy Level: average of today's mood_entries.energy_level (or latest if only one)
+        const { data: moodData } = await db
+          .from('mood_entries')
+          .select('energy_level')
+          .eq('user_id', currentUser.id)
+          .gte('created_at', todayStart.toISOString())
+          .not('energy_level', 'is', null)
+          .order('created_at', { ascending: false });
+
+        const energyEl = document.getElementById('energyStatValue');
+        const energyBar = document.getElementById('energyStatBar');
+        if (moodData && moodData.length > 0) {
+          const avg = Math.round(moodData.reduce((sum, r) => sum + r.energy_level, 0) / moodData.length);
+          if (energyEl) energyEl.textContent = avg + '/10';
+          if (energyBar) energyBar.style.width = (avg * 10) + '%';
+        } else {
+          if (energyEl) energyEl.textContent = '--/10';
+          if (energyBar) energyBar.style.width = '0%';
+        }
+
+        // Stress Level: derived from today's total battery drain
+        // 0 drain = 0/10 stress, 100% drain = 10/10 stress
+        const { data: drainData } = await db
+          .from('battery_activities')
+          .select('drain')
+          .eq('user_id', currentUser.id)
+          .gte('logged_at', todayStart.toISOString());
+
+        const stressEl = document.getElementById('stressStatValue');
+        const stressBar = document.getElementById('stressStatBar');
+        if (drainData && drainData.length > 0) {
+          const totalDrain = drainData.reduce((sum, a) => sum + (a.drain || 0), 0);
+          const stress = Math.min(10, Math.round(totalDrain / 10));
+          if (stressEl) stressEl.textContent = stress + '/10';
+          if (stressBar) stressBar.style.width = (stress * 10) + '%';
+        } else {
+          if (stressEl) stressEl.textContent = '0/10';
+          if (stressBar) stressBar.style.width = '0%';
+        }
+      } catch(e) {
+        console.error('Overview stats error:', e);
+      }
+    }
+
     // ============ INITIALIZE ============
     async function initWellness() {
       applyAppearanceSettings();
       await initAuth();
       await loadBatteryData();
+      await loadOverviewStats();
     }
 
     initWellness();

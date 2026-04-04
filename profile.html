@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Profile - Introvert Place</title>
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="shortcut icon" href="/assets/logo.png">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://dlgntsscabbhdqlxqpwd.supabase.co">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -989,7 +996,9 @@
     }
   </style>
   <!-- Supabase -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Subscription Manager -->
+  <script src="js/subscription.js"></script>
 </head>
 <body>
   <div class="particles" id="particles"></div>
@@ -1018,6 +1027,7 @@
       <button class="profile-tab active" data-tab="about" onclick="switchTab('about')">✨ About Me</button>
       <button class="profile-tab" data-tab="spaces" onclick="switchTab('spaces')">🏠 My Spaces</button>
       <button class="profile-tab" data-tab="preferences" onclick="switchTab('preferences')">⚙️ Preferences</button>
+      <button class="profile-tab" data-tab="subscription" onclick="switchTab('subscription')">💎 Subscription</button>
     </div>
 
     <div class="tab-content active" id="tab-about">
@@ -1445,6 +1455,81 @@
       </div>
     </div>
 
+    <!-- Subscription Tab -->
+    <div class="tab-content" id="tab-subscription">
+
+      <!-- Current Plan Status -->
+      <div class="glass-card" id="sub-status-card">
+        <div class="section-header-simple">
+          <div class="section-title-row"><span class="section-emoji">💎</span><h3 class="section-title">Your Plan</h3></div>
+        </div>
+        <div class="section-body" id="sub-status-body">
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 0;">
+            <div class="loading-spinner-small"></div>
+            <span style="color:var(--text-gray-500);font-size:14px;">Loading subscription status...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upgrade Section (shown for free users) -->
+      <div id="sub-upgrade-section" style="display:none;">
+        <div class="glass-card" style="border:1px solid rgba(196,161,255,0.2);background:linear-gradient(135deg,rgba(196,161,255,0.05) 0%,rgba(124,184,232,0.05) 100%);">
+          <div class="section-header-simple">
+            <div class="section-title-row"><span class="section-emoji">🌙</span><h3 class="section-title">Upgrade to Quiet Soul</h3></div>
+          </div>
+          <div class="section-body">
+            <p style="color:var(--text-gray-400);font-size:14px;margin-bottom:20px;line-height:1.6;">Unlock everything Introvert Place has to offer. Includes a 14-day free trial — no credit card required upfront.</p>
+
+            <ul style="list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:10px;">
+              <li style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-gray-300);"><span style="color:#7ce8a8;font-size:16px;">✓</span> Unlimited creative spaces</li>
+              <li style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-gray-300);"><span style="color:#7ce8a8;font-size:16px;">✓</span> Advanced mood insights</li>
+              <li style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-gray-300);"><span style="color:#7ce8a8;font-size:16px;">✓</span> Priority community features</li>
+              <li style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-gray-300);"><span style="color:#7ce8a8;font-size:16px;">✓</span> Support quiet development</li>
+            </ul>
+
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <button class="sub-upgrade-btn primary" onclick="startCheckout('monthly')" id="btnMonthly">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span>Monthly — $6/month</span>
+                  <span style="font-size:12px;opacity:0.7;">Cancel anytime</span>
+                </div>
+              </button>
+              <button class="sub-upgrade-btn secondary" onclick="startCheckout('yearly')" id="btnYearly">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span>Yearly — $55/year</span>
+                  <span style="font-size:12px;background:rgba(124,232,168,0.2);color:#7ce8a8;padding:2px 8px;border-radius:20px;">Save 24%</span>
+                </div>
+              </button>
+            </div>
+
+            <p style="text-align:center;margin-top:16px;font-size:12px;color:var(--text-gray-500);">14-day free trial included. No charge until trial ends.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manage Section (shown for premium users) -->
+      <div id="sub-manage-section" style="display:none;">
+        <div class="glass-card">
+          <div class="section-header-simple">
+            <div class="section-title-row"><span class="section-emoji">⚙️</span><h3 class="section-title">Manage Subscription</h3></div>
+          </div>
+          <div class="section-body">
+            <div class="account-action-card">
+              <div class="action-info">
+                <span class="action-icon">💳</span>
+                <div>
+                  <h4>Billing & Invoices</h4>
+                  <p>Update payment method, view past invoices, cancel</p>
+                </div>
+              </div>
+              <button class="action-btn primary-action" onclick="openBillingPortal()">Manage</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 
   <div class="toast" id="toast"></div>
@@ -1609,8 +1694,88 @@
 
         // Load profile from database
         loadProfile();
+
+        // Load subscription status
+        initSubscription();
       } catch (err) {
         console.error('Auth error:', err);
+      }
+    }
+
+    // ── Subscription ──────────────────────────────
+    let subManager = null;
+
+    async function initSubscription() {
+      if (!db) return;
+      subManager = new SubscriptionManager(db);
+      await renderSubscriptionStatus();
+    }
+
+    async function renderSubscriptionStatus() {
+      const body = document.getElementById('sub-status-body');
+      if (!body || !subManager) return;
+
+      try {
+        const status = await subManager.getStatus();
+
+        let badgeHtml = '';
+        let statusDetail = '';
+
+        if (status.isPremium && status.status === 'trialing') {
+          const end = status.periodEnd ? new Date(status.periodEnd).toLocaleDateString() : '';
+          badgeHtml = '<span class="sub-plan-badge trial">⏳ Free Trial</span>';
+          statusDetail = end ? `Trial ends <strong>${end}</strong> — then $6/month` : 'Free trial active';
+        } else if (status.isPremium) {
+          const end = status.periodEnd ? new Date(status.periodEnd).toLocaleDateString() : '';
+          badgeHtml = '<span class="sub-plan-badge premium">💎 Quiet Soul</span>';
+          statusDetail = status.cancelAtPeriodEnd
+            ? `Cancels on <strong>${end}</strong>`
+            : end ? `Renews <strong>${end}</strong>` : 'Active';
+        } else if (status.status === 'past_due') {
+          badgeHtml = '<span class="sub-plan-badge free">⚠️ Payment Failed</span>';
+          statusDetail = 'Please update your payment method to restore access.';
+        } else {
+          badgeHtml = '<span class="sub-plan-badge free">🌱 Free Plan</span>';
+          statusDetail = 'Upgrade to unlock all features with a 14-day free trial.';
+        }
+
+        body.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:10px;padding:4px 0;">
+            ${badgeHtml}
+            <p style="font-size:13px;color:var(--text-gray-400);line-height:1.5;">${statusDetail}</p>
+          </div>
+        `;
+
+        // Show/hide upgrade vs manage sections
+        const upgradeSection = document.getElementById('sub-upgrade-section');
+        const manageSection = document.getElementById('sub-manage-section');
+        if (upgradeSection) upgradeSection.style.display = (status.isPremium || status.status === 'past_due') ? 'none' : 'block';
+        if (manageSection) manageSection.style.display = (status.isPremium || status.status === 'past_due') ? 'block' : 'none';
+
+      } catch (err) {
+        console.error('Subscription render error:', err);
+        body.innerHTML = '<p style="font-size:13px;color:var(--text-gray-500);">Could not load subscription status.</p>';
+      }
+    }
+
+    async function startCheckout(priceType) {
+      if (!subManager) return;
+      const btn = document.getElementById(priceType === 'monthly' ? 'btnMonthly' : 'btnYearly');
+      if (btn) { btn.disabled = true; btn.textContent = 'Redirecting to checkout...'; }
+      try {
+        await subManager.startCheckout(priceType);
+      } catch (err) {
+        showToast('Could not start checkout: ' + (err.message || 'Please try again.'));
+        if (btn) { btn.disabled = false; btn.textContent = priceType === 'monthly' ? 'Monthly — $6/month' : 'Yearly — $55/year'; }
+      }
+    }
+
+    async function openBillingPortal() {
+      if (!subManager) return;
+      try {
+        await subManager.openCustomerPortal();
+      } catch (err) {
+        showToast('Could not open billing portal: ' + (err.message || 'Please try again.'));
       }
     }
 
@@ -3131,6 +3296,49 @@
     * { -webkit-tap-highlight-color: transparent; }
     button, a, [onclick] { touch-action: manipulation; }
     body { -webkit-overflow-scrolling: touch; }
+
+    /* ── Subscription Tab Styles ── */
+    .sub-plan-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+    }
+    .sub-plan-badge.free {
+      background: rgba(156,163,175,0.15); color: #9ca3af;
+      border: 1px solid rgba(156,163,175,0.25);
+    }
+    .sub-plan-badge.premium {
+      background: rgba(196,161,255,0.15); color: #c4a1ff;
+      border: 1px solid rgba(196,161,255,0.35);
+    }
+    .sub-plan-badge.trial {
+      background: rgba(232,168,124,0.15); color: #e8a87c;
+      border: 1px solid rgba(232,168,124,0.35);
+    }
+    .sub-upgrade-btn {
+      width: 100%; padding: 16px 20px; border-radius: 12px; border: none;
+      font-size: 15px; font-weight: 500; cursor: pointer;
+      transition: all 0.2s ease; text-align: left;
+      touch-action: manipulation;
+    }
+    .sub-upgrade-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .sub-upgrade-btn.primary {
+      background: linear-gradient(135deg, #c4a1ff 0%, #7cb8e8 100%);
+      color: #0a0c10;
+    }
+    .sub-upgrade-btn.primary:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .sub-upgrade-btn.secondary {
+      background: rgba(255,255,255,0.06); color: var(--text-white);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .sub-upgrade-btn.secondary:hover:not(:disabled) {
+      background: rgba(255,255,255,0.1); border-color: rgba(196,161,255,0.4);
+    }
+    .loading-spinner-small {
+      width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.1);
+      border-top-color: #c4a1ff; border-radius: 50%;
+      animation: spin 0.8s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </body>
 </html>
