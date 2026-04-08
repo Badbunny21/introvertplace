@@ -161,19 +161,23 @@
     .logo-icon { font-size: 28px; }
     .logo-text { font-family: 'Cormorant Garamond', serif; font-size: 22px; }
     .logo-img {
-      height: 60px;
+      height: 120px;
       width: auto;
       display: block;
       mix-blend-mode: screen;
       filter: drop-shadow(0 2px 8px rgba(196,161,255,0.3));
     }
 
+    @media (max-width: 1024px) {
+      .logo-img { height: 100px; }
+    }
+
     @media (max-width: 768px) {
-      .logo-img { height: 44px; }
+      .logo-img { height: 80px; }
     }
 
     @media (max-width: 480px) {
-      .logo-img { height: 36px; }
+      .logo-img { height: 64px; }
     }
 
     .header-nav {
