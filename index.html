@@ -136,12 +136,14 @@
       left: 0;
       right: 0;
       z-index: 100;
-      padding: 20px 40px;
+      padding: 0 40px;
+      height: 72px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       background: linear-gradient(to bottom, var(--bg-deep) 0%, transparent 100%);
       transition: all 0.3s ease;
+      overflow: visible;
     }
 
     header.scrolled {
@@ -156,6 +158,8 @@
       gap: 12px;
       text-decoration: none;
       color: inherit;
+      align-self: stretch;
+      overflow: visible;
     }
 
     .logo-icon { font-size: 28px; }
