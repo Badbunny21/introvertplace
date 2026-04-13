@@ -1573,15 +1573,167 @@
   <script>
     const SUPABASE_URL = 'https://dlgntsscabbhdqlxqpwd.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsZ250c3NjYWJiaGRxbHhxcHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3MDAyMzYsImV4cCI6MjA3MDI3NjIzNn0.FIyWgqehDBMMQCN3nl-dPfkDAPjv_-dFBvmGHgABEBA';
-    const supabase = (function initSupabase() {
-      if (window._introvertSupabase) return window._introvertSupabase;
-      window._introvertSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      return window._introvertSupabase;
+
+    function showToast(msg) {
+      var toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+      toast.style.opacity = '1';
+      setTimeout(function() {
+        toast.style.transform = 'translateX(-50%) translateY(100px)';
+        toast.style.opacity = '0';
+      }, 2500);
+    }
+
+    /* Milky Way canvas first so a Supabase failure never kills the background */
+    (function initStarfield() {
+      var canvas = document.getElementById('milkyway-canvas');
+      if (!canvas || !canvas.getContext) return;
+      var ctx = canvas.getContext('2d');
+      var width, height, centerX, centerY;
+      var stars = [];
+      var shootingStars = [];
+      var rotation = 0;
+      var config = {
+        starCount: 300,
+        rotationSpeed: 0.000008,
+        flickerSpeed: 0.008,
+        shootingStarChance: 0.00012,
+        milkyWayDensity: 0.7
+      };
+      function initStars() {
+        stars = [];
+        for (var i = 0; i < config.starCount; i++) {
+          var angle = Math.random() * Math.PI * 2;
+          var distance = Math.random() * Math.max(width, height) * 0.6;
+          var bandOffset = (Math.random() - 0.5) * height * 0.2;
+          var inMilkyWay = Math.abs(bandOffset) < height * 0.14;
+          stars.push({
+            angle: angle,
+            distance: distance,
+            bandOffset: bandOffset,
+            size: inMilkyWay ? Math.random() * 1.5 + 0.45 : Math.random() * 0.9 + 0.25,
+            baseOpacity: inMilkyWay ? Math.random() * 0.45 + 0.42 : Math.random() * 0.28 + 0.22,
+            flickerOffset: Math.random() * Math.PI * 2,
+            flickerSpeed: Math.random() * 0.008 + 0.004,
+            color: inMilkyWay
+              ? 'rgba(' + Math.floor(205 + Math.random() * 35) + ', ' + Math.floor(200 + Math.random() * 40) + ', ' + Math.floor(235 + Math.random() * 15) + ', '
+              : 'rgba(255, 255, 255, '
+          });
+        }
+      }
+      function createShootingStar() {
+        var startAngle = Math.random() * Math.PI * 2;
+        var startDistance = Math.random() * width * 0.3 + width * 0.2;
+        shootingStars.push({
+          x: centerX + Math.cos(startAngle) * startDistance,
+          y: centerY + Math.sin(startAngle) * startDistance,
+          angle: startAngle + Math.PI + (Math.random() - 0.5) * 0.5,
+          speed: Math.random() * 8 + 6,
+          length: Math.random() * 80 + 40,
+          opacity: 1,
+          decay: Math.random() * 0.02 + 0.015
+        });
+      }
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        centerX = width / 2;
+        centerY = height / 2;
+        initStars();
+      }
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        rotation += config.rotationSpeed;
+        stars.forEach(function(star) {
+          var rotatedAngle = star.angle + rotation;
+          var x = centerX + Math.cos(rotatedAngle) * star.distance;
+          var y = centerY + Math.sin(rotatedAngle) * star.distance * 0.3 + star.bandOffset;
+          if (x < -10 || x > width + 10 || y < -10 || y > height + 10) return;
+          star.flickerOffset += star.flickerSpeed;
+          var flicker = Math.sin(star.flickerOffset) * 0.3 + 0.7;
+          var opacity = star.baseOpacity * flicker;
+          ctx.beginPath();
+          ctx.arc(x, y, star.size, 0, Math.PI * 2);
+          ctx.fillStyle = star.color + opacity + ')';
+          ctx.fill();
+          if (star.size > 1.2) {
+            ctx.beginPath();
+            ctx.arc(x, y, star.size * 2, 0, Math.PI * 2);
+            ctx.fillStyle = star.color + (opacity * 0.2) + ')';
+            ctx.fill();
+          }
+        });
+        if (Math.random() < config.shootingStarChance) createShootingStar();
+        shootingStars.forEach(function(star, index) {
+          var gradient = ctx.createLinearGradient(
+            star.x, star.y,
+            star.x - Math.cos(star.angle) * star.length,
+            star.y - Math.sin(star.angle) * star.length
+          );
+          gradient.addColorStop(0, 'rgba(255, 255, 255, ' + star.opacity + ')');
+          gradient.addColorStop(0.3, 'rgba(200, 180, 255, ' + (star.opacity * 0.5) + ')');
+          gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.beginPath();
+          ctx.moveTo(star.x, star.y);
+          ctx.lineTo(
+            star.x - Math.cos(star.angle) * star.length,
+            star.y - Math.sin(star.angle) * star.length
+          );
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          star.x += Math.cos(star.angle) * star.speed;
+          star.y += Math.sin(star.angle) * star.speed;
+          star.opacity -= star.decay;
+          if (star.opacity <= 0) shootingStars.splice(index, 1);
+        });
+        requestAnimationFrame(animate);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+      animate();
     })();
+
+    /** Safe client: v2 UMD may expose createClient on window.supabase or as named export */
+    function getSupabaseClient() {
+      if (window._introvertSupabase) return window._introvertSupabase;
+      try {
+        var lib = typeof window !== 'undefined' && window.supabase ? window.supabase : (typeof supabase !== 'undefined' ? supabase : null);
+        if (!lib) {
+          console.warn('Supabase script did not load.');
+          return null;
+        }
+        var createFn = lib && lib.createClient;
+        if (typeof createFn !== 'function' && lib && lib.default && typeof lib.default.createClient === 'function') {
+          createFn = lib.default.createClient;
+        }
+        if (typeof createFn === 'function') {
+          window._introvertSupabase = createFn.call(lib, SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else if (typeof lib === 'function') {
+          window._introvertSupabase = lib(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+          console.warn('Supabase createClient not found.');
+          return null;
+        }
+        return window._introvertSupabase;
+      } catch (err) {
+        console.error('Supabase init failed:', err);
+        return null;
+      }
+    }
+    /** Do not name this `supabase` — that overwrites window.supabase from the CDN and breaks createClient */
+    var supabaseClient = getSupabaseClient();
 
     function goToApp() {
       window.location.href = 'app.html';
     }
+
+    window.addEventListener('scroll', function() {
+      var header = document.getElementById('header');
+      if (header) header.classList.toggle('scrolled', window.scrollY > 50);
+    });
 
     function openAuthModal(which) {
       closeAuthModal('signin');
@@ -1618,6 +1770,10 @@
 
     async function handleSignIn(e) {
       e.preventDefault();
+      if (!supabaseClient) {
+        showToast('Sign-in is unavailable. Please refresh the page.');
+        return;
+      }
       const form = e.target;
       const email = form.querySelector('[name="email"]').value.trim();
       const password = form.querySelector('[name="password"]').value;
@@ -1631,7 +1787,7 @@
       }
       btn.disabled = true;
       btn.textContent = 'Signing in…';
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
       btn.disabled = false;
       btn.textContent = 'Sign in';
       if (error) {
@@ -1646,6 +1802,10 @@
 
     async function handleSignUp(e) {
       e.preventDefault();
+      if (!supabaseClient) {
+        showToast('Sign-up is unavailable. Please refresh the page.');
+        return;
+      }
       const form = e.target;
       const email = form.querySelector('[name="email"]').value.trim();
       const password = form.querySelector('[name="password"]').value;
@@ -1660,7 +1820,7 @@
       }
       btn.disabled = true;
       btn.textContent = 'Creating…';
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
         options: { data: { username: username || undefined } }
@@ -1680,156 +1840,6 @@
         showToast('Check your email to confirm your account, then sign in.');
         openAuthModal('signin');
       }
-    }
-
-    const canvas = document.getElementById('milkyway-canvas');
-    const ctx = canvas.getContext('2d');
-    
-    let width, height, centerX, centerY;
-    let stars = [];
-    let shootingStars = [];
-    let rotation = 0;
-    
-    const config = {
-      starCount: 300,
-      rotationSpeed: 0.000008,
-      flickerSpeed: 0.008,
-      shootingStarChance: 0.00012,
-      milkyWayDensity: 0.7,
-    };
-    
-    function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      centerX = width / 2;
-      centerY = height / 2;
-      initStars();
-    }
-    
-    function initStars() {
-      stars = [];
-      
-      for (let i = 0; i < config.starCount; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.random() * Math.max(width, height) * 0.6;
-        const bandOffset = (Math.random() - 0.5) * height * 0.2;
-        const inMilkyWay = Math.abs(bandOffset) < height * 0.14;
-        
-        stars.push({
-          angle: angle,
-          distance: distance,
-          bandOffset: bandOffset,
-          size: inMilkyWay ? Math.random() * 1.5 + 0.45 : Math.random() * 0.9 + 0.25,
-          baseOpacity: inMilkyWay ? Math.random() * 0.45 + 0.42 : Math.random() * 0.28 + 0.22,
-          flickerOffset: Math.random() * Math.PI * 2,
-          flickerSpeed: Math.random() * 0.008 + 0.004,
-          color: inMilkyWay 
-            ? `rgba(${205 + Math.random() * 35}, ${200 + Math.random() * 40}, ${235 + Math.random() * 15}, `
-            : `rgba(255, 255, 255, `,
-        });
-      }
-    }
-    
-    function createShootingStar() {
-      const startAngle = Math.random() * Math.PI * 2;
-      const startDistance = Math.random() * width * 0.3 + width * 0.2;
-      
-      shootingStars.push({
-        x: centerX + Math.cos(startAngle) * startDistance,
-        y: centerY + Math.sin(startAngle) * startDistance,
-        angle: startAngle + Math.PI + (Math.random() - 0.5) * 0.5,
-        speed: Math.random() * 8 + 6,
-        length: Math.random() * 80 + 40,
-        opacity: 1,
-        decay: Math.random() * 0.02 + 0.015,
-      });
-    }
-    
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
-      rotation += config.rotationSpeed;
-      
-      stars.forEach(star => {
-        const rotatedAngle = star.angle + rotation;
-        const x = centerX + Math.cos(rotatedAngle) * star.distance;
-        const y = centerY + Math.sin(rotatedAngle) * star.distance * 0.3 + star.bandOffset;
-        
-        if (x < -10 || x > width + 10 || y < -10 || y > height + 10) return;
-        
-        star.flickerOffset += star.flickerSpeed;
-        const flicker = Math.sin(star.flickerOffset) * 0.3 + 0.7;
-        const opacity = star.baseOpacity * flicker;
-        
-        ctx.beginPath();
-        ctx.arc(x, y, star.size, 0, Math.PI * 2);
-        ctx.fillStyle = star.color + opacity + ')';
-        ctx.fill();
-        
-        if (star.size > 1.2) {
-          ctx.beginPath();
-          ctx.arc(x, y, star.size * 2, 0, Math.PI * 2);
-          ctx.fillStyle = star.color + (opacity * 0.2) + ')';
-          ctx.fill();
-        }
-      });
-      
-      if (Math.random() < config.shootingStarChance) {
-        createShootingStar();
-      }
-      
-      shootingStars.forEach((star, index) => {
-        const gradient = ctx.createLinearGradient(
-          star.x, star.y,
-          star.x - Math.cos(star.angle) * star.length,
-          star.y - Math.sin(star.angle) * star.length
-        );
-        gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`);
-        gradient.addColorStop(0.3, `rgba(200, 180, 255, ${star.opacity * 0.5})`);
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        
-        ctx.beginPath();
-        ctx.moveTo(star.x, star.y);
-        ctx.lineTo(
-          star.x - Math.cos(star.angle) * star.length,
-          star.y - Math.sin(star.angle) * star.length
-        );
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        star.x += Math.cos(star.angle) * star.speed;
-        star.y += Math.sin(star.angle) * star.speed;
-        star.opacity -= star.decay;
-        
-        if (star.opacity <= 0) {
-          shootingStars.splice(index, 1);
-        }
-      });
-      
-      requestAnimationFrame(animate);
-    }
-    
-    window.addEventListener('resize', resize);
-    resize();
-    animate();
-
-    window.addEventListener('scroll', () => {
-      const header = document.getElementById('header');
-      if (header) {
-        header.classList.toggle('scrolled', window.scrollY > 50);
-      }
-    });
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      if (!toast) return;
-      toast.textContent = msg;
-      toast.style.transform = 'translateX(-50%) translateY(0)';
-      toast.style.opacity = '1';
-      setTimeout(() => {
-        toast.style.transform = 'translateX(-50%) translateY(100px)';
-        toast.style.opacity = '0';
-      }, 2500);
     }
   </script>
 
