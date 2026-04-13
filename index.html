@@ -7,6 +7,7 @@
   <meta name="description" content="No endless feeds. No likes. No pressure to reply instantly. Introvert Place gives you meaningful conversations, creative space, and gentle tools — all at your own pace.">
   <link rel="icon" type="image/png" href="assets/logo/Logo_1.png">
   <link rel="apple-touch-icon" href="assets/logo/Logo_1.png">
+  <link rel="dns-prefetch" href="https://dlgntsscabbhdqlxqpwd.supabase.co">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -1025,6 +1026,111 @@
       transition: all 0.3s ease;
       z-index: 1001;
     }
+
+    /* Auth modals */
+    .auth-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(5, 6, 8, 0.75);
+      backdrop-filter: blur(8px);
+    }
+    .auth-modal-backdrop.open { display: flex; }
+    .auth-modal {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      padding: 28px 26px 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-light);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+    }
+    .auth-modal h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+    .auth-modal .auth-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .auth-modal label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .auth-modal input {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 16px;
+    }
+    .auth-modal input:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+    }
+    .auth-modal .auth-error {
+      display: none;
+      font-size: 13px;
+      color: var(--accent-rose);
+      margin-bottom: 12px;
+    }
+    .auth-modal .auth-error.show { display: block; }
+    .auth-modal-submit {
+      width: 100%;
+      padding: 14px;
+      margin-top: 4px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent-warm), var(--accent-soft));
+      color: var(--bg-deep);
+    }
+    .auth-modal-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .auth-modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-secondary);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .auth-modal-close:hover { color: var(--text-primary); background: rgba(255,255,255,0.1); }
+    .auth-switch {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--accent-soft);
+      cursor: pointer;
+      font-size: inherit;
+      text-decoration: underline;
+      padding: 0;
+    }
   </style>
 </head>
 <body>
@@ -1052,8 +1158,8 @@
       <a href="#pricing" class="nav-link">Pricing</a>
     </nav>
     <div class="header-actions">
-      <button class="sign-in-btn" onclick="window.location.href='app.html'">Sign In</button>
-      <button class="get-started-btn" onclick="window.location.href='app.html'">Start Free</button>
+      <button type="button" class="sign-in-btn" onclick="openAuthModal('signin')">Sign In</button>
+      <button type="button" class="get-started-btn" onclick="openAuthModal('signup')">Start Free</button>
     </div>
   </header>
 
@@ -1070,7 +1176,7 @@
     </p>
 
     <div class="hero-cta">
-      <button class="cta-primary" onclick="window.location.href='app.html'">Start Your Free 14-Day Sanctuary</button>
+      <button type="button" class="cta-primary" onclick="openAuthModal('signup')">Start Your Free 14-Day Sanctuary</button>
       <button class="cta-secondary" onclick="document.getElementById('video').scrollIntoView({behavior: 'smooth'})">
         <span>▶</span>
         <span>See How It Feels</span>
@@ -1298,8 +1404,8 @@
       </div>
 
       <div class="community-cta">
-        <button class="cta-primary" onclick="window.location.href='app.html'">Create a community</button>
-        <button class="cta-secondary" onclick="window.location.href='app.html'">Get early access to curated spaces</button>
+        <button type="button" class="cta-primary" onclick="openAuthModal('signup')">Create a community</button>
+        <button type="button" class="cta-secondary" onclick="openAuthModal('signup')">Get early access to curated spaces</button>
       </div>
     </div>
   </section>
@@ -1337,7 +1443,7 @@
             <li>✓ Community access</li>
             <li class="dimmed">◦ Creative spaces (limited)</li>
           </ul>
-          <button class="pricing-btn secondary" onclick="window.location.href='app.html'">Start Free</button>
+          <button type="button" class="pricing-btn secondary" onclick="openAuthModal('signup')">Start Free</button>
         </div>
 
         <div class="pricing-card featured">
@@ -1352,7 +1458,7 @@
             <li>✓ Advanced mood insights</li>
             <li>✓ Support quiet development</li>
           </ul>
-          <button class="pricing-btn primary" onclick="window.location.href='app.html'">Get Started</button>
+          <button type="button" class="pricing-btn primary" onclick="openAuthModal('signup')">Get Started</button>
         </div>
 
         <div class="pricing-card">
@@ -1367,7 +1473,7 @@
             <li>✓ 2 months free vs monthly</li>
             <li>✓ Early access to new features</li>
           </ul>
-          <button class="pricing-btn primary" onclick="window.location.href='app.html'">Get Started</button>
+          <button type="button" class="pricing-btn primary" onclick="openAuthModal('signup')">Get Started</button>
         </div>
       </div>
 
@@ -1383,7 +1489,7 @@
         Where silence is welcome. Where you finally belong.
       </p>
       <div class="final-cta-buttons">
-        <button class="cta-primary" onclick="window.location.href='app.html'">Start Your Free Sanctuary</button>
+        <button type="button" class="cta-primary" onclick="openAuthModal('signup')">Start Your Free Sanctuary</button>
         <button class="cta-secondary" onclick="document.getElementById('how-it-works').scrollIntoView({behavior: 'smooth'})">Learn More First</button>
       </div>
     </div>
@@ -1423,9 +1529,159 @@
     </div>
   </footer>
 
+  <!-- Sign in -->
+  <div class="auth-modal-backdrop" id="signinModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="signinTitle">
+    <div class="auth-modal" onclick="event.stopPropagation()">
+      <button type="button" class="auth-modal-close" onclick="closeAuthModal('signin')" aria-label="Close">×</button>
+      <h3 id="signinTitle">Sign in</h3>
+      <p class="auth-sub">Welcome back to your quiet corner.</p>
+      <div class="auth-error" id="signinError"></div>
+      <form id="signinForm" onsubmit="handleSignIn(event)">
+        <label for="signinEmail">Email</label>
+        <input id="signinEmail" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
+        <label for="signinPassword">Password</label>
+        <input id="signinPassword" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">
+        <button type="submit" class="auth-modal-submit" id="signinSubmit">Sign in</button>
+      </form>
+      <p class="auth-switch">New here? <button type="button" class="link-btn" onclick="closeAuthModal('signin'); openAuthModal('signup')">Create an account</button></p>
+    </div>
+  </div>
+
+  <!-- Sign up -->
+  <div class="auth-modal-backdrop" id="signupModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="signupTitle">
+    <div class="auth-modal" onclick="event.stopPropagation()">
+      <button type="button" class="auth-modal-close" onclick="closeAuthModal('signup')" aria-label="Close">×</button>
+      <h3 id="signupTitle">Create your space</h3>
+      <p class="auth-sub">14-day sanctuary access. No credit card required.</p>
+      <div class="auth-error" id="signupError"></div>
+      <form id="signupForm" onsubmit="handleSignUp(event)">
+        <label for="signupUsername">Username (optional)</label>
+        <input id="signupUsername" name="username" type="text" autocomplete="username" placeholder="quiet_soul">
+        <label for="signupEmail">Email</label>
+        <input id="signupEmail" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
+        <label for="signupPassword">Password</label>
+        <input id="signupPassword" name="password" type="password" autocomplete="new-password" required minlength="6" placeholder="At least 6 characters">
+        <button type="submit" class="auth-modal-submit" id="signupSubmit">Start free</button>
+      </form>
+      <p class="auth-switch">Already have an account? <button type="button" class="link-btn" onclick="closeAuthModal('signup'); openAuthModal('signin')">Sign in</button></p>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    const SUPABASE_URL = 'https://dlgntsscabbhdqlxqpwd.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsZ250c3NjYWJiaGRxbHhxcHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3MDAyMzYsImV4cCI6MjA3MDI3NjIzNn0.FIyWgqehDBMMQCN3nl-dPfkDAPjv_-dFBvmGHgABEBA';
+    const supabase = (function initSupabase() {
+      if (window._introvertSupabase) return window._introvertSupabase;
+      window._introvertSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      return window._introvertSupabase;
+    })();
+
+    function goToApp() {
+      window.location.href = 'app.html';
+    }
+
+    function openAuthModal(which) {
+      closeAuthModal('signin');
+      closeAuthModal('signup');
+      const id = which === 'signin' ? 'signinModalBackdrop' : 'signupModalBackdrop';
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        const err = document.getElementById(which === 'signin' ? 'signinError' : 'signupError');
+        if (err) { err.textContent = ''; err.classList.remove('show'); }
+      }
+    }
+
+    function closeAuthModal(which) {
+      const id = which === 'signin' ? 'signinModalBackdrop' : 'signupModalBackdrop';
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('signinModalBackdrop').addEventListener('click', function(e) {
+      if (e.target === this) closeAuthModal('signin');
+    });
+    document.getElementById('signupModalBackdrop').addEventListener('click', function(e) {
+      if (e.target === this) closeAuthModal('signup');
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeAuthModal('signin');
+        closeAuthModal('signup');
+      }
+    });
+
+    async function handleSignIn(e) {
+      e.preventDefault();
+      const form = e.target;
+      const email = form.querySelector('[name="email"]').value.trim();
+      const password = form.querySelector('[name="password"]').value;
+      const errEl = document.getElementById('signinError');
+      const btn = document.getElementById('signinSubmit');
+      errEl.classList.remove('show');
+      if (!email || !password) {
+        errEl.textContent = 'Enter email and password.';
+        errEl.classList.add('show');
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Signing in…';
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+      if (error) {
+        errEl.textContent = error.message || 'Sign in failed.';
+        errEl.classList.add('show');
+        return;
+      }
+      closeAuthModal('signin');
+      showToast('Welcome back — opening your sanctuary…');
+      goToApp();
+    }
+
+    async function handleSignUp(e) {
+      e.preventDefault();
+      const form = e.target;
+      const email = form.querySelector('[name="email"]').value.trim();
+      const password = form.querySelector('[name="password"]').value;
+      const username = (form.querySelector('[name="username"]') && form.querySelector('[name="username"]').value.trim()) || '';
+      const errEl = document.getElementById('signupError');
+      const btn = document.getElementById('signupSubmit');
+      errEl.classList.remove('show');
+      if (!email || !password) {
+        errEl.textContent = 'Enter email and password.';
+        errEl.classList.add('show');
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Creating…';
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username: username || undefined } }
+      });
+      btn.disabled = false;
+      btn.textContent = 'Start free';
+      if (error) {
+        errEl.textContent = error.message || 'Sign up failed.';
+        errEl.classList.add('show');
+        return;
+      }
+      closeAuthModal('signup');
+      if (data && data.session) {
+        showToast('Welcome — opening your sanctuary…');
+        goToApp();
+      } else {
+        showToast('Check your email to confirm your account, then sign in.');
+        openAuthModal('signin');
+      }
+    }
+
     const canvas = document.getElementById('milkyway-canvas');
     const ctx = canvas.getContext('2d');
     
