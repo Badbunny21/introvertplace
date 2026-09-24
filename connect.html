@@ -5,9 +5,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Connect - Introvert Place</title>
-  <link rel="icon" type="image/png" href="/assets/logo/Logo_1.png">
-  <link rel="shortcut icon" href="/assets/logo/Logo_1.png">
-  <link rel="apple-touch-icon" href="/assets/logo/Logo_1.png">
+  <script>
+    // Members-only page: send logged-out visitors to the landing page.
+    (function () {
+      try {
+        if (!localStorage.getItem('sb-dlgntsscabbhdqlxqpwd-auth-token')) {
+          (window.top || window).location.replace('/');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://dlgntsscabbhdqlxqpwd.supabase.co">
@@ -998,7 +1008,7 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1"></script>
 
   <script>
     // ===== SUPABASE =====
@@ -1911,8 +1921,11 @@
     async function submitReport(postId, reason) {
       document.getElementById('reportDialog')?.remove();
       if (!db || !currentUser || !currentCommunity) return;
-      try { await db.from('community_reports').insert({ reporter_id: currentUser.id, post_id: postId, community_id: currentCommunity.id, reason, status: 'open' }); } catch(e) {}
-      showToast('🚩 Report received — thank you.');
+      try {
+        const { error } = await db.from('community_reports').insert({ reporter_id: currentUser.id, post_id: postId, community_id: currentCommunity.id, reason, status: 'open' });
+        if (error) throw error;
+        showToast('🚩 Report received — thank you.');
+      } catch(e) { console.error('Report error:', e); showToast('⚠️ Could not send report. Please try again.'); }
     }
 
     // ===== SEARCH =====

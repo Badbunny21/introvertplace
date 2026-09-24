@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Introvert Place - Moderation</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <style>
+    body { margin: 0; background: #0b0b12; color: #e8e6f0; font-family: Inter, system-ui, sans-serif; }
+    main { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
+    h1 { font-weight: 400; font-size: 26px; margin: 0 0 6px; }
+    .sub { color: rgba(232,230,240,0.6); margin: 0 0 24px; font-size: 14px; }
+    .tabs button { background: none; border: 1px solid rgba(255,255,255,0.12); color: inherit; border-radius: 999px; padding: 6px 14px; margin-right: 6px; cursor: pointer; }
+    .tabs button.active { background: #c4a1ff; color: #14121c; border-color: #c4a1ff; }
+    .card { border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 16px; margin-top: 14px; background: rgba(255,255,255,0.03); }
+    .meta { font-size: 12px; color: rgba(232,230,240,0.55); margin-bottom: 8px; }
+    .reason { font-weight: 600; margin-bottom: 8px; }
+    .post { white-space: pre-wrap; background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+    .actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .actions button { border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: inherit; border-radius: 10px; padding: 8px 12px; cursor: pointer; }
+    .actions .danger { border-color: rgba(232,124,124,0.5); color: #f0a0a0; }
+    .empty, .msg { color: rgba(232,230,240,0.6); padding: 24px 0; }
+    a { color: #c4a1ff; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Moderation</h1>
+  <p class="sub">Reports from community members. Only Introvert Place admins can see this page.</p>
+  <div class="tabs">
+    <button data-status="open" class="active">Open</button>
+    <button data-status="reviewed">Reviewed</button>
+    <button data-status="dismissed">Dismissed</button>
+  </div>
+  <div id="list"><div class="msg">Loading...</div></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1"></script>
+<script>
+  const db = window.supabase.createClient('https://dlgntsscabbhdqlxqpwd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsZ250c3NjYWJiaGRxbHhxcHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3MDAyMzYsImV4cCI6MjA3MDI3NjIzNn0.FIyWgqehDBMMQCN3nl-dPfkDAPjv_-dFBvmGHgABEBA');
+  const list = document.getElementById('list');
+  let status = 'open';
+
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function say(text) { list.replaceChildren(el('div', 'msg', text)); }
+
+  async function load() {
+    say('Loading...');
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) { list.replaceChildren(el('div', 'msg', 'Please sign in on the home page first.')); return; }
+    const { data: isAdmin } = await db.rpc('is_app_admin');
+    if (!isAdmin) { say('This page is for Introvert Place admins only.'); return; }
+    const { data: reports, error } = await db.from('community_reports')
+      .select('id, reason, status, created_at, post_id, community_id, reporter_id')
+      .eq('status', status).order('created_at', { ascending: false }).limit(100);
+    if (error) { say('Could not load reports: ' + error.message); return; }
+    if (!reports.length) { say(status === 'open' ? 'No open reports. All quiet.' : 'Nothing here.'); return; }
+    const postIds = [...new Set(reports.map(r => r.post_id).filter(Boolean))];
+    const commIds = [...new Set(reports.map(r => r.community_id))];
+    const [{ data: posts }, { data: comms }] = await Promise.all([
+      postIds.length ? db.from('community_posts').select('id, content, title, author_id').in('id', postIds) : { data: [] },
+      db.from('communities').select('id, name').in('id', commIds)
+    ]);
+    const postMap = Object.fromEntries((posts || []).map(p => [p.id, p]));
+    const commMap = Object.fromEntries((comms || []).map(c => [c.id, c.name]));
+    list.replaceChildren();
+    reports.forEach(r => {
+      const card = el('div', 'card');
+      card.appendChild(el('div', 'meta', new Date(r.created_at).toLocaleString() + ' · ' + (commMap[r.community_id] || 'Community')));
+      card.appendChild(el('div', 'reason', 'Reason: ' + r.reason));
+      const p = postMap[r.post_id];
+      card.appendChild(el('div', 'post', p ? ((p.title ? p.title + '\n' : '') + (p.content || '')) : '(post already removed)'));
+      const actions = el('div', 'actions');
+      if (r.status !== 'reviewed') actions.appendChild(button('Mark reviewed', () => setStatus(r.id, 'reviewed')));
+      if (r.status !== 'dismissed') actions.appendChild(button('Dismiss', () => setStatus(r.id, 'dismissed')));
+      if (p) actions.appendChild(button('Delete post', async () => {
+        if (!confirm('Delete this post for everyone?')) return;
+        const { error } = await db.from('community_posts').delete().eq('id', p.id);
+        if (error) return alert('Could not delete: ' + error.message);
+        await setStatus(r.id, 'reviewed');
+      }, 'danger'));
+      card.appendChild(actions);
+      list.appendChild(card);
+    });
+  }
+  function button(label, fn, cls) { const b = el('button', cls || '', label); b.onclick = fn; return b; }
+  async function setStatus(id, s) {
+    const { error } = await db.from('community_reports').update({ status: s }).eq('id', id);
+    if (error) return alert('Could not update: ' + error.message);
+    load();
+  }
+  document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+    document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active'); status = b.dataset.status; load();
+  });
+  load();
+</script>
+</body>
+</html>

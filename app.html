@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Introvert Place — App</title>
-  <link rel="icon" type="image/png" href="/assets/logo/Logo_1.png">
-  <link rel="shortcut icon" href="/assets/logo/Logo_1.png">
-  <link rel="apple-touch-icon" href="/assets/logo/Logo_1.png">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://dlgntsscabbhdqlxqpwd.supabase.co">
@@ -550,8 +550,30 @@
     * { -webkit-tap-highlight-color: transparent; }
     button, a, [onclick] { touch-action: manipulation; }
     body { -webkit-overflow-scrolling: touch; }
+  
+    /* Notifications + unread badges */
+    .notif-bell { position: fixed; top: 14px; right: 16px; z-index: 900; width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.12); background: rgba(18,18,28,0.85); backdrop-filter: blur(10px);
+      color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    body.breathing-active .notif-bell, body.breathing-active .notif-panel { display: none !important; }
+    .notif-count, .nav-badge { display: none; position: absolute; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+      background: #c4a1ff; color: #14121c; font: 600 11px/18px Inter, sans-serif; text-align: center; }
+    .notif-count { top: -4px; right: -4px; }
+    .nav-badge { top: -6px; right: -10px; }
+    .notif-count.show, .nav-badge.show { display: inline-block; }
+    .notif-panel { display: none; position: fixed; top: 64px; right: 16px; z-index: 901; width: min(340px, calc(100vw - 32px));
+      max-height: 60vh; overflow-y: auto; background: rgba(20,20,30,0.98); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); font-family: Inter, sans-serif; color: #e8e6f0; }
+    .notif-panel.open { display: block; }
+    .notif-panel-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: 500; }
+    .notif-panel-head button { background: none; border: none; color: inherit; font-size: 20px; cursor: pointer; }
+    .notif-item { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+    .notif-item.unseen { background: rgba(196,161,255,0.08); }
+    .notif-time { display: block; margin-top: 4px; font-size: 12px; color: rgba(232,230,240,0.5); }
+    .notif-empty { padding: 24px 16px; text-align: center; color: rgba(232,230,240,0.6); font-size: 14px; }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1"></script>
 </head>
 <body>
 
@@ -617,6 +639,13 @@
 
   <!-- Main App (hidden until mood selected) -->
   <div class="app-wrapper">
+    <button type="button" class="notif-bell" id="notifBell" onclick="toggleNotifications()" aria-label="Notifications" title="Notifications">
+      <span aria-hidden="true">🔔</span><span class="notif-count" id="notifCount"></span>
+    </button>
+    <div class="notif-panel" id="notifPanel" role="dialog" aria-label="Notifications">
+      <div class="notif-panel-head"><span>Notifications</span><button type="button" onclick="toggleNotifications(false)" aria-label="Close">×</button></div>
+      <div class="notif-list" id="notifList"><div class="notif-empty">Nothing new. Enjoy the quiet.</div></div>
+    </div>
     <main class="app-content">
       <iframe id="appFrame" class="app-frame" src="sanctuary.html"></iframe>
     </main>
@@ -640,7 +669,7 @@
         <span class="nav-item-label">Blog</span>
       </button>
       <button class="nav-item" data-page="connect" onclick="loadPage('connect', event, {view: 'communities'})">
-        <span class="nav-item-icon"><i data-lucide="earth"></i></span>
+        <span class="nav-item-icon" style="position:relative"><i data-lucide="earth"></i><span class="nav-badge" id="navMessagesBadge" aria-label="Unread messages"></span></span>
         <span class="nav-item-label">Connect</span>
       </button>
       <button class="nav-item" data-page="profile" onclick="loadPage('profile', event)">
@@ -917,8 +946,90 @@
       }, 5000);
     }
 
+
+    // ============ NOTIFICATIONS + UNREAD MESSAGES (realtime) ============
+    function timeAgo(ts) {
+      const s = Math.max(1, Math.floor((Date.now() - new Date(ts).getTime()) / 1000));
+      if (s < 60) return 'just now';
+      const m = Math.floor(s / 60); if (m < 60) return m + 'm ago';
+      const hr = Math.floor(m / 60); if (hr < 24) return hr + 'h ago';
+      return Math.floor(hr / 24) + 'd ago';
+    }
+    function setBadge(el, n) {
+      if (!el) return;
+      if (n > 0) { el.textContent = n > 99 ? '99+' : String(n); el.classList.add('show'); }
+      else { el.textContent = ''; el.classList.remove('show'); }
+    }
+    async function refreshUnreadMessages() {
+      if (!currentUser) return;
+      try {
+        const { count } = await db.from('messages').select('id', { count: 'exact', head: true })
+          .eq('recipient_id', currentUser.id).eq('read', false);
+        setBadge(document.getElementById('navMessagesBadge'), count || 0);
+      } catch (e) { console.warn('Unread count failed', e); }
+    }
+    async function refreshNotifications() {
+      if (!currentUser) return;
+      try {
+        const { data, error } = await db.from('notifications').select('id, type, message, seen, created_at')
+          .eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(30);
+        if (error) throw error;
+        const list = document.getElementById('notifList');
+        const items = data || [];
+        setBadge(document.getElementById('notifCount'), items.filter(n => !n.seen).length);
+        while (list.firstChild) list.removeChild(list.firstChild);
+        if (!items.length) {
+          const empty = document.createElement('div'); empty.className = 'notif-empty';
+          empty.textContent = 'Nothing new. Enjoy the quiet.'; list.appendChild(empty); return;
+        }
+        items.forEach(n => {
+          const row = document.createElement('div'); row.className = 'notif-item' + (n.seen ? '' : ' unseen');
+          row.textContent = n.message || 'Something new for you';
+          const t = document.createElement('span'); t.className = 'notif-time'; t.textContent = timeAgo(n.created_at);
+          row.appendChild(t); list.appendChild(row);
+        });
+      } catch (e) { console.warn('Notifications failed', e); }
+    }
+    async function toggleNotifications(force) {
+      const panel = document.getElementById('notifPanel');
+      const open = typeof force === 'boolean' ? force : !panel.classList.contains('open');
+      panel.classList.toggle('open', open);
+      if (open && currentUser) {
+        await refreshNotifications();
+        try {
+          await db.from('notifications').update({ seen: true }).eq('user_id', currentUser.id).eq('seen', false);
+          setBadge(document.getElementById('notifCount'), 0);
+        } catch (e) {}
+      }
+    }
+    function startRealtime() {
+      if (!currentUser || window._ipRealtime) return;
+      refreshUnreadMessages();
+      refreshNotifications();
+      try {
+        window._ipRealtime = db.channel('user-' + currentUser.id)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: 'recipient_id=eq.' + currentUser.id }, refreshUnreadMessages)
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: 'user_id=eq.' + currentUser.id }, refreshNotifications)
+          .subscribe();
+      } catch (e) { console.warn('Realtime unavailable', e); }
+      // Fallback refresh in case realtime drops
+      setInterval(refreshUnreadMessages, 60000);
+      showAdminLink();
+    }
+    async function showAdminLink() {
+      try {
+        const { data } = await db.rpc('is_app_admin');
+        if (data !== true) return;
+        const a = document.createElement('a');
+        a.href = '/admin.html'; a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = 'Moderation'; a.className = 'admin-link';
+        a.style.cssText = 'position:fixed;top:18px;right:70px;z-index:1001;font-size:12px;color:#c4a1ff;text-decoration:none;border:1px solid rgba(196,161,255,0.35);border-radius:999px;padding:6px 12px;background:rgba(10,12,16,0.7)';
+        document.body.appendChild(a);
+      } catch (e) {}
+    }
+
     // Initialize
-    init();
+    init().then(startRealtime);
     handlePaymentRedirect();
 
     // ============ FEEDBACK FUNCTIONALITY ============
@@ -979,8 +1090,8 @@
     }
 
     // Close modal on overlay click
-    document.getElementById('feedbackModal').addEventListener('click', function(e) {
-      if (e.target.id === 'feedbackModal') {
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'feedbackModal') {
         closeFeedbackModal();
       }
     });
@@ -1011,7 +1122,7 @@
       </div>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@1.48.0/dist/umd/lucide.min.js"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>
