@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Introvert Place — Social Connection That Respects Your Energy</title>
   <meta name="description" content="No endless feeds. No likes. No pressure to reply instantly. Introvert Place gives you meaningful conversations, creative space, and gentle tools — all at your own pace.">
-  <link rel="icon" type="image/png" href="assets/logo/Logo_1.png">
-  <link rel="apple-touch-icon" href="assets/logo/Logo_1.png">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png">
   <link rel="dns-prefetch" href="https://dlgntsscabbhdqlxqpwd.supabase.co">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -151,6 +151,12 @@
       font-family: 'Cormorant Garamond', serif;
       font-size: 20px;
       color: var(--text-primary);
+    }
+    .mobile-menu-btn {
+      display: none; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 12px; margin-left: auto; margin-right: 8px;
+      background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.12);
+      font-size: 18px; cursor: pointer;
     }
     .header-nav {
       display: flex;
@@ -997,6 +1003,14 @@
     @media (max-width: 768px) {
       header { padding: 16px 20px; }
       .header-nav { display: none; }
+      .mobile-menu-btn { display: inline-flex; }
+      header.menu-open .header-nav {
+        display: flex; flex-direction: column; gap: 4px;
+        position: absolute; top: 100%; left: 16px; right: 16px;
+        background: rgba(12, 12, 20, 0.97); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px; padding: 12px; backdrop-filter: blur(12px);
+      }
+      header.menu-open .header-nav .nav-link { padding: 12px 14px; }
       .hero h1 { font-size: 32px; }
       .hero-subtitle { font-size: 16px; }
       .hero-cta { flex-direction: column; width: 100%; max-width: 300px; }
@@ -1147,8 +1161,8 @@
   </div>
 
   <header id="header">
-    <a href="#" class="logo">
-      <img src="assets/logo/Logo_1.png" alt="Introvert Place" class="logo-img" onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='block';">
+    <a href="/" class="logo">
+      <img src="/assets/logo/logo-400.webp" alt="Introvert Place" class="logo-img" onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='block';">
       <span class="logo-text" style="display:none;">Introvert Place</span>
     </a>
     <nav class="header-nav">
@@ -1157,6 +1171,7 @@
       <a href="#community" class="nav-link">Community</a>
       <a href="#pricing" class="nav-link">Pricing</a>
     </nav>
+    <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu" aria-expanded="false" onclick="toggleMobileMenu()">☰</button>
     <div class="header-actions">
       <button type="button" class="sign-in-btn" onclick="openAuthModal('signin')">Sign In</button>
       <button type="button" class="get-started-btn" onclick="openAuthModal('signup')">Start Free</button>
@@ -1176,8 +1191,8 @@
     </p>
 
     <div class="hero-cta">
-      <button type="button" class="cta-primary" onclick="openAuthModal('signup')">Start Your Free 14-Day Sanctuary</button>
-      <button class="cta-secondary" onclick="document.getElementById('video').scrollIntoView({behavior: 'smooth'})">
+      <button type="button" class="cta-primary" onclick="openAuthModal('signup')">Start Your Free Sanctuary</button>
+      <button class="cta-secondary" onclick="document.getElementById('how-it-works').scrollIntoView({behavior: 'smooth'})">
         <span>▶</span>
         <span>See How It Feels</span>
       </button>
@@ -1263,29 +1278,6 @@
     </div>
   </section>
 
-  <section id="video" class="video-section">
-    <div class="video-container">
-      <div class="section-header">
-        <span class="section-label calm">Watch a Calm Walkthrough</span>
-        <h2>See the peace for yourself</h2>
-        <p>A gentle tour of the Sanctuary, energy tools, journaling, and creative spaces.</p>
-      </div>
-
-      <div class="video-wrapper" onclick="this.innerHTML='<iframe width=100% height=100% src=about:blank frameborder=0 allowfullscreen></iframe>'; alert('Video coming soon! This is a placeholder.');">
-        <div class="video-placeholder">
-          <div class="play-button">
-            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          </div>
-          <h3>Take a Quiet Tour</h3>
-          <p>See how Introvert Place feels from the inside</p>
-          <div class="video-duration">
-            <span>⏱</span>
-            <span>47 seconds</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <section id="features">
     <div class="section-container">
@@ -1433,9 +1425,9 @@
       <div class="pricing-cards">
         <div class="pricing-card">
           <div class="pricing-badge default">Start Here</div>
-          <h3>Free Trial</h3>
+          <h3>Free</h3>
           <div class="pricing-price"><span>$0</span></div>
-          <p class="pricing-period">14 days free</p>
+          <p class="pricing-period">Free forever</p>
           <ul class="pricing-features">
             <li>✓ Full access to Sanctuary</li>
             <li>✓ Social battery tracking</li>
@@ -1477,7 +1469,7 @@
         </div>
       </div>
 
-      <p class="pricing-note">✨ All plans include a 14-day free trial. No credit card required.</p>
+      <p class="pricing-note">✨ Free is free forever - no credit card. Quiet Soul starts with a 14-day free trial, cancel anytime.</p>
     </div>
   </section>
 
@@ -1498,8 +1490,8 @@
   <footer>
     <div class="footer-content">
       <div class="footer-brand">
-        <a href="#" class="logo">
-          <img src="assets/logo/Logo_1.png" alt="Introvert Place" class="logo-img" onerror="this.outerHTML='<span style=font-family:Cormorant Garamond,serif;font-size:18px;>Introvert Place</span>';">
+        <a href="/" class="logo">
+          <img src="/assets/logo/logo-400.webp" alt="Introvert Place" class="logo-img" >
         </a>
         <p>A social sanctuary designed for introverts. Connection without exhaustion. Built by quiet souls, for quiet souls.</p>
       </div>
@@ -1508,24 +1500,15 @@
         <a href="#features">Features</a>
         <a href="#community">Community</a>
         <a href="#pricing">Pricing</a>
-        <a href="#">Roadmap</a>
-      </div>
-      <div class="footer-column">
-        <h4>Resources</h4>
-        <a href="#">Blog</a>
-        <a href="#">Help Center</a>
-        <a href="#">Guidelines</a>
       </div>
       <div class="footer-column">
         <h4>Company</h4>
-        <a href="#">About</a>
-        <a href="#">Privacy</a>
-        <a href="#">Terms</a>
-        <a href="#">Contact</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© 2025 Introvert Place. Made with 💜 for quiet souls everywhere.</p>
+      <p>© <span id="footerYear">2026</span> Introvert Place. Made with 💜 for quiet souls everywhere.</p>
     </div>
   </footer>
 
@@ -1543,6 +1526,7 @@
         <input id="signinPassword" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">
         <button type="submit" class="auth-modal-submit" id="signinSubmit">Sign in</button>
       </form>
+      <p class="auth-switch"><button type="button" class="link-btn" id="forgotPasswordBtn" onclick="handleForgotPassword()">Forgot your password?</button></p>
       <p class="auth-switch">New here? <button type="button" class="link-btn" onclick="closeAuthModal('signin'); openAuthModal('signup')">Create an account</button></p>
     </div>
   </div>
@@ -1552,7 +1536,7 @@
     <div class="auth-modal" onclick="event.stopPropagation()">
       <button type="button" class="auth-modal-close" onclick="closeAuthModal('signup')" aria-label="Close">×</button>
       <h3 id="signupTitle">Create your space</h3>
-      <p class="auth-sub">14-day sanctuary access. No credit card required.</p>
+      <p class="auth-sub">Free to join. No credit card required.</p>
       <div class="auth-error" id="signupError"></div>
       <form id="signupForm" onsubmit="handleSignUp(event)">
         <label for="signupUsername">Username (optional)</label>
@@ -1569,7 +1553,7 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1"></script>
   <script>
     const SUPABASE_URL = 'https://dlgntsscabbhdqlxqpwd.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsZ250c3NjYWJiaGRxbHhxcHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3MDAyMzYsImV4cCI6MjA3MDI3NjIzNn0.FIyWgqehDBMMQCN3nl-dPfkDAPjv_-dFBvmGHgABEBA';
@@ -1726,6 +1710,17 @@
     /** Do not name this `supabase` — that overwrites window.supabase from the CDN and breaks createClient */
     var supabaseClient = getSupabaseClient();
 
+    function toggleMobileMenu(force) {
+      var header = document.getElementById('header');
+      var open = typeof force === 'boolean' ? force : !header.classList.contains('menu-open');
+      header.classList.toggle('menu-open', open);
+      document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    document.querySelectorAll('.header-nav .nav-link').forEach(function(a) {
+      a.addEventListener('click', function() { toggleMobileMenu(false); });
+    });
+    (function() { var y = document.getElementById('footerYear'); if (y) y.textContent = new Date().getFullYear(); })();
+
     function goToApp() {
       window.location.href = 'app.html';
     }
@@ -1798,6 +1793,30 @@
       closeAuthModal('signin');
       showToast('Welcome back — opening your sanctuary…');
       goToApp();
+    }
+
+    async function handleForgotPassword() {
+      const errEl = document.getElementById('signinError');
+      const email = (document.getElementById('signinEmail').value || '').trim();
+      errEl.classList.remove('show');
+      if (!email) {
+        errEl.textContent = 'Type your email above first, then tap "Forgot your password?".';
+        errEl.classList.add('show');
+        return;
+      }
+      if (!supabaseClient) { showToast('Password reset is unavailable. Please refresh the page.'); return; }
+      const btn = document.getElementById('forgotPasswordBtn');
+      btn.disabled = true;
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password'
+      });
+      btn.disabled = false;
+      if (error) {
+        errEl.textContent = error.message || 'Could not send the reset email. Please try again in a bit.';
+        errEl.classList.add('show');
+        return;
+      }
+      showToast('If that email has an account, a reset link is on its way.');
     }
 
     async function handleSignUp(e) {
