@@ -199,6 +199,8 @@
       display: flex; align-items: center; justify-content: center;
     }
     .planet:hover .planet-dot { transform: scale(1.35); }
+    .planet-dot img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+    .planet-img { overflow: hidden; border: 2px solid rgba(255,255,255,0.25); background: rgba(0,0,0,0.45); }
     .planet-label {
       font-size: 10.5px; color: rgba(255,255,255,0.55); letter-spacing: 0.04em;
       max-width: 110px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -695,6 +697,41 @@
     // ==================== STATE ====================
     const VALID_MODES = ['constellation', 'canvas'];
     const TYPE_COLORS = { writing: '#c4a1ff', visual: '#7cb8e8', music: '#7ce8a8', idea: '#e8c87c' };
+    const TYPE_HUES = { writing: 262, visual: 207, music: 140, idea: 42 };
+    const TYPE_GLYPHS = { writing: '\u270d\ufe0f', visual: '\ud83c\udfa8', music: '\ud83c\udfb5', idea: '\ud83d\udca1' };
+    // Mood shifts how a planet burns: same type, different soul
+    const MOOD_MODS = {
+      calm:       { s: -8,  l: 10 },
+      reflective: { s: -12, l: 0 },
+      creative:   { s: 18,  l: 6 },
+      cozy:       { s: 2,   l: 14 },
+      melancholy: { s: -22, l: -12 },
+      hopeful:    { s: 8,   l: 16 }
+    };
+
+    // Every planet gets a unique visual identity from the post itself:
+    // type = base hue, mood = how it burns, content length = size, cover image = its face
+    function planetVisual(c) {
+      const hue = TYPE_HUES[c.type] != null ? TYPE_HUES[c.type] : 262;
+      const mod = MOOD_MODS[c.mood] || { s: 0, l: 0 };
+      const sat = Math.max(35, Math.min(95, 72 + mod.s));
+      const light = Math.max(38, Math.min(82, 66 + mod.l));
+      const color = 'hsl(' + hue + ' ' + sat + '% ' + light + '%)';
+      const len = ((c.content || '') + (c.description || '')).length;
+      let size = Math.round(Math.min(42, Math.max(16, 15 + len / 45)));
+      const img = c.cover_image_url || null;
+      if (img) size = Math.max(size, 30);
+      return { color: color, size: size, img: img, glyph: TYPE_GLYPHS[c.type] || '\u2728' };
+    }
+
+    function planetDotHtml(c) {
+      const v = planetVisual(c);
+      if (v.img) {
+        return '<div class="planet-dot planet-img" style="width:' + v.size + 'px;height:' + v.size + 'px;border-color:' + v.color + ';box-shadow:0 0 ' + Math.round(v.size * 0.7) + 'px 3px ' + v.color + '"><img src="' + escapeHtml(v.img) + '" alt="" loading="lazy"></div>';
+      }
+      const fs = Math.max(9, Math.round(v.size * 0.52));
+      return '<div class="planet-dot" style="width:' + v.size + 'px;height:' + v.size + 'px;background:' + v.color + ';box-shadow:0 0 ' + Math.round(v.size * 0.8) + 'px 3px ' + v.color + '66;font-size:' + fs + 'px">' + v.glyph + '</div>';
+    }
     const TYPE_EMOJIS = { writing: '✍️', visual: '🎨', music: '🎵', idea: '💡' };
 
     let myProfile = null;
@@ -934,12 +971,10 @@
           const pw = document.createElement('div');
           pw.className = 'planet-wrap';
           pw.style.transform = `rotate(${angle}deg) translateX(${radius}px)`;
-          const color = TYPE_COLORS[c.type] || '#c4a1ff';
           const p = document.createElement('div');
           p.className = 'planet';
           p.style.setProperty('--spin', spin + 's');
-          p.innerHTML = `
-            <div class="planet-dot" style="width:14px;height:14px;background:${color};box-shadow:0 0 12px 3px ${color}66"></div>
+          p.innerHTML = planetDotHtml(c) + `
             <span class="planet-label">${escapeHtml(c.title || 'Untitled')}</span>`;
           p.onclick = (e) => { e.stopPropagation(); openDetail(c, true); };
           pw.appendChild(p);
@@ -1036,7 +1071,7 @@
       recent.slice(0, 5).forEach((item, i) => {
         const el = document.createElement('div');
         el.className = 'comet';
-        const col = TYPE_COLORS[item.c.type] || '#c4a1ff';
+        const col = planetVisual(item.c).color;
         el.style.top = (8 + i * 9 + (hashCode(item.c.id || String(i)) % 5)) + '%';
         el.style.setProperty('--cd', (70 + i * 18) + 's');
         el.style.setProperty('--cdl', (-i * 22) + 's');
@@ -1119,12 +1154,10 @@
           const pw = document.createElement('div');
           pw.className = 'planet-wrap';
           pw.style.transform = `rotate(${angle}deg) translateX(${radius}px)`;
-          const color = TYPE_COLORS[c.type] || '#c4a1ff';
           const p = document.createElement('div');
           p.className = 'planet';
           p.style.setProperty('--spin', spin + 's');
-          p.innerHTML = `
-            <div class="planet-dot" style="width:16px;height:16px;background:${color};box-shadow:0 0 14px 4px ${color}66"></div>
+          p.innerHTML = planetDotHtml(c) + `
             <span class="planet-label">${escapeHtml(c.title || 'Untitled')}</span>`;
           p.onclick = (e) => { e.stopPropagation(); openDetail(c, false, soul); };
           pw.appendChild(p);
