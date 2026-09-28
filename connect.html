@@ -2255,6 +2255,15 @@
     function startMessagePolling(userId) { stopMessagePolling(); messagePollingInterval = setInterval(async()=>{ if(currentConvoUserId!==userId) return; await loadMessages(userId); markAsRead(userId); }, 8000); }
     function stopMessagePolling() { if(messagePollingInterval){clearInterval(messagePollingInterval);messagePollingInterval=null;} }
     function openConversationById(partnerId) { const p=conversationProfiles[partnerId]; if(!p) return; openConversation(partnerId,p.name,p.avatar,p.avatarBg,p.avatarUrl); }
+    // Open a conversation with any user id, fetching their profile first (used by ?to= deep links)
+    async function openConversationWithUser(userId) {
+      if (!db) return;
+      try {
+        const { data: profile } = await db.from('profiles').select('*').eq('id', userId).single();
+        if (!profile) { showToast('Could not open that conversation'); return; }
+        openConversation(profile.id, profile.username||'Anonymous', profile.avatar||profile.avatar_emoji||'\ud83c\udf19', profile.avatar_bg||'linear-gradient(135deg,#667eea,#764ba2)', profile.avatar_url||null);
+      } catch(e) { showToast('Could not open that conversation'); }
+    }
 
     function closeConversation() {
       stopMessagePolling(); currentConvoUserId=null; sessionStorage.removeItem('activeConversation');
@@ -2298,9 +2307,11 @@
       const initialView = urlParams.get('view') || 'communities';
       const communityId = urlParams.get('community');
       const conversationParam = urlParams.get('conversation');
+      const toParam = urlParams.get('to');
       switchView(initialView);
       if (communityId) { switchView('communities'); setTimeout(() => viewCommunity(communityId), 500); }
-      if (conversationParam) { switchView('messages'); setTimeout(() => { const p = conversationProfiles[conversationParam]; if(p) openConversation(conversationParam,p.name,p.avatar,p.avatarBg,p.avatarUrl); }, 1000); }
+      if (conversationParam) { switchView('messages'); setTimeout(() => { const p = conversationProfiles[conversationParam]; if(p) openConversation(conversationParam,p.name,p.avatar,p.avatarBg,p.avatarUrl); else openConversationWithUser(conversationParam); }, 1000); }
+      if (toParam) { switchView('messages'); setTimeout(() => openConversationWithUser(toParam), 600); }
       if (initialView === 'messages') { const saved = sessionStorage.getItem('activeConversation'); if(saved) { try { const c = JSON.parse(saved); setTimeout(() => openConversation(c.userId,c.userName,c.userAvatar,c.userAvatarBg,c.userAvatarUrl), 1000); } catch(e){} } }
     });
   </script>
