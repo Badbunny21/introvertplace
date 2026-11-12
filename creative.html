@@ -1013,8 +1013,7 @@
           <div class="sun-halo"></div>
           ${(myProfile && myProfile.avatar_url) ? '' : `<span class="sun-emoji">${escapeHtml((myProfile && (myProfile.avatar_emoji || myProfile.avatar)) || '🌙')}</span>`}
         </div>
-        <div class="sun-name">${escapeHtml(name)}</div>
-        <div class="sun-you">your galaxy</div>`;
+        <div class="sun-name">${escapeHtml(name)}</div>`;
       stage.appendChild(sun);
     }
 
