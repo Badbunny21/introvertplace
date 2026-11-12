@@ -721,7 +721,7 @@
       let size = Math.round(Math.min(42, Math.max(16, 15 + len / 45)));
       const img = c.cover_image_url || null;
       if (img) size = Math.max(size, 30);
-      return { color: color, size: size, img: img, glyph: TYPE_GLYPHS[c.type] || '\u2728' };
+      return { color: color, size: size, img: img, glyph: '\u2b50' };
     }
 
     function planetDotHtml(c) {
