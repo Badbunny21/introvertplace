@@ -552,7 +552,8 @@
     body { -webkit-overflow-scrolling: touch; }
   
     /* Notifications + unread badges */
-    body.creative-active .notif-bell, body.creative-active .notif-panel, body.creative-active .admin-link { display: none !important; }
+    body.creative-active .notif-bell, body.creative-active .notif-panel, body.creative-active .admin-link,
+    body.room-active .notif-bell, body.room-active .notif-panel, body.room-active .admin-link { display: none !important; }
     .notif-bell { position: fixed; top: 14px; right: 16px; z-index: 900; width: 42px; height: 42px; border-radius: 50%;
       border: 1px solid rgba(255,255,255,0.12); background: rgba(18,18,28,0.85); backdrop-filter: blur(10px);
       color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -818,6 +819,7 @@
       setActiveNav(page);
       // Keep the Creative page's own header controls clear of the shell's fixed overlays
       document.body.classList.toggle('creative-active', page === 'creative');
+      document.body.classList.remove('room-active');
     }
 
     // Logout — clear all app-specific storage to prevent data leaking to next user
@@ -845,6 +847,10 @@
     window.addEventListener('message', (event) => {
       if (event.data && event.data.action === 'navigate') {
         loadPage(event.data.page, null, event.data.params);
+      }
+      // Community rooms have their own top bar; keep it clear of the shell's fixed overlays
+      if (event.data && event.data.action === 'community-room') {
+        document.body.classList.toggle('room-active', !!event.data.open);
       }
     });
 
