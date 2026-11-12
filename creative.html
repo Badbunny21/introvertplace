@@ -838,6 +838,15 @@
       showChooser();
     }
 
+    let _cachedIsBuilder = null;
+    async function checkIsBuilder() {
+      if (_cachedIsBuilder !== null) return _cachedIsBuilder;
+      if (!db || !currentUser) { _cachedIsBuilder = false; return false; }
+      try { const { data } = await db.rpc('is_app_admin'); _cachedIsBuilder = data === true; }
+      catch(e) { _cachedIsBuilder = false; }
+      return _cachedIsBuilder;
+    }
+
     async function checkIsPremium() {
       if (_cachedIsPremium !== null) return _cachedIsPremium;
       if (!db || !currentUser) { _cachedIsPremium = false; return false; }
@@ -854,7 +863,8 @@
       const saved = myProfile && myProfile.display_mode;
       if (saved && VALID_MODES.includes(saved) && saved !== mode) {
         const isPremium = await checkIsPremium();
-        if (!isPremium) {
+        const isBuilder = !isPremium && await checkIsBuilder();
+        if (!isPremium && !isBuilder) {
           showToast('🌙 Each sky has its own quiet rhythm. Wandering freely between them is part of Quiet Soul.');
           return;
         }
