@@ -726,9 +726,10 @@
       .souls-grid { grid-template-columns: 1fr; gap: 12px; }
     }
     @media (max-width: 480px) {
-      .room-topbar { gap: 10px; padding: 12px 14px; }
+      .room-topbar { flex-wrap: wrap; gap: 8px 10px; padding: 10px 14px; }
       .room-back-btn { padding: 8px 12px; }
       .room-topbar-icon { font-size: 22px; }
+      .room-mode-badge { order: 6; }
       .room-topbar-meta { display: none; }
       .reading-mode-toggle { display: none; }
       .communities-grid,
