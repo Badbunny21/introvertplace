@@ -1227,6 +1227,7 @@
       // Show room — swap entire body view so nothing else is visible
       document.body.classList.add('room-open');
       document.getElementById('communityRoom').classList.add('active');
+      try { window.parent.postMessage({ action: 'community-room', open: true }, window.location.origin); } catch(e) {}
       window.scrollTo(0, 0);
 
       // Load channels and posts
@@ -1262,6 +1263,7 @@
     function closeCommunityRoom() {
       document.body.classList.remove('room-open');
       document.getElementById('communityRoom').classList.remove('active');
+      try { window.parent.postMessage({ action: 'community-room', open: false }, window.location.origin); } catch(e) {}
       currentCommunity = null;
       currentRoomId = null;
       currentRoomChannels = [];
