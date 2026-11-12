@@ -404,7 +404,6 @@
           <div class="header-top">
             <div class="welcome-section">
               <h1 id="sanctuaryGreeting">Good evening, <span>peaceful_soul</span></h1>
-              <div class="user-sub" id="userMoodText">😌 Feeling peaceful</div>
               <div class="current-mood-badge" onclick="showMoodScreen()">
                 <span class="emoji" id="currentMoodEmoji">😌</span>
                 <span id="currentMoodLabel">Feeling peaceful this evening</span>
@@ -1324,7 +1323,6 @@
       const data = moodData[mood];
       document.getElementById('currentMoodEmoji').textContent = data.emoji;
       document.getElementById('currentMoodLabel').textContent = `Feeling ${data.label.toLowerCase()} this ${getTimeOfDay()}`;
-      document.getElementById('userMoodText').textContent = `${data.emoji} Feeling ${data.label.toLowerCase()}`;
 
       const moodMessage = document.getElementById('moodMessage');
       moodMessage.style.setProperty('--mood-accent', data.color);
