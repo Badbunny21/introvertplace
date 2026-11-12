@@ -397,6 +397,7 @@
     }
     .room-back-btn:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-light); }
     .room-topbar-center { flex: 1; display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .room-topbar-center > div { min-width: 0; flex: 1; }
     .room-topbar-icon { font-size: 28px; flex-shrink: 0; }
     .room-topbar-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .room-topbar-meta { font-size: 12px; color: var(--text-muted); }
@@ -718,13 +719,16 @@
       .view-header h1 { font-size: 28px; }
       .view-nav-item .nav-label { display: none; }
       .view-nav-item { padding: 10px 16px; }
-      .view-nav { max-width: 280px; }
+      .view-nav { max-width: 280px; margin-top: 52px; }
       .room-topbar-title { font-size: 17px; }
       /* Force single-column grids on mobile */
       .communities-grid,
       .souls-grid { grid-template-columns: 1fr; gap: 12px; }
     }
     @media (max-width: 480px) {
+      .room-topbar { gap: 10px; padding: 12px 14px; }
+      .room-back-btn { padding: 8px 12px; }
+      .room-topbar-icon { font-size: 22px; }
       .room-topbar-meta { display: none; }
       .reading-mode-toggle { display: none; }
       .communities-grid,
