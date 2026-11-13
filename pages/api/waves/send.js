@@ -31,35 +31,36 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized: invalid token' });
   }
 
-  const { to_user_id } = req.body;
+  const { to_user_id, body } = req.body || {};
+  const note = typeof body === 'string' ? body.trim() : '';
 
   if (!to_user_id) {
     return res.status(400).json({ error: 'Missing to_user_id' });
+  }
+  if (!note || note.length > 500) {
+    return res.status(400).json({ error: 'A note needs between 1 and 500 characters' });
   }
 
   // 2. Enforce that from_user_id === the authenticated user
   const from_user_id = user.id;
 
   if (from_user_id === to_user_id) {
-    return res.status(400).json({ error: 'Cannot send a wave to yourself' });
+    return res.status(400).json({ error: 'Cannot send a note to yourself' });
   }
 
-  // 3. Save the wave (upsert to avoid duplicates)
-  const { error: waveError } = await supabaseAdmin
-    .from('waves')
-    .upsert({ from_user_id, to_user_id });
-
-  if (waveError) return res.status(400).json({ error: waveError.message });
-
-  // 4. Create in-app notification
-  await supabaseAdmin
-    .from('notifications')
+  // 3. Leave a note. The database holds it for at least four hours
+  // before the other person can read it. No notification is created.
+  const deliversAt = new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString();
+  const { error: noteError } = await supabaseAdmin
+    .from('quiet_notes')
     .insert({
-      user_id: to_user_id,
-      type: 'wave',
-      message: 'Someone sent you a quiet wave 🌙',
-      seen: false,
+      from_user_id,
+      to_user_id,
+      body: note,
+      delivers_at: deliversAt,
     });
 
-  res.status(200).json({ success: true });
+  if (noteError) return res.status(400).json({ error: noteError.message });
+
+  res.status(200).json({ success: true, delivers_at: deliversAt });
 }

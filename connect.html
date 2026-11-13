@@ -286,6 +286,14 @@
     .message-input-area input { flex: 1; padding: 14px 18px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); color: var(--text-primary); font-family: inherit; font-size: 14px; transition: all 0.2s; }
     .message-input-area input:focus { outline: none; border-color: var(--accent-soft); background: var(--bg-surface); }
     .message-input-area input::placeholder { color: var(--text-muted); }
+    .message-input-area.note-mode { align-items: stretch; }
+    .note-gate { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .note-gate p { margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.45; }
+    .note-gate textarea { width: 100%; min-height: 72px; resize: vertical; box-sizing: border-box; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border-subtle); background: var(--bg-elevated); color: var(--text-primary); font: inherit; font-size: 16px; }
+    .note-gate button { align-self: flex-end; background: var(--accent-soft); color: #14121c; border: none; border-radius: 999px; padding: 8px 14px; font-weight: 600; cursor: pointer; }
+    .note-letter { margin: 10px 16px; padding: 12px 14px; border-radius: 14px; background: rgba(196,161,255,0.08); border: 1px solid rgba(196,161,255,0.2); }
+    .note-letter.mine { margin-left: 48px; background: rgba(255,255,255,0.04); }
+    .note-letter .note-meta { margin-top: 6px; font-size: 11px; color: var(--text-muted); }
     .send-btn { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent-soft) 0%, #a78bfa 100%); border: none; border-radius: var(--radius-md); color: var(--bg-deep); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 4px 12px rgba(196,161,255,0.3); }
     .send-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(196,161,255,0.4); }
     .send-btn:active { transform: translateY(0); }
@@ -771,7 +779,6 @@
           <button class="view-nav-item" data-view="messages" onclick="switchView('messages')">
             <span class="nav-icon">💬</span>
             <span class="nav-label">Messages</span>
-            <span class="view-nav-badge" id="messagesBadge" style="display: none;">0</span>
           </button>
         </nav>
 
@@ -1017,6 +1024,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1"></script>
+  <script src="js/quiet-note.js"></script>
 
   <script>
     // ===== SUPABASE =====
@@ -2136,27 +2144,25 @@
             <div class="soul-tagline">${escapeHtml(p.tagline || p.bio?.substring(0,60) || 'A quiet soul')}</div>
             ${vibeHtml}
             ${interestsHtml}
-            <button class="wave-btn" onclick="event.stopPropagation(); sendWave('${p.id}', this)">👋 Send a quiet wave</button>
+            <button class="wave-btn" data-user-id="${p.id}" data-user-name="${escapeHtml(p.username || 'them').replace(/"/g, '&quot;')}" onclick="event.stopPropagation(); leaveQuietNote(this)">✉️ Leave a note</button>
           </div>`;
         }).join('');
 
       } catch(err) { console.error('loadSouls error:', err); }
     }
 
-    function sendWave(userId, btn) {
-      btn.classList.add('waved');
-      btn.innerHTML = '<span>✓</span> Wave sent!';
-      btn.onclick = null;
-      saveWaveToSupabase(userId);
-    }
-
-    async function saveWaveToSupabase(toUserId) {
-      if (!db || !currentUser) { showToast('Please sign in to send waves 🌙'); return; }
-      try {
-        await db.from('waves').upsert({ from_user_id: currentUser.id, to_user_id: toUserId });
-        await db.from('notifications').insert({ user_id: toUserId, type: 'wave', message: '👋 Someone sent you a quiet wave', seen: false });
-        showToast('🌙 Quiet wave sent!');
-      } catch(e) { console.log('Wave error:', e); }
+    function leaveQuietNote(btn) {
+      if (!currentUser) { showToast('Sign in to leave a note'); return; }
+      const toId = btn.getAttribute('data-user-id');
+      const toName = btn.getAttribute('data-user-name') || 'them';
+      if (!window.QuietNote || !toId) return;
+      QuietNote.openComposer({
+        db: db,
+        fromId: currentUser.id,
+        toId: toId,
+        toName: toName,
+        onDone: function (result) { showToast(result.phrase || 'Your note will settle in a few hours.'); }
+      });
     }
 
     // ===== PROFILE MODAL =====
@@ -2175,7 +2181,7 @@
       const avatar = profile.avatar||profile.avatar_emoji||'🌙'; const avatarBg = profile.avatar_bg||'linear-gradient(135deg,#667eea,#764ba2)';
       const interests = profile.interests ? profile.interests.split(',').map(i=>i.trim()).filter(Boolean) : [];
       pendingMessageProfile = { id: profile.id, username: profile.username||'Anonymous', avatar, avatarBg, avatarUrl: profile.avatar_url||null };
-      modal.innerHTML = `<div class="modal-box" style="max-width:480px"><button class="close-btn" onclick="document.getElementById('profileViewModal').classList.remove('active')">✕</button><div class="modal-header"><div class="profile-view-card">${renderAvatarHtml(profile.avatar_url||null,avatar,avatarBg,'profile-view-avatar')}<div class="profile-view-name">${escapeHtml(profile.username||'Anonymous')}</div>${profile.tagline?`<p style="font-size:14px;color:var(--text-muted);font-style:italic;margin-bottom:8px">${escapeHtml(profile.tagline)}</p>`:''}</div></div><div class="modal-body">${profile.bio?`<p class="profile-view-bio">${escapeHtml(profile.bio)}</p>`:''} ${interests.length?`<div class="profile-view-interests">${interests.map(i=>`<span class="interest">${escapeHtml(i)}</span>`).join('')}</div>`:''}<div class="profile-view-actions"><button class="submit-btn" onclick="messageFromProfile()">💬 Send Message</button></div></div></div>`;
+      modal.innerHTML = `<div class="modal-box" style="max-width:480px"><button class="close-btn" onclick="document.getElementById('profileViewModal').classList.remove('active')">✕</button><div class="modal-header"><div class="profile-view-card">${renderAvatarHtml(profile.avatar_url||null,avatar,avatarBg,'profile-view-avatar')}<div class="profile-view-name">${escapeHtml(profile.username||'Anonymous')}</div>${profile.tagline?`<p style="font-size:14px;color:var(--text-muted);font-style:italic;margin-bottom:8px">${escapeHtml(profile.tagline)}</p>`:''}</div></div><div class="modal-body">${profile.bio?`<p class="profile-view-bio">${escapeHtml(profile.bio)}</p>`:''} ${interests.length?`<div class="profile-view-interests">${interests.map(i=>`<span class="interest">${escapeHtml(i)}</span>`).join('')}</div>`:''}<div class="profile-view-actions"><button class="submit-btn" onclick="messageFromProfile()">✉️ Leave a note</button></div></div></div>`;
       modal.classList.add('active');
     }
     function messageFromProfile() {
@@ -2186,44 +2192,107 @@
     }
 
     // ===== MESSAGING =====
-    let conversationsCache=[], currentConvoUserId=null, messagePollingInterval=null, lastRenderedMsgCount=0, lastRenderedMsgId=null, conversationProfiles={};
+    let conversationsCache=[], currentConvoUserId=null, conversationLocked=false, messagePollingInterval=null, lastRenderedMsgCount=0, lastRenderedMsgId=null, conversationProfiles={};
 
     async function loadConversations() {
       if (!db || !currentUser) return;
       const container = document.querySelector('.conversations'); if (!container) return;
+      const empty = `<div class="messages-empty"><span class="icon">✉️</span><h3>No notes yet</h3><p style="color:var(--text-muted);margin-top:8px">Leave a note. A conversation opens after you have each written one.</p></div>`;
       try {
-        const { data: messages } = await db.from('messages').select('*').or(`sender_id.eq.${currentUser.id},recipient_id.eq.${currentUser.id}`).order('created_at',{ascending:false});
-        if (!messages || !messages.length) { container.innerHTML = `<div class="messages-empty"><span class="icon">💬</span><h3>No messages yet</h3><p style="color:var(--text-muted);margin-top:8px">Connect with souls to start chatting!</p></div>`; return; }
+        const msgRes = await db.from('messages').select('*').or(`sender_id.eq.${currentUser.id},recipient_id.eq.${currentUser.id}`).order('created_at',{ascending:false});
+        const noteRes = await db.from('quiet_notes').select('body, created_at, delivers_at, from_user_id, to_user_id').or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`).order('created_at',{ascending:false});
+        const messages = msgRes.error ? [] : (msgRes.data || []);
+        const notes = noteRes.error ? [] : (noteRes.data || []);
         const convos = {};
-        messages.forEach(msg => {
-          const partnerId = msg.sender_id===currentUser.id ? msg.recipient_id : msg.sender_id;
-          if (!convos[partnerId]) convos[partnerId] = { partnerId, lastMessage: msg, unreadCount: 0 };
-          if (msg.recipient_id===currentUser.id && !msg.read) convos[partnerId].unreadCount++;
+        notes.forEach(note => {
+          const partnerId = note.from_user_id === currentUser.id ? note.to_user_id : note.from_user_id;
+          if (convos[partnerId]) return;
+          const mine = note.from_user_id === currentUser.id;
+          const pending = mine && new Date(note.delivers_at).getTime() > Date.now();
+          convos[partnerId] = { partnerId, at: note.created_at, preview: pending ? 'On its way' : (note.body || '').substring(0, 60), mine };
         });
-        conversationsCache = Object.values(convos);
-        const partnerIds = Object.keys(convos);
-        if (!partnerIds.length) { container.innerHTML = `<div class="messages-empty"><span class="icon">💬</span><h3>No messages yet</h3><p style="color:var(--text-muted);margin-top:8px">Connect with souls to start chatting!</p></div>`; return; }
+        messages.forEach(msg => {
+          const partnerId = msg.sender_id === currentUser.id ? msg.recipient_id : msg.sender_id;
+          const mine = msg.sender_id === currentUser.id;
+          const existing = convos[partnerId];
+          if (!existing || new Date(msg.created_at) >= new Date(existing.at)) {
+            convos[partnerId] = { partnerId, at: msg.created_at, preview: (msg.content || '').substring(0, 60), mine };
+          }
+        });
+        conversationsCache = Object.values(convos).sort((a, b) => new Date(b.at) - new Date(a.at));
+        const countEl = document.getElementById('convosCount');
+        if (countEl) countEl.textContent = conversationsCache.length ? String(conversationsCache.length) : '0';
+        if (!conversationsCache.length) { container.innerHTML = empty; return; }
+        const partnerIds = conversationsCache.map(c => c.partnerId);
         const { data: profiles } = await db.from('profiles').select('id, username, avatar, avatar_emoji, avatar_bg, avatar_url').in('id', partnerIds);
         const profileMap = {}; if (profiles) profiles.forEach(p => { profileMap[p.id] = p; });
         container.innerHTML = conversationsCache.map(convo => {
           const p = profileMap[convo.partnerId]||{}; const avatar = p.avatar_emoji||p.avatar||'🌙'; const avatarBg = p.avatar_bg||'var(--bg-elevated)'; const name = p.username||'Anonymous';
-          const preview = (convo.lastMessage.content||'').substring(0,60); const time = formatMessageTime(convo.lastMessage.created_at); const isSent = convo.lastMessage.sender_id===currentUser.id;
+          const time = formatMessageTime(convo.at);
           conversationProfiles[convo.partnerId] = { name, avatar, avatarBg, avatarUrl: p.avatar_url||null };
-          return `<div class="conversation ${convo.unreadCount>0?'unread':''}" onclick="openConversationById('${convo.partnerId}')">${renderAvatarHtml(p.avatar_url||null,avatar,avatarBg,'convo-avatar')}<div class="convo-content"><div class="convo-header"><span class="convo-name">${escapeHtml(name)}</span><span class="convo-time">${time}</span></div><div class="convo-preview">${isSent?'You: ':''}${escapeHtml(preview)}</div></div>${convo.unreadCount>0?`<div class="unread-badge">${convo.unreadCount}</div>`:''}</div>`;
+          return `<div class="conversation" onclick="openConversationById('${convo.partnerId}')">${renderAvatarHtml(p.avatar_url||null,avatar,avatarBg,'convo-avatar')}<div class="convo-content"><div class="convo-header"><span class="convo-name">${escapeHtml(name)}</span><span class="convo-time">${time}</span></div><div class="convo-preview">${convo.mine?'You: ':''}${escapeHtml(convo.preview)}</div></div></div>`;
         }).join('');
       } catch(err) { console.error(err); }
     }
 
     async function openConversation(userId, userName, userAvatar, userAvatarBg, userAvatarUrl) {
-      if (!db || !currentUser) { showToast('Sign in to message'); return; }
+      if (!db || !currentUser) { showToast('Sign in to leave a note'); return; }
       currentConvoUserId = userId; switchView('messages');
       sessionStorage.setItem('activeConversation', JSON.stringify({ userId, userName, userAvatar, userAvatarBg, userAvatarUrl }));
+      conversationLocked = !(window.QuietNote && await QuietNote.chatUnlocked(db, currentUser.id, userId));
       const section = document.querySelector('.messages-section');
-      section.innerHTML = `<div class="convo-view-header"><button class="back-btn" onclick="closeConversation()">←</button>${renderAvatarHtml(userAvatarUrl,userAvatar||'🌙',userAvatarBg||'var(--bg-elevated)','convo-view-avatar')}<div class="convo-user-info"><div class="convo-user-name">${escapeHtml(userName)}</div><div class="convo-user-status">Take your time responding</div></div></div><div class="messages-list" id="messagesList"><div style="text-align:center;color:var(--text-muted);padding:20px">Loading...</div></div><div class="message-input-area"><input type="text" id="messageInput" placeholder="Write a message..." autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"><button class="send-btn" onclick="sendMessage()">→</button></div>`;
+      const composer = conversationLocked
+        ? `<div class="message-input-area note-mode"><div class="note-gate"><p>A conversation opens after you have each left a note. Yours settles in a few hours.</p><textarea id="noteDraft" maxlength="500" placeholder="Leave a note..."></textarea><button type="button" onclick="sendNoteInConversation()">Leave this note</button></div></div>`
+        : `<div class="message-input-area"><input type="text" id="messageInput" placeholder="Write a message..." autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"><button class="send-btn" onclick="sendMessage()">→</button></div>`;
+      section.innerHTML = `<div class="convo-view-header"><button class="back-btn" onclick="closeConversation()">←</button>${renderAvatarHtml(userAvatarUrl,userAvatar||'🌙',userAvatarBg||'var(--bg-elevated)','convo-view-avatar')}<div class="convo-user-info"><div class="convo-user-name">${escapeHtml(userName)}</div><div class="convo-user-status">${conversationLocked ? 'A note, when you are ready' : 'Take your time responding'}</div></div></div><div class="messages-list" id="messagesList"><div style="text-align:center;color:var(--text-muted);padding:20px">Loading...</div></div>${composer}`;
       lastRenderedMsgCount = 0; lastRenderedMsgId = null;
-      await loadMessages(userId); markAsRead(userId);
-      startMessagePolling(userId);
-      setTimeout(() => document.getElementById('messageInput')?.focus(), 100);
+      if (conversationLocked) {
+        await renderNoteThread(userId);
+        setTimeout(() => document.getElementById('noteDraft')?.focus(), 100);
+      } else {
+        await loadMessages(userId); markAsRead(userId);
+        startMessagePolling(userId);
+        setTimeout(() => document.getElementById('messageInput')?.focus(), 100);
+      }
+    }
+
+    async function renderNoteThread(partnerId) {
+      const container = document.getElementById('messagesList'); if (!container || !db || !currentUser) return;
+      const { data, error } = await db.from('quiet_notes').select('id, body, created_at, delivers_at, from_user_id, opened_at').or(`and(from_user_id.eq.${currentUser.id},to_user_id.eq.${partnerId}),and(from_user_id.eq.${partnerId},to_user_id.eq.${currentUser.id})`).order('created_at', { ascending: true });
+      if (error) { container.textContent = 'Notes could not be loaded.'; return; }
+      if (!data || !data.length) {
+        container.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:60px 20px"><div style="font-size:40px;margin-bottom:12px">✉️</div><p>Nothing has settled yet. Leave the first note.</p></div>`;
+        return;
+      }
+      const now = Date.now();
+      container.innerHTML = data.map(n => {
+        const mine = n.from_user_id === currentUser.id;
+        const pending = mine && new Date(n.delivers_at).getTime() > now;
+        const meta = pending ? 'On its way' : formatMessageTime(n.created_at);
+        return `<div class="note-letter ${mine ? 'mine' : ''}"><div>${escapeHtml(n.body)}</div><div class="note-meta">${mine ? 'You' : 'Them'} · ${escapeHtml(meta)}</div></div>`;
+      }).join('');
+      container.scrollTop = container.scrollHeight;
+      data.forEach(n => {
+        if (n.from_user_id !== currentUser.id && !n.opened_at && window.QuietNote) QuietNote.markOpened(db, n.id);
+      });
+    }
+
+    async function sendNoteInConversation() {
+      const field = document.getElementById('noteDraft');
+      if (!field || !window.QuietNote || !currentUser || !currentConvoUserId) return;
+      const result = await QuietNote.send(db, currentUser.id, currentConvoUserId, field.value);
+      if (!result.ok) { showToast(result.error || 'Could not leave the note'); return; }
+      field.value = '';
+      showToast(result.phrase || 'Your note will settle in a few hours.');
+      const saved = sessionStorage.getItem('activeConversation');
+      if (await QuietNote.chatUnlocked(db, currentUser.id, currentConvoUserId) && saved) {
+        try {
+          const c = JSON.parse(saved);
+          await openConversation(c.userId, c.userName, c.userAvatar, c.userAvatarBg, c.userAvatarUrl);
+          return;
+        } catch (e) {}
+      }
+      await renderNoteThread(currentConvoUserId);
     }
 
     async function loadMessages(partnerId) {
@@ -2245,6 +2314,10 @@
 
     async function sendMessage() {
       if (!db || !currentUser || !currentConvoUserId) return;
+      if (conversationLocked || (window.QuietNote && !(await QuietNote.chatUnlocked(db, currentUser.id, currentConvoUserId)))) {
+        showToast('Leave a note first. A conversation opens after you have each written one.');
+        return;
+      }
       const input = document.getElementById('messageInput'); if (!input) return;
       const content = input.value.trim(); if (!content) return;
       input.value = '';
@@ -2280,9 +2353,9 @@
       loadConversations();
     }
 
-    async function loadUnreadCount() {
-      const badge = document.getElementById('messagesBadge'); if (!badge || !db || !currentUser) { if(badge) badge.style.display='none'; return; }
-      try { const {count} = await db.from('messages').select('*',{count:'exact',head:true}).eq('recipient_id',currentUser.id).eq('read',false); if(count>0){badge.textContent=count>99?'99+':count;badge.style.display='inline-block';}else{badge.style.display='none';} } catch(e){badge.style.display='none';}
+    function loadUnreadCount() {
+      const badge = document.getElementById('messagesBadge');
+      if (badge) badge.style.display = 'none';
     }
 
     // ===== GRACEFUL DECLINE =====
