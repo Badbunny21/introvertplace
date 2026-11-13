@@ -591,8 +591,7 @@
       <div class="interior-topbar">
         <button class="interior-back" onclick="exitGalaxy()">← your universe</button>
         <div class="interior-actions">
-          <button class="interior-action-btn" id="waveBtn" onclick="sendWave()">👋 Send a quiet wave</button>
-          <button class="interior-action-btn" onclick="leaveNote()">✉️ Leave a note</button>
+          <button class="interior-action-btn" id="waveBtn" onclick="leaveNote()">✉️ Leave a note</button>
         </div>
       </div>
       <div class="interior-stage" id="interiorStage"></div>
@@ -705,6 +704,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1"></script>
+  <script src="js/quiet-note.js"></script>
   <script>
     // ==================== SUPABASE INIT ====================
     const SUPABASE_URL = 'https://dlgntsscabbhdqlxqpwd.supabase.co';
@@ -1199,7 +1199,7 @@
       // Reset wave button
       const wb = document.getElementById('waveBtn');
       wb.classList.remove('waved');
-      wb.innerHTML = '👋 Send a quiet wave';
+      wb.innerHTML = '✉️ Leave a note';
 
       interior.classList.add('open');
       requestAnimationFrame(() => interior.classList.add('visible'));
@@ -1215,30 +1215,25 @@
       if (!instant) interiorUser = null;
     }
 
-    async function sendWave() {
-      if (!db || !currentUser || !interiorUser) return;
-      try {
-        await db.from('waves').upsert({ from_user_id: currentUser.id, to_user_id: interiorUser.profile.id });
-        await db.from('notifications').insert({ user_id: interiorUser.profile.id, type: 'wave', message: '👋 Someone sent you a quiet wave', seen: false });
-        const wb = document.getElementById('waveBtn');
-        wb.classList.add('waved');
-        wb.innerHTML = '✓ Wave sent';
-        showToast('🌙 A quiet wave drifts their way');
-      } catch(e) { console.error('Wave error:', e); showToast('Could not send the wave just now'); }
+    function noteRecipient() {
+      if (interiorUser && interiorUser.profile) return interiorUser.profile;
+      if (detailContext && detailContext.soul && detailContext.soul.profile) return detailContext.soul.profile;
+      return null;
     }
 
     function leaveNote() {
-      if (!interiorUser) return;
-      const p = interiorUser.profile;
-      try {
-        sessionStorage.setItem('activeConversation', JSON.stringify({
-          userId: p.id, userName: p.username || 'Anonymous',
-          userAvatar: p.avatar_emoji || p.avatar || '🌙',
-          userAvatarBg: p.avatar_bg || 'linear-gradient(135deg,#667eea,#764ba2)',
-          userAvatarUrl: p.avatar_url || null
-        }));
-      } catch(e) {}
-      window.location.href = 'connect.html?view=messages';
+      const profile = noteRecipient();
+      if (!profile) return;
+      if (!currentUser) { showToast('Sign in to leave a note'); return; }
+      if (!window.QuietNote) return;
+      if (profile.id === currentUser.id) { showToast('That star is already yours'); return; }
+      QuietNote.openComposer({
+        db: db,
+        fromId: currentUser.id,
+        toId: profile.id,
+        toName: profile.username || 'them',
+        onDone: function (result) { showToast(result.phrase || 'Your note will settle in a few hours.'); }
+      });
     }
 
     // ==================== CANVAS MODE ====================
@@ -1541,12 +1536,17 @@
         ${textHtml}
         ${creation.mood ? `<div class="detail-mood"><span class="chip selected">${escapeHtml(creation.mood)}</span></div>` : ''}
         <div class="detail-actions">
-          ${!isMine && soul ? `<button class="btn-secondary" onclick="closeDetail();leaveNote()">✉️ Leave a note</button>` : ''}
+          ${!isMine && soul ? `<button class="btn-secondary" onclick="leaveNoteFromDetail()">✉️ Leave a note</button>` : ''}
           ${isMine ? `<button class="danger-btn" onclick="deleteCreation()">Remove this star</button>` : ''}
         </div>`;
       document.getElementById('detailModal').classList.add('open');
     }
     function closeDetail() { document.getElementById('detailModal').classList.remove('open'); }
+    function leaveNoteFromDetail() {
+      if (detailContext && detailContext.soul) interiorUser = detailContext.soul;
+      closeDetail();
+      leaveNote();
+    }
 
     async function deleteCreation() {
       if (!detailContext || !detailContext.isMine || !db || !currentUser) return;
